@@ -1,0 +1,166 @@
+openapi: 3.0.4
+info:
+  title: printer-shop
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080/api/v1
+paths:
+  /products:
+    get:
+      summary: Get all products.
+      tags:
+        - Product
+      operationId: getAllProducts
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        default:
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create product
+      tags:
+        - Product
+      operationId: crateProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        default:
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /products/{product_id}:
+    get:
+      summary: Get product by id.
+      tags:
+        - Product
+      operationId: getProductById
+      parameters:
+        - name: product_id
+          in: path
+          description: Id of product to return
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid ID supplied
+        default:
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete product by id.
+      tags:
+        - Product
+      operationId: deleteProductById
+      parameters:
+        - name: product_id
+          in: path
+          description: Id of product to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product deleted
+        '400':
+          description: Invalid ID supplied
+        default:
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        
+
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - status
+      properties:
+        id:
+          type: string
+          example: 2cf72d73-0e08-4baf-a10f-f130c942dc38
+        name:
+          type: string
+          example: HP LaserJet 1080
+        price:
+          type: number
+          format: float
+          example: 17500.50
+        producer:
+            $ref: '#/components/schemas/Producer'
+        status:
+          type: string
+          example: published
+          enum:
+            - published
+            - hidden
+        created_at:
+          type: string
+          format: date-time
+    Producer:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          example: 2cf72d73-0e08-4baf-a10f-f130c942dc38
+        name:
+          type: string
+          example: Hewlett-Packard
+        description:
+          type: string
+          example: The Hewlett-Packard Company was founded by Bill Hewlett and David Packard in 1939
+        created_at:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
+
