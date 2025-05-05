@@ -5,6 +5,148 @@ info:
 servers:
   - url: http://localhost:8080/api/v1
 paths:
+  /Produsers:
+    get:
+      summary: Get all producers.
+      tags:
+        - Producer
+      operationId: getAllProducers
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Producer'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post: 
+      summary: Create producer
+      tags:
+        - Producer
+      operationId: createProducer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProducerRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /producers/{producer_id}: 
+    get:
+      summary: Get producer by id.
+      tags:
+        - Producer
+      operationId: getProducerById
+      parameters:
+        - name: producer_id
+          in: path
+          description: Id of producer to return
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producer'
+        '400':
+          description: Invalid ID supplied
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete producer by id.
+      tags:
+        - Producer
+      operationId: deleteProducerById
+      parameters:
+        - name: producer_id
+          in: path
+          description: Id of producer to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producer deleted
+        '400':
+          description: Invalid input
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put: 
+      summary: Update producer by id.
+      tags:
+        - Producer
+      operationId: updateProducerById
+      parameters:
+        - name: producer_id
+          in: path
+          description: Id of producer to update.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProducerRequest'
+      responses:
+        '200':
+          description: Producer updated
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Producer'          
+        '400':
+          description: Ivalid input
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /products:
     get:
       summary: Get all products.
@@ -20,7 +162,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Product'
-        default:
+        '500':
           description: Unexpected error
           content:
             aplication/json:
@@ -36,7 +178,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: '#/components/schemas/CreateProductRequest'
       responses:
         '200':
           description: Successful operation
@@ -44,7 +186,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Product'
-        default:
+        '500':
           description: Unexpected error
           content:
             aplication/json:
@@ -72,7 +214,11 @@ paths:
                 $ref: '#/components/schemas/Product'
         '400':
           description: Invalid ID supplied
-        default:
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
           description: Unexpected error
           content:
             aplication/json:
@@ -95,12 +241,542 @@ paths:
           description: Product deleted
         '400':
           description: Invalid ID supplied
-        default:
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
           description: Unexpected error
           content:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    put: 
+      summary: Update product by id.
+      tags:
+        - Product
+      operationId: updateProductById
+      parameters:
+        - name: product_id
+          in: path
+          description: Id of product to update.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Ivalid input
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /products/{product_id}/publish:
+    put: 
+      summary: Publish product by id.
+      tags:
+        - Product
+      operationId: publishProductById
+      parameters:
+        - name: product_id
+          in: path
+          description: Id of product to publish
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid ID supplied
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /products/{product_id}/hide:
+    put: 
+      summary: Hide product by id.
+      tags:
+        - Product
+      operationId: hideProductById
+      parameters:
+        - name: product_id
+          in: path
+          description: Id of product to hide
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid ID supplied
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users:
+    get:
+      summary: Get all users 
+      tags:
+        - User
+      operationId: getAllUsers
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post: 
+      summary: User registration
+      tags: 
+        - User
+      operationId: userRegistration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest' 
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users/{user_id}:
+    get:
+      summary: Get user by id.
+      tags:
+        - User
+      operationId: getUserById
+      parameters:
+        - name: user_id
+          in: path
+          description: Id of user to get
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put: 
+      summary: Update user by id.
+      tags:
+        - User
+      operationId: updateUserById.
+      parameters:
+        - name: user_id
+          in: path
+          description: Id of user to update.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete: 
+      summary: Delete user by id.
+      tags:
+        - User
+      operationId: deleteUserById
+      parameters:
+        - name: user_id
+          in: path
+          description: Id of user to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User deleted
+        '400':
+          description: Invalid input
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users/{user_id}/block:
+    put: 
+      summary: Block user by id.
+      tags:
+        - User
+      operationId: blockUserById
+      parameters:
+        - name: user_id
+          in: path
+          description: Id of user to block
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid ID supplied
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users/{user_id}/unblock:
+    put: 
+      summary: Unblock user by id.
+      tags:
+        - User
+      operationId: unblockUserById
+      parameters:
+        - name: user_id
+          in: path
+          description: Id of user to unblock
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid ID supplied
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /cart:
+    get:
+      summary: Get all products in cart.
+      tags:
+        - Cart
+      operationId: getAllProductsInCart
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductInCart'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Add rpoduct to cart
+      tags:
+        - Cart
+      operationId: addProductToCart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddProductsToCart'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid input.
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /order: 
+    get:
+      summary: Get all orders.
+      tags:
+        - Order
+      operationId: getAllOrders
+      parameters:
+        - name: user_id
+          in: query
+          description: Id of user of order
+          required: false
+          schema:
+            type: string
+        - name: order_status
+          in: query
+          description: Status of order
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post: 
+      summary: Place order
+      tags: 
+        - Order
+      operationId: placeOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductInCart'
+      responses: 
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Invalid input.
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /order/{order_id}:
+    get: 
+      summary: Get order by id
+      tags:
+        - Order
+      operationId: getOrderById 
+      parameters:
+        - name: order_id
+          in: path
+          description: Id of order to return.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Invalid input.
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put: 
+      summary: Update order
+      tags:
+        - Order
+      operationId: updateOrderById
+      parameters:
+        - name: order_id
+          in: path
+          description: Id of order to update.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductInCart'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Invalid input.
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete order by id
+      tags:
+        - Order
+      operationId: deleteOrderById
+      parameters:
+        - name: order_id
+          in: path
+          description: Id of order to delete.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order deleted
+        '400':
+          description: Invalid input.
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      
+
+
 
         
 
@@ -111,6 +787,8 @@ components:
       required:
         - id
         - name
+        - price
+        - producer
         - status
       properties:
         id:
@@ -134,11 +812,68 @@ components:
         created_at:
           type: string
           format: date-time
+    ProductInCart:
+      type: object
+      required:
+        - id
+        - name
+        - price
+        - producer
+        - status
+        - count
+      properties:
+        id:
+          type: string
+          example: 2cf72d73-0e08-4baf-a10f-f130c942dc38
+        name:
+          type: string
+          example: HP LaserJet 1080
+        price:
+          type: number
+          format: float
+          example: 17500.50
+        producer:
+          $ref: '#/components/schemas/Producer'
+        status:
+          type: string
+          example: published
+          enum:
+            - published
+            - hidden
+        created_at:
+          type: string
+          format: date-time
+        count:
+          type: integer
+          example: 8
+    CreateProductRequest:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+          example: HP LaserJet 1080
+        price:
+          type: number
+          format: float
+          example: 17500.50
+        producer_id:
+          type: string
+          example: 2cf72d73-0e08-4baf-a10f-f130c942dc38
+        status:
+          type: string
+          example: published
+          enum:
+            - published
+            - hidden
     Producer:
       type: object
       required:
         - id
         - name
+        - created_at
       properties:
         id:
           type: string
@@ -152,6 +887,74 @@ components:
         created_at:
           type: string
           format: date-time
+    CreateProducerRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: Hewlett-Packard
+        description:
+          type: string
+          example: The Hewlett-Packard Company was founded by Bill Hewlett and David Packard in 1939
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - status
+        - role
+        - created_at
+      properties:
+        id:
+          type: string
+          example: 2cf72d73-0e08-4baf-a10f-f130c942dc38
+        first_name:
+          type: string
+          example: Ivan
+        last_name:
+          type: string
+          example: Ivanov
+        email:
+          type: string
+          format: email
+          example: ivan@gmail.com
+        status:
+          type: string
+          example: active
+          enum:
+            - active
+            - blocked
+        role:
+          type: string
+          example: customer
+          enum:
+            - customer
+            - admin
+        created_at:
+          type: string
+          format: date-time
+    CreateUserRequest:
+      type: object
+      required:
+        - email
+        - status
+        - password
+      properties:
+        first_name:
+          type: string
+          example: Ivan
+        last_name:
+          type: string
+          example: Ivanov
+        email:
+          type: string
+          format: email
+          example: ivan@gmail.com
+        password:
+          type: string
+          format: password
     Error:
       type: object
       required:
@@ -161,6 +964,40 @@ components:
         code:
           type: string
         message:
+          type: string 
+    AddProductsToCart:
+      type: object
+      required:
+        - product_id
+        - count
+      properties:
+        product_id:
           type: string
-
+          example: 2cf72d73-0e08-4baf-a10f-f130c942dc38
+        count:
+          type: integer
+          example: 8
+    Order:
+      type: object
+      required:
+        - order_id
+        - status
+        - products
+      properties:
+        order_id:
+          type: string
+          example: 2cf72d73-0e08-4baf-a10f-f130c942dc38
+        user: 
+          $ref: '#/components/schemas/User'
+        status:
+          type: string
+          example: new
+          enum:
+            - new
+            - in_progress
+            - done
+        products: 
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductInCart'
 
