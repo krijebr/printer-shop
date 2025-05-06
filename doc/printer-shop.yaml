@@ -47,7 +47,7 @@ paths:
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
   /producers/{producer_id}: 
@@ -73,13 +73,13 @@ paths:
         '400':
           description: Invalid ID supplied
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     delete:
@@ -100,13 +100,13 @@ paths:
         '400':
           description: Invalid input
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     put: 
@@ -131,19 +131,19 @@ paths:
         '200':
           description: Producer updated
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Producer'          
         '400':
           description: Ivalid input
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
 
@@ -165,7 +165,7 @@ paths:
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
@@ -189,7 +189,7 @@ paths:
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
   /products/{product_id}:
@@ -215,13 +215,13 @@ paths:
         '400':
           description: Invalid ID supplied
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     delete:
@@ -242,13 +242,13 @@ paths:
         '400':
           description: Invalid ID supplied
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     put: 
@@ -273,85 +273,22 @@ paths:
         '200':
           description: Product updated
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Product'
         '400':
           description: Ivalid input
           content:
-            aplication/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Unexpected error
-          content:
-            aplication/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /products/{product_id}/publish:
-    put: 
-      summary: Publish product by id.
-      tags:
-        - Product
-      operationId: publishProductById
-      parameters:
-        - name: product_id
-          in: path
-          description: Id of product to publish
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content: 
             application/json:
               schema:
-                $ref: '#/components/schemas/Product'
-        '400':
-          description: Invalid ID supplied
-          content:
-            aplication/json:
-              schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /products/{product_id}/hide:
-    put: 
-      summary: Hide product by id.
-      tags:
-        - Product
-      operationId: hideProductById
-      parameters:
-        - name: product_id
-          in: path
-          description: Id of product to hide
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content: 
             application/json:
               schema:
-                $ref: '#/components/schemas/Product'
-        '400':
-          description: Invalid ID supplied
-          content:
-            aplication/json:
-              schema:
                 $ref: '#/components/schemas/Error'
-        '500':
-          description: Unexpected error
-          content:
-            aplication/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+
   /users:
     get:
       summary: Get all users 
@@ -370,7 +307,7 @@ paths:
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     post: 
@@ -394,13 +331,13 @@ paths:
         '400':
           description: Invalid input
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
   /users/{user_id}:
@@ -426,13 +363,13 @@ paths:
         '400':
           description: Invalid input
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     put: 
@@ -463,13 +400,13 @@ paths:
         '400':
           description: Invalid input
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     delete: 
@@ -490,79 +427,16 @@ paths:
         '400':
           description: Invalid input
           content:
-            aplication/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Unexpected error
-          content:
-            aplication/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /users/{user_id}/block:
-    put: 
-      summary: Block user by id.
-      tags:
-        - User
-      operationId: blockUserById
-      parameters:
-        - name: user_id
-          in: path
-          description: Id of user to block
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content: 
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Invalid ID supplied
-          content:
-            aplication/json:
-              schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /users/{user_id}/unblock:
-    put: 
-      summary: Unblock user by id.
-      tags:
-        - User
-      operationId: unblockUserById
-      parameters:
-        - name: user_id
-          in: path
-          description: Id of user to unblock
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content: 
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Invalid ID supplied
-          content:
-            aplication/json:
-              schema:
                 $ref: '#/components/schemas/Error'
-        '500':
-          description: Unexpected error
-          content:
-            aplication/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+
   /cart:
     get:
       summary: Get all products in cart.
@@ -581,7 +455,7 @@ paths:
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
@@ -601,13 +475,13 @@ paths:
         '400':
           description: Invalid input.
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
   /order: 
@@ -641,7 +515,7 @@ paths:
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     post: 
@@ -667,13 +541,13 @@ paths:
         '400':
           description: Invalid input.
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
   /order/{order_id}:
@@ -699,13 +573,13 @@ paths:
         '400':
           description: Invalid input.
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     put: 
@@ -738,13 +612,13 @@ paths:
         '400':
           description: Invalid input.
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     delete:
@@ -765,16 +639,126 @@ paths:
         '400':
           description: Invalid input.
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Unexpected error
           content:
-            aplication/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /profile:
+    get:
+      summary: Get profile.
+      tags:
+        - Profile
+      operationId: getProfile
+      responses:
+        '401':
+          description: Unauthorized
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put: 
+      summary: Update profile.
+      tags:
+        - Profile
+      operationId: updateProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth:
+    post:
+      summary: Authentication
+      tags:
+        - Authentication
+      operationId: authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Authentication'
+      responses:
+        '200':
+          description: Successfully logged in
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tokens'
+        '403':
+          description: Wrong email or password
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/refresh-tokens:
+    post: 
+      summary: Refresh tokens
+      tags:
+        - Authentication
+      operationId: refreshTokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshToken'
+      responses:
+        '200':
+          description: Successfully logged in
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tokens'
+        '403':
+          description: Refresh Token expired 
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+
       
+
+
 
 
 
@@ -988,7 +972,8 @@ components:
           type: string
           example: 2cf72d73-0e08-4baf-a10f-f130c942dc38
         user: 
-          $ref: '#/components/schemas/User'
+          type: string
+          example: 2cf72d73-0e08-4baf-a10f-f130c942dc38
         status:
           type: string
           example: new
@@ -1000,4 +985,35 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ProductInCart'
-
+    Authentication:
+      type: object
+      required: 
+        - email
+        - password
+      properties: 
+        email:
+          type: string
+          format: email
+          example: ivan@gmail.com
+        password:
+          type: string
+    Tokens:
+      type: object
+      required:
+        - token
+        - refresh_token
+      properties:
+        token: 
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJBdXRoIFNlcnZlciIsInN1YiI6ImF1dGgiLCJleHAiOjE1MDU0Njc3NTY4NjksImlhdCI6MTUwNTQ2NzE1MjA2OSwidXNlciI6MX0.9VPGwNXYfXnNFWH3VsKwhFJ0MazwmNvjSSRZ1vf3ZUU
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJBdXRoIFNlcnZlciIsInN1YiI6ImF1dGgiLCJleHAiOjE1MDU0Njc3NTY4NjksImlhdCI6MTUwNTQ2NzE1MjA2OSwidXNlciI6MX0.9VPGwNXYfXnNFWH3VsKwhFJ0MazwmNvjSSRZ1vf3ZUU
+    RefreshToken:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJBdXRoIFNlcnZlciIsInN1YiI6ImF1dGgiLCJleHAiOjE1MDU0Njc3NTY4NjksImlhdCI6MTUwNTQ2NzE1MjA2OSwidXNlciI6MX0.9VPGwNXYfXnNFWH3VsKwhFJ0MazwmNvjSSRZ1vf3ZUU
