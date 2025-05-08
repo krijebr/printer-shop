@@ -22,3 +22,11 @@ type Order struct {
 	Status    OrderStatus `json:"status"`
 	CreatedAt time.Time   `json:"created_at"`
 }
+
+type OrderWithProducts struct {
+	Id        uuid.UUID   `json:"id"`
+	UserId    uuid.UUID   `json:"user_id"`
+	Status    OrderStatus `json:"status"`
+	Products  []*ProductInCart
+	CreatedAt time.Time `json:"created_at"`
+}
