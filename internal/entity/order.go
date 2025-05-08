@@ -18,15 +18,12 @@ const (
 
 type Order struct {
 	Id        uuid.UUID   `json:"id"`
-	UserId    uuid.UUID   `json:"user_id"`
+	UserId    *User       `json:"omitempty"`
 	Status    OrderStatus `json:"status"`
 	CreatedAt time.Time   `json:"created_at"`
-}
-
-type OrderWithProducts struct {
-	Id        uuid.UUID   `json:"id"`
-	UserId    uuid.UUID   `json:"user_id"`
-	Status    OrderStatus `json:"status"`
 	Products  []*ProductInCart
-	CreatedAt time.Time `json:"created_at"`
+}
+type OrderFilter struct {
+	UserId *uuid.UUID
+	Status *OrderStatus
 }

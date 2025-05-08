@@ -22,10 +22,10 @@ type User interface {
 }
 
 type Product interface {
-	GetAll() (allProducts []*entity.ProductWithProducer, err error)
-	GetById(id uuid.UUID) (product *entity.ProductWithProducer, err error)
+	GetAll(filter *entity.ProductFilter) (allProducts []*entity.Product, err error)
+	GetById(id uuid.UUID) (product *entity.Product, err error)
 	Create(product entity.Product) (createdProduct *entity.Product, err error)
-	UpdateById(id uuid.UUID, product entity.Product) (updatedProduct *entity.ProductWithProducer, err error)
+	UpdateById(id uuid.UUID, product entity.Product) (updatedProduct *entity.Product, err error)
 	DeleteById(id uuid.UUID) (err error)
 }
 
@@ -40,13 +40,13 @@ type Producer interface {
 type Cart interface {
 	GetAllProducts() (allProducts []*entity.ProductInCart, err error)
 	AddProduct(productId uuid.UUID, count int) (err error)
-	UpdateCount(productId uuid.UUID) (err error)
+	UpdateCount(productId uuid.UUID, count int) (err error)
 }
 
 type Order interface {
-	Place([]*entity.ProductForOrder) (err error)
-	GetAll() (allOrders []*entity.OrderWithProducts, err error)
-	GetById(id uuid.UUID) (allProducts entity.OrderWithProducts, err error)
-	UpdateById(id uuid.UUID) (order entity.OrderWithProducts, err error)
-	ChangeStatus(productId uuid.UUID, status entity.ProductStatus) (order entity.OrderWithProducts, err error)
+	Create(userId uuid.UUID) (err error)
+	GetAll(filter *entity.OrderFilter) (allOrders []*entity.Order, err error)
+	GetById(id uuid.UUID) (allProducts entity.Order, err error)
+	DeleteById(id uuid.UUID) (err error)
+	UpdateById(id uuid.UUID) (order entity.Order, err error)
 }
