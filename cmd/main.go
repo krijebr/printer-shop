@@ -1,19 +1,15 @@
 package main
 
 import (
-	"context"
 	"log"
-	"net/http"
-	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/redis/go-redis/v9"
+	"github.com/krijebr/printer-shop/internal/delivery/http"
+	"github.com/krijebr/printer-shop/internal/usecase"
 )
 
 func main() {
 
-	rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
+	/*rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
 
 	var ctx = context.Background()
 
@@ -23,37 +19,12 @@ func main() {
 	}
 	result, _ := rdb.Get(ctx, "message").Result()
 
-	log.Println(result)
+	log.Println(result)*/
+	u := usecase.NewUseCases(usecase.NewAuth(), usecase.NewCart(), usecase.NewOrder(), usecase.NewProducer(), usecase.NewProduct(), usecase.NewUser())
+	r := http.CreateNewEchoServer(u)
 
-	e := echo.New()
-
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-
-	e.GET("/", gethandler)
-	e.POST("/", posthandler)
-	e.PUT("/", puthandler)
-	e.DELETE("/", deletehandler)
-
-	e.Logger.Fatal(e.Start(":8000"))
-}
-
-func gethandler(c echo.Context) error {
-	c.String(http.StatusOK, "Ответ на GET запрос")
-	return nil
-}
-
-func posthandler(c echo.Context) error {
-	c.String(http.StatusOK, "Ответ на POST запрос")
-	return nil
-}
-
-func puthandler(c echo.Context) error {
-	c.String(http.StatusOK, "Ответ на PUT запрос")
-	return nil
-}
-
-func deletehandler(c echo.Context) error {
-	c.String(http.StatusOK, "Ответ на DELETE запрос")
-	return nil
+	err := r.Start(":8000")
+	if err != nil {
+		log.Println("Ошибка запуска сервера")
+	}
 }

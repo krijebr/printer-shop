@@ -11,15 +11,22 @@ type ProfileHandlers struct {
 	usecase usecase.User
 }
 
-func NewProfileHandlers(uc usecase.User) *ProfileHandlers {
-	return &ProfileHandlers{usecase: uc}
+func NewProfileHandlers(u usecase.User) *ProfileHandlers {
+	return &ProfileHandlers{usecase: u}
 }
 
-func (h *UserHandlers) getProfile(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (p *ProfileHandlers) getProfile() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
-func (h *UserHandlers) updateProfile(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
+}
+func RegisterProfileRoutes(u usecase.User, g *echo.Group) {
+	a := NewProfileHandlers(u)
+	g.GET("", a.getProfile())
+	g.PUT("", a.updateProfile())
 }

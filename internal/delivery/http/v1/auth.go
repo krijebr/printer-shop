@@ -11,14 +11,21 @@ type AuthHandlers struct {
 	usecase usecase.Auth
 }
 
-func NewAuthHandlers(uc usecase.Auth) *AuthHandlers {
-	return &AuthHandlers{usecase: uc}
+func NewAuthHandlers(u usecase.Auth) *AuthHandlers {
+	return &AuthHandlers{usecase: u}
 }
-func (h *AuthHandlers) login(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (a *AuthHandlers) login() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
-func (h *AuthHandlers) refreshTokens(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
+}
+func RegisterAuthRoutes(u usecase.Auth, g *echo.Group) {
+	a := NewAuthHandlers(u)
+	g.POST("", a.login())
+	g.POST("/refresh-tokens", a.refreshTokens())
 }

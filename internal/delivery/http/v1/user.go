@@ -11,29 +11,42 @@ type UserHandlers struct {
 	usecase usecase.User
 }
 
-func NewUserHandlers(uc usecase.User) *UserHandlers {
-	return &UserHandlers{usecase: uc}
+func NewUserHandlers(u usecase.User) *UserHandlers {
+	return &UserHandlers{usecase: u}
 }
 
-func (h *UserHandlers) allUsers(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (u *UserHandlers) allUsers() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
 
-func (h *UserHandlers) createUser(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (u *UserHandlers) createUser() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
 
-func (h *UserHandlers) getUserById(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (u *UserHandlers) getUserById() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
-func (h *UserHandlers) updateUserById(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (u *UserHandlers) updateUserById() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
-func (h *UserHandlers) deleteUserById(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (u *UserHandlers) deleteUserById() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
+}
+func RegisterUserRoutes(u usecase.User, g *echo.Group) {
+	a := NewUserHandlers(u)
+	g.GET("", a.allUsers())
+	g.POST("", a.createUser())
+	g.GET("/:id", a.getUserById())
+	g.PUT("/:id", a.updateUserById())
+	g.DELETE("/:id", a.deleteUserById())
 }

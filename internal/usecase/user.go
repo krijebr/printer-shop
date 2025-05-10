@@ -13,18 +13,18 @@ func NewUser() User {
 }
 
 func (u *user) GetAll() ([]*entity.User, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (u *user) GetById(id uuid.UUID) (*entity.User, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (u *user) Create(user entity.User) (*entity.User, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (u *user) UpdateById(id uuid.UUID, user entity.User) (*entity.User, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (u *user) DeleteById(id uuid.UUID) error {
 
-	return err
+	return ErrNotImplemented
 }

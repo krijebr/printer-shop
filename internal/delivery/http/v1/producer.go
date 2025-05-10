@@ -11,29 +11,42 @@ type ProducerHandlers struct {
 	usecase usecase.Producer
 }
 
-func NewProducerHandlers(uc usecase.Producer) *ProducerHandlers {
-	return &ProducerHandlers{usecase: uc}
+func NewProducerHandlers(u usecase.Producer) *ProducerHandlers {
+	return &ProducerHandlers{usecase: u}
 }
 
-func (h *ProducerHandlers) getAllProducers(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (p *ProducerHandlers) getAllProducers() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
 
-func (h *ProducerHandlers) createProducer(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
 
-func (h *ProducerHandlers) getProducerById(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
-func (h *ProducerHandlers) updateProducerById(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
-func (h *ProducerHandlers) deleteProducerById(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
+}
+func RegisterProducerRoutes(u usecase.Producer, g *echo.Group) {
+	a := NewProducerHandlers(u)
+	g.GET("", a.getAllProducers())
+	g.POST("", a.createProducer())
+	g.GET("/:id", a.getProducerById())
+	g.PUT("/:id", a.updateProducerById())
+	g.DELETE("/:id", a.deleteProducerById())
 }

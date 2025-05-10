@@ -4,4 +4,4 @@ import (
 	"errors"
 )
 
-var err = errors.New("not implemented")
+var ErrNotImplemented = errors.New("not implemented")

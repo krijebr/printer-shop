@@ -11,14 +11,21 @@ type CartHandlers struct {
 	usecase usecase.Cart
 }
 
-func NewCartHandlers(uc usecase.Cart) *CartHandlers {
-	return &CartHandlers{usecase: uc}
+func NewCartHandlers(u usecase.Cart) *CartHandlers {
+	return &CartHandlers{usecase: u}
 }
-func (h *CartHandlers) getAllProductsInCart(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (c *CartHandlers) getAllProductsInCart() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
 }
-func (h *CartHandlers) addProductToCart(c echo.Context) error {
-	c.String(http.StatusNotImplemented, "Not Implemented")
-	return nil
+func (c *CartHandlers) addProductToCart() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.String(http.StatusNotImplemented, "Not Implemented")
+	}
+}
+func RegisterCartRoutes(u usecase.Cart, g *echo.Group) {
+	a := NewCartHandlers(u)
+	g.GET("", a.getAllProductsInCart())
+	g.POST("", a.addProductToCart())
 }

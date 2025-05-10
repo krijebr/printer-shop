@@ -12,17 +12,17 @@ func NewProducer() Producer {
 	return &producer{}
 }
 func (p *producer) GetAll() ([]*entity.Producer, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (p *producer) GetById(id uuid.UUID) (*entity.Producer, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (p *producer) Create(producer entity.Producer) (*entity.Producer, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (p *producer) UpdateById(id uuid.UUID, producer entity.Producer) (*entity.Producer, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (p *producer) DeleteById(id uuid.UUID) error {
-	return err
+	return ErrNotImplemented
 }

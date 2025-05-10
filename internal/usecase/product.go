@@ -13,17 +13,17 @@ func NewProduct() Product {
 }
 
 func (p *product) GetAll(filter *entity.ProductFilter) ([]*entity.Product, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (p *product) GetById(id uuid.UUID) (*entity.Product, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (p *product) Create(product entity.Product) (*entity.Product, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (p *product) UpdateById(id uuid.UUID, product entity.Product) (*entity.Product, error) {
-	return nil, err
+	return nil, ErrNotImplemented
 }
 func (p *product) DeleteById(id uuid.UUID) error {
-	return err
+	return ErrNotImplemented
 }
