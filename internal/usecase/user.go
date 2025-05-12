@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/krijebr/printer-shop/internal/entity"
 )
@@ -12,19 +14,19 @@ func NewUser() User {
 	return &user{}
 }
 
-func (u *user) GetAll() ([]*entity.User, error) {
+func (u *user) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*entity.User, error) {
 	return nil, ErrNotImplemented
 }
-func (u *user) GetById(id uuid.UUID) (*entity.User, error) {
+func (u *user) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	return nil, ErrNotImplemented
 }
-func (u *user) Create(user entity.User) (*entity.User, error) {
+func (u *user) Create(ctx context.Context, user entity.User) (*entity.User, error) {
 	return nil, ErrNotImplemented
 }
-func (u *user) UpdateById(id uuid.UUID, user entity.User) (*entity.User, error) {
+func (u *user) UpdateById(ctx context.Context, id uuid.UUID, user entity.User) (*entity.User, error) {
 	return nil, ErrNotImplemented
 }
-func (u *user) DeleteById(id uuid.UUID) error {
+func (u *user) DeleteById(ctx context.Context, id uuid.UUID) error {
 
 	return ErrNotImplemented
 }

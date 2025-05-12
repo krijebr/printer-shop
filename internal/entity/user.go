@@ -29,3 +29,7 @@ type User struct {
 	Role         UserRole   `json:"role"`
 	CreatedAt    time.Time  `json:"created_at"`
 }
+type UserFilter struct {
+	UserStatus *UserStatus `json:"user_status"`
+	UserRole   *UserRole   `json:"user_role"`
+}
