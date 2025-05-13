@@ -8,5 +8,11 @@
     },
     "http_server":{
         "port":8000
+    },
+    "redis":{
+        "host":"locslhost",
+		"port":6379,
+		"password":"",
+		"db":0
     }
 }

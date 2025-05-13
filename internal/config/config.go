@@ -17,9 +17,16 @@ type (
 	HttpServer struct {
 		Port int `json:"port"`
 	}
+	Redis struct {
+		Host     string `json:"host"`
+		Port     int    `json:"port"`
+		Password string `json:"password"`
+		DB       int    `json:"db"`
+	}
 	Config struct {
 		Postgres   Postgres   `json:"postgres"`
 		HttpServer HttpServer `json:"http_server"`
+		Redis      Redis      `json:"redis"`
 	}
 )
 
