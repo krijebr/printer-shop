@@ -17,7 +17,7 @@ type User interface {
 	GetAll(ctx context.Context, filter *entity.UserFilter) (allUsers []*entity.User, err error)
 	GetById(ctx context.Context, id uuid.UUID) (user *entity.User, err error)
 	Register(ctx context.Context, user entity.User) (createdUser *entity.User, err error)
-	UpdateById(ctx context.Context, id uuid.UUID, user entity.User) (updatedUser *entity.User, err error)
+	Update(ctx context.Context, user entity.User) (updatedUser *entity.User, err error)
 	DeleteById(ctx context.Context, id uuid.UUID) (err error)
 }
 

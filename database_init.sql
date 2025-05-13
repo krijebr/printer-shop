@@ -6,8 +6,8 @@ AS
 ENUM('active', 'blocked');
 CREATE TABLE users (
 	id uuid NOT NULL,
-	first_name varchar NULL,
-	last_name varchar NULL,
+	first_name varchar NOT NULL,
+	last_name varchar NOT NULL,
 	email varchar NOT NULL,
 	password_hash varchar NOT NULL,
 	status user_status NOT NULL,

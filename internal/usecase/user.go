@@ -32,14 +32,14 @@ func (u *user) Register(ctx context.Context, user entity.User) (*entity.User, er
 	user.CreatedAt = time.Now()
 	user.Status = entity.UserStatusActive
 	user.Role = entity.UserRoleCustomer
-	err := u.repo.Register(ctx, user)
+	err := u.repo.Create(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 	newUser, err := u.repo.GetById(ctx, user.Id)
 	return newUser, nil
 }
-func (u *user) UpdateById(ctx context.Context, id uuid.UUID, user entity.User) (*entity.User, error) {
+func (u *user) Update(ctx context.Context, user entity.User) (*entity.User, error) {
 	return nil, ErrNotImplemented
 }
 func (u *user) DeleteById(ctx context.Context, id uuid.UUID) error {

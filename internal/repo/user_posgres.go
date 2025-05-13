@@ -65,17 +65,10 @@ func (u *UserRepoPg) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*
 func (u *UserRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	row := u.db.QueryRowContext(ctx, "select * from users where id = $1", id)
 	var dateStr string
-	var firstNameStr, lastNameStr sql.NullString
 	user := new(entity.User)
-	err := row.Scan(&user.Id, &firstNameStr, &lastNameStr, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
+	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
 	if err != nil {
 		return nil, err
-	}
-	if firstNameStr.Valid {
-		user.FirstName = firstNameStr.String
-	}
-	if lastNameStr.Valid {
-		user.LastName = lastNameStr.String
 	}
 	user.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
 	if err != nil {
@@ -83,7 +76,7 @@ func (u *UserRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.User, e
 	}
 	return user, nil
 }
-func (u *UserRepoPg) Register(ctx context.Context, user entity.User) error {
+func (u *UserRepoPg) Create(ctx context.Context, user entity.User) error {
 	_, err := u.db.ExecContext(ctx,
 		"insert into users (id, first_name, last_name, email, password_hash, status, role, created_at) values ($1,$2,$3,$4,$5,$6,$7,$8)",
 		user.Id, user.FirstName, user.LastName, user.Email, user.PasswordHash, user.Status, user.Role, user.CreatedAt)
@@ -92,8 +85,25 @@ func (u *UserRepoPg) Register(ctx context.Context, user entity.User) error {
 	}
 	return nil
 }
-func (u *UserRepoPg) UpdateById(ctx context.Context, id uuid.UUID, user entity.User) error {
-	_, err := u.db.ExecContext(ctx, "update users set first_name = $1, last_name = $2, password_hash = $3, status = $4, role = $5 where id = $6", user.FirstName, user.LastName, user.PasswordHash, user.Status, user.Role, id)
+func (u *UserRepoPg) Update(ctx context.Context, user entity.User) error {
+	set := []string{}
+	if user.FirstName != "" {
+		set = append(set, "first_name = '"+user.FirstName+"'")
+	}
+	if user.LastName != "" {
+		set = append(set, "last_name = '"+user.LastName+"'")
+	}
+	if user.PasswordHash != "" {
+		set = append(set, "password_hash = '"+user.PasswordHash+"'")
+	}
+	if user.Status != "" {
+		set = append(set, "status = '"+string(user.Status)+"'")
+	}
+	if user.Role != "" {
+		set = append(set, "role = '"+string(user.Role)+"'")
+	}
+
+	_, err := u.db.ExecContext(ctx, "update users set "+strings.Join(set, ", ")+" where id = $1", user.Id)
 	if err != nil {
 		return err
 	}
@@ -109,17 +119,10 @@ func (u *UserRepoPg) DeleteById(ctx context.Context, id uuid.UUID) error {
 func (u *UserRepoPg) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	row := u.db.QueryRowContext(ctx, "select * from users where email = $1", email)
 	var dateStr string
-	var firstNameStr, lastNameStr sql.NullString
 	user := new(entity.User)
-	err := row.Scan(&user.Id, &firstNameStr, &lastNameStr, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
+	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
 	if err != nil {
 		return nil, err
-	}
-	if firstNameStr.Valid {
-		user.FirstName = firstNameStr.String
-	}
-	if lastNameStr.Valid {
-		user.LastName = lastNameStr.String
 	}
 	user.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
 	if err != nil {
