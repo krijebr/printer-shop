@@ -69,7 +69,7 @@ func (u *UserHandlers) createUser() echo.HandlerFunc {
 		newUser.LastName = request.LastName
 		newUser.Email = request.Email
 		newUser.PasswordHash = request.Password
-		user, err := u.usecase.Create(c.Request().Context(), newUser)
+		user, err := u.usecase.Register(c.Request().Context(), newUser)
 		if err != nil {
 			log.Println("Ошибка создания ползьзователя", err)
 			return c.String(http.StatusInternalServerError, "")

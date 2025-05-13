@@ -27,15 +27,16 @@ func (u *user) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*entity
 func (u *user) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	return nil, ErrNotImplemented
 }
-func (u *user) Create(ctx context.Context, user entity.User) (*entity.User, error) {
+func (u *user) Register(ctx context.Context, user entity.User) (*entity.User, error) {
 	user.Id = uuid.New()
 	user.CreatedAt = time.Now()
 	user.Status = entity.UserStatusActive
 	user.Role = entity.UserRoleCustomer
-	newUser, err := u.repo.Create(ctx, user)
+	err := u.repo.Register(ctx, user)
 	if err != nil {
 		return nil, err
 	}
+	newUser, err := u.repo.GetById(ctx, user.Id)
 	return newUser, nil
 }
 func (u *user) UpdateById(ctx context.Context, id uuid.UUID, user entity.User) (*entity.User, error) {
