@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"time"
 )
 
 type (
@@ -23,10 +24,17 @@ type (
 		Password string `json:"password"`
 		DB       int    `json:"db"`
 	}
+	Security struct {
+		TokenTTL        time.Duration `json:"token_ttl"`
+		RefreshTokenTTL time.Duration `json:"refrsh_token_ttl"`
+		HashSalt        string        `json:"hash_salt"`
+	}
+
 	Config struct {
 		Postgres   Postgres   `json:"postgres"`
 		HttpServer HttpServer `json:"http_server"`
 		Redis      Redis      `json:"redis"`
+		Security   Security   `json:"security"`
 	}
 )
 

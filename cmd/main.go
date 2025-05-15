@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -9,24 +10,14 @@ import (
 	"github.com/krijebr/printer-shop/internal/delivery/http"
 	"github.com/krijebr/printer-shop/internal/repo"
 	"github.com/krijebr/printer-shop/internal/usecase"
+	"github.com/redis/go-redis/v9"
+
 	_ "github.com/lib/pq"
 )
 
 const confpath string = "../config/config.json"
 
 func main() {
-
-	/*rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
-
-	var ctx = context.Background()
-
-	err := rdb.Set(ctx, "message", "example", time.Second*50).Err()
-	if err != nil {
-		log.Println(err)
-	}
-	result, _ := rdb.Get(ctx, "message").Result()
-
-	log.Println(result)*/
 
 	log.Println("starting app")
 
@@ -35,13 +26,21 @@ func main() {
 		log.Println("Ошибка инициализации", err)
 		return
 	}
+
 	db, err := initDB(&cfg.Postgres)
 	if err != nil {
 		log.Println("Ошибка инициализации базы данных", err)
 		return
 	}
+	rdb, err := initRedis(&cfg.Redis)
+	if err != nil {
+		log.Println("Ошибка инициализации redis", err)
+		return
+	}
 	userRepo := repo.NewUserRepoPg(db)
-	u := usecase.NewUseCases(usecase.NewAuth(), usecase.NewCart(), usecase.NewOrder(), usecase.NewProducer(), usecase.NewProduct(), usecase.NewUser(userRepo))
+	tokenRepo := repo.NewTokenRedis(rdb)
+	u := usecase.NewUseCases(usecase.NewAuth(userRepo, tokenRepo, cfg.Security.TokenTTL, cfg.Security.RefreshTokenTTL, cfg.Security.HashSalt),
+		usecase.NewCart(), usecase.NewOrder(), usecase.NewProducer(), usecase.NewProduct(), usecase.NewUser(userRepo))
 	r := http.CreateNewEchoServer(u)
 
 	err = r.Start(":8000")
@@ -62,4 +61,14 @@ func initDB(cfg *config.Postgres) (*sql.DB, error) {
 		return nil, err
 	}
 	return db, nil
+}
+func initRedis(cfg *config.Redis) (*redis.Client, error) {
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	ctx := context.Background()
+	client := redis.NewClient(&redis.Options{Addr: addr, Password: cfg.Password, DB: cfg.DB})
+	_, err := client.Ping(ctx).Result()
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }

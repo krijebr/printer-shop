@@ -14,5 +14,10 @@
 		"port":6379,
 		"password":"",
 		"db":0
+    },
+    "security":{
+        "token_ttl":"5m",
+		"refrsh_token_ttl":"20h",
+		"hash_salt":"qwerty"
     }
 }
