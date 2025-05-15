@@ -1,11 +1,10 @@
 package v1
 
 import (
-	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/krijebr/printer-shop/internal/usecase"
 	"github.com/labstack/echo/v4"
@@ -45,30 +44,34 @@ func (u *UserHandlers) allUsers() echo.HandlerFunc {
 	}
 }
 
-func (u *UserHandlers) createUser() echo.HandlerFunc {
+func (u *UserHandlers) register() echo.HandlerFunc {
 	type request struct {
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-		Email     string `json:"email"`
-		Password  string `json:"password"`
+		FirstName string `json:"first_name" validate:"required"`
+		LastName  string `json:"last_name" validate:"required"`
+		Email     string `json:"email" validate:"required,email"`
+		Password  string `json:"password" validate:"required"`
 	}
 	return func(c echo.Context) error {
-		data, err := io.ReadAll(c.Request().Body)
+		var requestData request
+		err := c.Bind(&requestData)
 		if err != nil {
 			log.Println("Ошибка чтения тела запроса ", err)
-			return c.String(http.StatusInternalServerError, "")
-		}
-		var newUser entity.User
-		var request request
-		err = json.Unmarshal(data, &request)
-		if err != nil {
-			log.Println("Ошибка декодирования тела запроса", err)
 			return c.String(http.StatusBadRequest, "")
 		}
-		newUser.FirstName = request.FirstName
-		newUser.LastName = request.LastName
-		newUser.Email = request.Email
-		newUser.PasswordHash = request.Password
+		validate := validator.New()
+		err = validate.Struct(requestData)
+		if err != nil {
+			log.Println("Не валидные данные ", err)
+			return c.String(http.StatusBadRequest, "")
+		}
+
+		newUser := entity.User{
+			FirstName:    requestData.FirstName,
+			LastName:     requestData.LastName,
+			Email:        requestData.Email,
+			PasswordHash: requestData.Password,
+		}
+
 		user, err := u.usecase.Register(c.Request().Context(), newUser)
 		if err != nil {
 			log.Println("Ошибка создания ползьзователя", err)
@@ -96,7 +99,7 @@ func (u *UserHandlers) deleteUserById() echo.HandlerFunc {
 func RegisterUserRoutes(u usecase.User, g *echo.Group) {
 	a := NewUserHandlers(u)
 	g.GET("", a.allUsers())
-	g.POST("", a.createUser())
+	g.POST("", a.register())
 	g.GET("/:id", a.getUserById())
 	g.PUT("/:id", a.updateUserById())
 	g.DELETE("/:id", a.deleteUserById())

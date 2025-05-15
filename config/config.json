@@ -10,7 +10,7 @@
         "port":8000
     },
     "redis":{
-        "host":"locslhost",
+        "host":"localhost",
 		"port":6379,
 		"password":"",
 		"db":0

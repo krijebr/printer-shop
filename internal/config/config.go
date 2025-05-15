@@ -8,6 +8,7 @@ import (
 )
 
 type (
+	Duration time.Duration
 	Postgres struct {
 		Host     string `json:"host"`
 		Port     int    `json:"port"`
@@ -25,9 +26,9 @@ type (
 		DB       int    `json:"db"`
 	}
 	Security struct {
-		TokenTTL        time.Duration `json:"token_ttl"`
-		RefreshTokenTTL time.Duration `json:"refrsh_token_ttl"`
-		HashSalt        string        `json:"hash_salt"`
+		TokenTTL        Duration `json:"token_ttl"`
+		RefreshTokenTTL Duration `json:"refrsh_token_ttl"`
+		HashSalt        string   `json:"hash_salt"`
 	}
 
 	Config struct {
@@ -38,6 +39,16 @@ type (
 	}
 )
 
+func (d *Duration) UnmarshalJSON(b []byte) (err error) {
+	var str string
+
+	if err := json.Unmarshal(b, &str); err != nil {
+		return err
+	}
+	dur, err := time.ParseDuration(str)
+	*d = Duration(dur)
+	return err
+}
 func InitConfigFromJson(path string) (*Config, error) {
 	file, err := os.Open(path)
 	if err != nil {

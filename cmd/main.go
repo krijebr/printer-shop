@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/krijebr/printer-shop/internal/config"
 	"github.com/krijebr/printer-shop/internal/delivery/http"
@@ -39,8 +40,8 @@ func main() {
 	}
 	userRepo := repo.NewUserRepoPg(db)
 	tokenRepo := repo.NewTokenRedis(rdb)
-	u := usecase.NewUseCases(usecase.NewAuth(userRepo, tokenRepo, cfg.Security.TokenTTL, cfg.Security.RefreshTokenTTL, cfg.Security.HashSalt),
-		usecase.NewCart(), usecase.NewOrder(), usecase.NewProducer(), usecase.NewProduct(), usecase.NewUser(userRepo))
+	u := usecase.NewUseCases(usecase.NewAuth(userRepo, tokenRepo, time.Duration(cfg.Security.TokenTTL), time.Duration(cfg.Security.RefreshTokenTTL),
+		cfg.Security.HashSalt), usecase.NewCart(), usecase.NewOrder(), usecase.NewProducer(), usecase.NewProduct(), usecase.NewUser(userRepo))
 	r := http.CreateNewEchoServer(u)
 
 	err = r.Start(":8000")

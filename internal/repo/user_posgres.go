@@ -40,18 +40,11 @@ func (u *UserRepoPg) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*
 	users := []*entity.User{}
 	for rows.Next() {
 		var dateStr string
-		var firstNameStr, lastNameStr sql.NullString
 		user := new(entity.User)
-		err := rows.Scan(&user.Id, &firstNameStr, &lastNameStr, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
+		err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
 		if err != nil {
 			log.Println("Ошибка чтения строки", err)
 			continue
-		}
-		if firstNameStr.Valid {
-			user.FirstName = firstNameStr.String
-		}
-		if lastNameStr.Valid {
-			user.LastName = lastNameStr.String
 		}
 		user.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
 		if err != nil {

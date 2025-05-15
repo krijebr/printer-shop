@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/krijebr/printer-shop/internal/entity"
@@ -28,7 +27,7 @@ func (u *user) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) 
 	return nil, ErrNotImplemented
 }
 func (u *user) Register(ctx context.Context, user entity.User) (*entity.User, error) {
-	user.Id = uuid.New()
+	/*user.Id = uuid.New()
 	user.CreatedAt = time.Now()
 	user.Status = entity.UserStatusActive
 	user.Role = entity.UserRoleCustomer
@@ -36,8 +35,8 @@ func (u *user) Register(ctx context.Context, user entity.User) (*entity.User, er
 	if err != nil {
 		return nil, err
 	}
-	newUser, err := u.repo.GetById(ctx, user.Id)
-	return newUser, nil
+	newUser, err := u.repo.GetById(ctx, user.Id)*/
+	return nil, ErrNotImplemented
 }
 func (u *user) Update(ctx context.Context, user entity.User) (*entity.User, error) {
 	return nil, ErrNotImplemented
