@@ -19,6 +19,7 @@ type User interface {
 	Register(ctx context.Context, user entity.User) (createdUser *entity.User, err error)
 	Update(ctx context.Context, user entity.User) (updatedUser *entity.User, err error)
 	DeleteById(ctx context.Context, id uuid.UUID) (err error)
+	ValidatePassword(password, hash string) (result bool)
 }
 
 type Product interface {

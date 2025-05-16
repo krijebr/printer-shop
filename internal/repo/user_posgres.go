@@ -61,7 +61,12 @@ func (u *UserRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.User, e
 	user := new(entity.User)
 	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
 	if err != nil {
-		return nil, err
+		switch {
+		case err == sql.ErrNoRows:
+			return nil, ErrUserNotFound
+		default:
+			return nil, err
+		}
 	}
 	user.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
 	if err != nil {
@@ -115,7 +120,12 @@ func (u *UserRepoPg) GetByEmail(ctx context.Context, email string) (*entity.User
 	user := new(entity.User)
 	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
 	if err != nil {
-		return nil, err
+		switch {
+		case err == sql.ErrNoRows:
+			return nil, ErrUserNotFound
+		default:
+			return nil, err
+		}
 	}
 	user.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
 	if err != nil {

@@ -74,9 +74,16 @@ func (u *UserHandlers) register() echo.HandlerFunc {
 
 		user, err := u.usecase.Register(c.Request().Context(), newUser)
 		if err != nil {
-			log.Println("Ошибка создания ползьзователя", err)
-			return c.String(http.StatusInternalServerError, "")
+			switch {
+			case err == usecase.ErrEmailAlreadyExists:
+				log.Println("Пользователь с таким email уже существует", err)
+				return c.String(http.StatusBadRequest, "")
+			default:
+				log.Println("Ошибка создания ползьзователя", err)
+				return c.String(http.StatusInternalServerError, "")
+			}
 		}
+		log.Println("Регистрация нового пользователя")
 		return c.JSON(http.StatusOK, user)
 	}
 }

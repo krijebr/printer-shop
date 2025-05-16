@@ -2,6 +2,9 @@ package usecase
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/krijebr/printer-shop/internal/entity"
@@ -9,11 +12,24 @@ import (
 )
 
 type user struct {
-	repo repo.User
+	repo     repo.User
+	hashSalt string
 }
 
-func NewUser(r repo.User) User {
-	return &user{repo: r}
+func NewUser(r repo.User, salt string) User {
+	return &user{
+		repo:     r,
+		hashSalt: salt,
+	}
+}
+
+func (u *user) hashPassword(pass string) string {
+	h := sha256.New()
+	h.Write([]byte(pass + u.hashSalt))
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+func (u *user) ValidatePassword(password, hash string) bool {
+	return u.hashPassword(password) == hash
 }
 
 func (u *user) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*entity.User, error) {
@@ -27,16 +43,30 @@ func (u *user) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) 
 	return nil, ErrNotImplemented
 }
 func (u *user) Register(ctx context.Context, user entity.User) (*entity.User, error) {
-	/*user.Id = uuid.New()
+	someUser, err := u.repo.GetByEmail(ctx, user.Email)
+	if err != nil {
+		switch {
+		case err == repo.ErrUserNotFound:
+			break
+		default:
+			return nil, err
+		}
+	}
+	if someUser != nil {
+		return nil, ErrEmailAlreadyExists
+	}
+	user.Id = uuid.New()
+	user.PasswordHash = u.hashPassword(user.PasswordHash)
 	user.CreatedAt = time.Now()
 	user.Status = entity.UserStatusActive
 	user.Role = entity.UserRoleCustomer
-	err := u.repo.Create(ctx, user)
+	err = u.repo.Create(ctx, user)
 	if err != nil {
 		return nil, err
 	}
-	newUser, err := u.repo.GetById(ctx, user.Id)*/
-	return nil, ErrNotImplemented
+	newUser, err := u.repo.GetById(ctx, user.Id)
+
+	return newUser, nil
 }
 func (u *user) Update(ctx context.Context, user entity.User) (*entity.User, error) {
 	return nil, ErrNotImplemented

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+
 	"time"
 
 	"github.com/krijebr/printer-shop/internal/entity"
@@ -9,24 +10,36 @@ import (
 )
 
 type auth struct {
-	UserRepo        repo.User
-	TokenRepo       repo.Token
+	userRepo        repo.User
+	tokenRepo       repo.Token
 	tokenTTL        time.Duration
 	refreshTokenTTL time.Duration
-	hashSalt        string
+	userUseCase     User
 }
 
-func NewAuth(u repo.User, t repo.Token, tokenTTL time.Duration, refreshTokenTTL time.Duration, hashSalt string) Auth {
+func NewAuth(u repo.User, t repo.Token, tokenTTL time.Duration, refreshTokenTTL time.Duration, user User) Auth {
 	return &auth{
-		UserRepo:        u,
-		TokenRepo:       t,
+		userRepo:        u,
+		tokenRepo:       t,
 		tokenTTL:        tokenTTL,
 		refreshTokenTTL: refreshTokenTTL,
-		hashSalt:        hashSalt,
+		userUseCase:     user,
 	}
 }
 func (a *auth) Login(ctx context.Context, email, password string) (string, string, error) {
-	return "", "", ErrNotImplemented
+	user, err := a.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		switch {
+		case err == repo.ErrUserNotFound:
+			return "", "", ErrUserNotFound
+		default:
+			return "", "", err
+		}
+	}
+	if a.userUseCase.ValidatePassword(password, user.PasswordHash) {
+		return "", "", nil
+	}
+	return "", "", ErrWrongPassword
 }
 func (a *auth) ValidateToken(ctx context.Context, token string) (*entity.User, error) {
 	return nil, ErrNotImplemented

@@ -40,8 +40,14 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 		}
 		token, refreshToken, err := a.usecase.Login(c.Request().Context(), requestData.Email, requestData.Password)
 		if err != nil {
-			log.Println("Ошибка авторизации", err)
-			return c.String(http.StatusInternalServerError, "")
+			switch {
+			case err == usecase.ErrUserNotFound || err == usecase.ErrWrongPassword:
+				log.Println("Пользователь не правильно ввел пароль", err)
+				return c.String(http.StatusForbidden, "")
+			default:
+				log.Println("Ошибка авторизации", err)
+				return c.String(http.StatusInternalServerError, "")
+			}
 		}
 		responseData := response{
 			Token:        token,
