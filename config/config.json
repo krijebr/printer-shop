@@ -17,7 +17,7 @@
     },
     "security":{
         "token_ttl":"5m",
-		"refrsh_token_ttl":"20h",
+		"refrsh_token_ttl":"1h",
 		"hash_salt":"qwerty"
     }
 }
