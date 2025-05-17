@@ -36,10 +36,10 @@ func (a *auth) Login(ctx context.Context, email, password string) (string, strin
 			return "", "", err
 		}
 	}
-	if a.userUseCase.ValidatePassword(password, user.PasswordHash) {
-		return "", "", nil
+	if !a.userUseCase.ValidatePassword(password, user.PasswordHash) {
+		return "", "", ErrWrongPassword
 	}
-	return "", "", ErrWrongPassword
+	return "", "", nil
 }
 func (a *auth) ValidateToken(ctx context.Context, token string) (*entity.User, error) {
 	return nil, ErrNotImplemented

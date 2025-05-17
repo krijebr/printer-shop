@@ -33,24 +33,15 @@ func (u *user) ValidatePassword(password, hash string) bool {
 }
 
 func (u *user) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*entity.User, error) {
-	users, err := u.repo.GetAll(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	return users, err
+	return u.repo.GetAll(ctx, filter)
 }
 func (u *user) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	return nil, ErrNotImplemented
 }
 func (u *user) Register(ctx context.Context, user entity.User) (*entity.User, error) {
 	someUser, err := u.repo.GetByEmail(ctx, user.Email)
-	if err != nil {
-		switch {
-		case err == repo.ErrUserNotFound:
-			break
-		default:
-			return nil, err
-		}
+	if err != nil && err != repo.ErrUserNotFound {
+		return nil, err
 	}
 	if someUser != nil {
 		return nil, ErrEmailAlreadyExists
