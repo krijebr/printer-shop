@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,6 +33,9 @@ func (a *TokenRedis) SetRefreshToken(ctx context.Context, userId uuid.UUID, secr
 func (a *TokenRedis) GetTokenByUserId(ctx context.Context, userId uuid.UUID) (string, error) {
 	result, err := a.rdb.Get(ctx, tokenPrefix+userId.String()).Result()
 	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return "", ErrTokenNotFound
+		}
 		return "", err
 	}
 	return result, nil
@@ -39,6 +43,9 @@ func (a *TokenRedis) GetTokenByUserId(ctx context.Context, userId uuid.UUID) (st
 func (a *TokenRedis) GetRefreshTokenByUserId(ctx context.Context, userId uuid.UUID) (string, error) {
 	result, err := a.rdb.Get(ctx, refreshTokenPrefix+userId.String()).Result()
 	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return "", ErrTokenNotFound
+		}
 		return "", err
 	}
 	return result, nil
