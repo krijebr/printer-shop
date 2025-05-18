@@ -80,6 +80,10 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 
 		token, refreshToken, err := a.usecase.RefreshToken(c.Request().Context(), requestData.RefreshToken)
 		if err != nil {
+			if err == usecase.ErrInvalidToken {
+				log.Println("Не валидный токен", err)
+				return c.String(http.StatusForbidden, "")
+			}
 			log.Println("Ошибка обновления токенов", err)
 			return c.String(http.StatusInternalServerError, "")
 		}

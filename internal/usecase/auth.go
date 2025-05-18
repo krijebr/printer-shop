@@ -115,10 +115,7 @@ func (a *auth) ValidateToken(ctx context.Context, token string) (*entity.User, e
 		}
 		uid, err := uuid.Parse(userId)
 		if err != nil {
-			return nil, err
-		}
-		if err != nil {
-			return nil, err
+			return nil, ErrInvalidToken
 		}
 		secret, err := a.tokenRepo.GetTokenByUserId(ctx, uid)
 		if err != nil {
@@ -150,5 +147,70 @@ func (a *auth) ValidateToken(ctx context.Context, token string) (*entity.User, e
 	return user, nil
 }
 func (a *auth) RefreshToken(ctx context.Context, refreshToken string) (string, string, error) {
-	return "", "", ErrNotImplemented
+	jwToken, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		userId, err := token.Claims.GetIssuer()
+		if err != nil {
+			return nil, ErrInvalidToken
+		}
+		uid, err := uuid.Parse(userId)
+		if err != nil {
+			return nil, ErrInvalidToken
+		}
+		secret, err := a.tokenRepo.GetRefreshTokenByUserId(ctx, uid)
+		if err != nil {
+			if errors.Is(err, repo.ErrTokenNotFound) {
+				return nil, ErrInvalidToken
+			}
+			return nil, err
+		}
+
+		return []byte(secret), nil
+	})
+
+	if err != nil {
+		return "", "", ErrInvalidToken
+	}
+	userIdStr, err := jwToken.Claims.GetIssuer()
+	if err != nil {
+		return "", "", err
+	}
+	userId, err := uuid.Parse(userIdStr)
+	if err != nil {
+		return "", "", err
+	}
+	secret := a.generateRandomKey()
+	expTime := time.Now().Add(a.tokenTTL)
+	tokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"iss": userIdStr,
+		"exp": expTime.Unix(),
+	})
+	err = a.tokenRepo.SetToken(ctx, userId, secret, a.tokenTTL)
+	if err != nil {
+		return "", "", err
+	}
+	token, err := tokenObj.SignedString([]byte(secret))
+	if err != nil {
+		return "", "", err
+	}
+
+	secret = a.generateRandomKey()
+	expTime = time.Now().Add(a.refreshTokenTTL)
+	refreshTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"iss": userIdStr,
+		"exp": expTime.Unix(),
+	})
+	err = a.tokenRepo.SetRefreshToken(ctx, userId, secret, a.refreshTokenTTL)
+	if err != nil {
+		return "", "", err
+	}
+	newRefreshToken, err := refreshTokenObj.SignedString([]byte(secret))
+	if err != nil {
+		return "", "", err
+	}
+
+	return token, newRefreshToken, nil
 }
