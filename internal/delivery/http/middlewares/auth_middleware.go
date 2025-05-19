@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/krijebr/printer-shop/internal/delivery/http/common"
 	"github.com/krijebr/printer-shop/internal/usecase"
 	"github.com/labstack/echo/v4"
 )
@@ -34,7 +35,7 @@ func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 				c.NoContent(http.StatusInternalServerError)
 			}
 		}
-		c.Set("UserId", user.Id)
+		c.Set(common.UserIdContextKey, user.Id)
 		return next(c)
 	}
 
