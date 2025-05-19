@@ -36,7 +36,11 @@ func (u *user) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*entity
 	return u.repo.GetAll(ctx, filter)
 }
 func (u *user) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) {
-	return nil, ErrNotImplemented
+	user, err := u.repo.GetById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 func (u *user) Register(ctx context.Context, user entity.User) (*entity.User, error) {
 	someUser, err := u.repo.GetByEmail(ctx, user.Email)
@@ -60,7 +64,18 @@ func (u *user) Register(ctx context.Context, user entity.User) (*entity.User, er
 	return newUser, nil
 }
 func (u *user) Update(ctx context.Context, user entity.User) (*entity.User, error) {
-	return nil, ErrNotImplemented
+	if user.PasswordHash != "" {
+		user.PasswordHash = u.hashPassword(user.PasswordHash)
+	}
+	err := u.repo.Update(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	updatedUser, err := u.repo.GetById(ctx, user.Id)
+	if err != nil {
+		return nil, err
+	}
+	return updatedUser, nil
 }
 func (u *user) DeleteById(ctx context.Context, id uuid.UUID) error {
 	return ErrNotImplemented

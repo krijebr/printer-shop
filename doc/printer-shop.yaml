@@ -655,6 +655,12 @@ paths:
         - Profile
       operationId: getProfile
       responses:
+        '200':
+          description: Successful operation
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
         '401':
           description: Unauthorized
         '400':
