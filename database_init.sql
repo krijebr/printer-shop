@@ -15,3 +15,11 @@ CREATE TABLE users (
 	created_at timestamp NOT NULL,
 	CONSTRAINT users_pk PRIMARY KEY (id)
 );
+
+CREATE TABLE producers (
+	id uuid NOT NULL,
+	"name" varchar NOT NULL,
+	description varchar NOT NULL,
+	created_at timestamp NOT NULL,
+	CONSTRAINT newtable_pk PRIMARY KEY (id)
+);

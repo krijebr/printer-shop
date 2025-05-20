@@ -36,11 +36,7 @@ func (u *user) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*entity
 	return u.repo.GetAll(ctx, filter)
 }
 func (u *user) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) {
-	user, err := u.repo.GetById(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+	return u.repo.GetById(ctx, id)
 }
 func (u *user) Register(ctx context.Context, user entity.User) (*entity.User, error) {
 	someUser, err := u.repo.GetByEmail(ctx, user.Email)

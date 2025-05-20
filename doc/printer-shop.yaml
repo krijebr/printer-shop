@@ -43,7 +43,7 @@ paths:
           content: 
             application/json:
               schema:
-                $ref: '#/components/schemas/Product'
+                $ref: '#/components/schemas/Producer'
         '500':
           description: Unexpected error
           content:

@@ -35,7 +35,7 @@ func (u *UserHandlers) allUsers() echo.HandlerFunc {
 		}
 		users, err := u.usecase.GetAll(c.Request().Context(), userFilter)
 		if err != nil {
-			log.Println("Ошибка получения ", err)
+			log.Println("Ошибка получения пользователей", err)
 			return c.String(http.StatusInternalServerError, "")
 		}
 		log.Println("Получение всех пользователей")
@@ -65,14 +65,14 @@ func (u *UserHandlers) register() echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "")
 		}
 
-		newUser := entity.User{
+		user := entity.User{
 			FirstName:    requestData.FirstName,
 			LastName:     requestData.LastName,
 			Email:        requestData.Email,
 			PasswordHash: requestData.Password,
 		}
 
-		user, err := u.usecase.Register(c.Request().Context(), newUser)
+		newUser, err := u.usecase.Register(c.Request().Context(), user)
 		if err != nil {
 			switch {
 			case err == usecase.ErrEmailAlreadyExists:
@@ -84,7 +84,7 @@ func (u *UserHandlers) register() echo.HandlerFunc {
 			}
 		}
 		log.Println("Регистрация нового пользователя")
-		return c.JSON(http.StatusOK, user)
+		return c.JSON(http.StatusOK, newUser)
 	}
 }
 
