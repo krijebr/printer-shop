@@ -46,9 +46,39 @@ func (p *producer) Create(ctx context.Context, producer entity.Producer) (*entit
 	}
 	return newProducer, nil
 }
-func (p *producer) UpdateById(ictx context.Context, d uuid.UUID, producer entity.Producer) (*entity.Producer, error) {
-	return nil, ErrNotImplemented
+func (p *producer) Update(ctx context.Context, producer entity.Producer) (*entity.Producer, error) {
+	_, err := p.repo.GetById(ctx, producer.Id)
+	if err != nil {
+		switch {
+		case err == repo.ErrProducerNotFound:
+			return nil, ErrProducerNotFound
+		default:
+			return nil, err
+		}
+	}
+	err = p.repo.Update(ctx, producer)
+	if err != nil {
+		return nil, err
+	}
+	updatedProducer, err := p.repo.GetById(ctx, producer.Id)
+	if err != nil {
+		return nil, err
+	}
+	return updatedProducer, nil
 }
 func (p *producer) DeleteById(ctx context.Context, id uuid.UUID) error {
-	return ErrNotImplemented
+	_, err := p.repo.GetById(ctx, id)
+	if err != nil {
+		switch {
+		case err == repo.ErrProducerNotFound:
+			return ErrProducerNotFound
+		default:
+			return err
+		}
+	}
+	err = p.repo.DeleteById(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

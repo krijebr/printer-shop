@@ -60,10 +60,19 @@ func (u *user) Register(ctx context.Context, user entity.User) (*entity.User, er
 	return newUser, nil
 }
 func (u *user) Update(ctx context.Context, user entity.User) (*entity.User, error) {
+	_, err := u.repo.GetById(ctx, user.Id)
+	if err != nil {
+		switch {
+		case err == repo.ErrUserNotFound:
+			return nil, ErrUserNotFound
+		default:
+			return nil, err
+		}
+	}
 	if user.PasswordHash != "" {
 		user.PasswordHash = u.hashPassword(user.PasswordHash)
 	}
-	err := u.repo.Update(ctx, user)
+	err = u.repo.Update(ctx, user)
 	if err != nil {
 		return nil, err
 	}

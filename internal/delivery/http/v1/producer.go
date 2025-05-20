@@ -47,7 +47,7 @@ func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Не валидные данные ", err)
+			log.Println("Невалидные данные ", err)
 			return c.String(http.StatusBadRequest, "")
 		}
 
@@ -60,6 +60,8 @@ func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 			log.Println("Ошибка создания производителя", err)
 			return c.NoContent(http.StatusInternalServerError)
 		}
+		log.Println("Производитель создан")
+		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, newProducer)
 	}
 }
@@ -82,17 +84,74 @@ func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
 				return c.NoContent(http.StatusInternalServerError)
 			}
 		}
+		log.Println("Производитель получен")
 		return c.JSON(http.StatusOK, producer)
 	}
 }
 func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
+	type request struct {
+		Name        string `json:"name" validate:"required"`
+		Description string `json:"description" validate:"required"`
+	}
 	return func(c echo.Context) error {
-		return c.String(http.StatusNotImplemented, "Not Implemented")
+		producerId, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			log.Println("Невалидный id", err)
+			return c.NoContent(http.StatusBadRequest)
+		}
+		var requestData request
+		err = c.Bind(&requestData)
+		if err != nil {
+			log.Println("Ошибка чтения тела запроса ", err)
+			return c.NoContent(http.StatusBadRequest)
+		}
+		validate := validator.New()
+		err = validate.Struct(requestData)
+		if err != nil {
+			log.Println("Невалидные данные ", err)
+			return c.String(http.StatusBadRequest, "")
+		}
+		producer := entity.Producer{
+			Id:          producerId,
+			Name:        requestData.Name,
+			Description: requestData.Description,
+		}
+		updatedProducer, err := p.usecase.Update(c.Request().Context(), producer)
+		if err != nil {
+			switch {
+			case err == usecase.ErrProducerNotFound:
+				log.Println("Производителя с таким id не найдено", err)
+				return c.NoContent(http.StatusBadRequest)
+			default:
+				log.Println("Ошибка обновления производителя", err)
+				return c.NoContent(http.StatusInternalServerError)
+			}
+		}
+		log.Println("Производитель обновлен")
+		c.Response().Header().Set(echo.HeaderContentType, "application/json")
+		return c.JSON(http.StatusOK, updatedProducer)
 	}
 }
 func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.String(http.StatusNotImplemented, "Not Implemented")
+		producerId, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			log.Println("Невалидный id", err)
+			return c.NoContent(http.StatusBadRequest)
+		}
+		err = p.usecase.DeleteById(c.Request().Context(), producerId)
+		if err != nil {
+			switch {
+			case err == usecase.ErrProducerNotFound:
+				log.Println("Производителя с таким id не найдено", err)
+				return c.NoContent(http.StatusBadRequest)
+			default:
+				log.Println("Ошибка удаления производителя", err)
+				return c.NoContent(http.StatusInternalServerError)
+			}
+		}
+		log.Println("Производитель удален")
+		return c.NoContent(http.StatusOK)
 	}
 }
 func RegisterProducerRoutes(u usecase.Producer, g *echo.Group) {

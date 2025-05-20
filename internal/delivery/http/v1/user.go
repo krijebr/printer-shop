@@ -61,7 +61,7 @@ func (u *UserHandlers) register() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Не валидные данные ", err)
+			log.Println("Невалидные данные ", err)
 			return c.String(http.StatusBadRequest, "")
 		}
 

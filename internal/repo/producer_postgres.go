@@ -72,8 +72,16 @@ func (p *ProducerRepoPg) Create(ctx context.Context, producer entity.Producer) e
 	return nil
 }
 func (p *ProducerRepoPg) Update(ctx context.Context, producer entity.Producer) error {
+	_, err := p.db.ExecContext(ctx, "update producers set name = $1, description = $2 where id = $3", producer.Name, producer.Description, producer.Id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
-func (p *ProducerRepoPg) DeleteById(ctx context.Context, id uuid.UUID) (err error) {
+func (p *ProducerRepoPg) DeleteById(ctx context.Context, id uuid.UUID) error {
+	_, err := p.db.ExecContext(ctx, "delete from producers where id = $1", id)
+	if err != nil {
+		return err
+	}
 	return nil
 }

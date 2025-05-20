@@ -34,7 +34,7 @@ type Producer interface {
 	GetAll(ctx context.Context) (allProducers []*entity.Producer, err error)
 	GetById(ctx context.Context, id uuid.UUID) (producer *entity.Producer, err error)
 	Create(ctx context.Context, producer entity.Producer) (createdProducer *entity.Producer, err error)
-	UpdateById(ctx context.Context, id uuid.UUID, producer entity.Producer) (updatedProducer *entity.Producer, err error)
+	Update(ctx context.Context, producer entity.Producer) (updatedProducer *entity.Producer, err error)
 	DeleteById(ctx context.Context, id uuid.UUID) (err error)
 }
 
