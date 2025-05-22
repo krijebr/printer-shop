@@ -45,7 +45,7 @@ func (p *ProductHandlers) getAllProducts() echo.HandlerFunc {
 
 func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 	type request struct {
-		Name       string               `json:"name" validate:"required,max=30,min=3"`
+		Name       string               `json:"name" validate:"required,max=100,min=3"`
 		Price      float32              `json:"price" validate:"required"`
 		ProducerId uuid.UUID            `json:"producer_id" validate:"required,uuid"`
 		Status     entity.ProductStatus `json:"status" validate:"required,oneof=published hidden"`
@@ -90,12 +90,28 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 
 func (p *ProductHandlers) getProductById() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.String(http.StatusNotImplemented, "Not Implemented")
+		productId, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			log.Println("Невалидный id", err)
+			return c.NoContent(http.StatusBadRequest)
+		}
+		product, err := p.usecase.GetById(c.Request().Context(), productId)
+		if err != nil {
+			switch {
+			case err == usecase.ErrProductNotFound:
+				log.Println("Товар с таким id не найден", err)
+				return c.NoContent(http.StatusBadRequest)
+			default:
+				log.Println("Ошибка получения товара", err)
+				return c.NoContent(http.StatusInternalServerError)
+			}
+		}
+		return c.JSON(http.StatusOK, product)
 	}
 }
 func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 	type request struct {
-		Name       string               `json:"name" validate:"omitempty,max=30,min=3"`
+		Name       string               `json:"name" validate:"omitempty,max=100,min=3"`
 		Price      float32              `json:"price" validate:"omitempty"`
 		ProducerId uuid.UUID            `json:"producer_id" validate:"omitempty,uuid"`
 		Status     entity.ProductStatus `json:"status" validate:"omitempty,oneof=published hidden"`
