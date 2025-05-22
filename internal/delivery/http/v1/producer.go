@@ -34,8 +34,8 @@ func (p *ProducerHandlers) getAllProducers() echo.HandlerFunc {
 
 func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 	type request struct {
-		Name        string `json:"name" validate:"required"`
-		Description string `json:"description" validate:"required"`
+		Name        string `json:"name" validate:"required,max=30,min=3"`
+		Description string `json:"description" validate:"required,max=300,min=5"`
 	}
 	return func(c echo.Context) error {
 		var requestData request
@@ -77,7 +77,7 @@ func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case err == usecase.ErrProducerNotFound:
-				log.Println("Производителя с таким id не найдено", err)
+				log.Println("Производитель с таким id не найден", err)
 				return c.NoContent(http.StatusBadRequest)
 			default:
 				log.Println("Ошибка получения производителя", err)
@@ -90,8 +90,8 @@ func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
 }
 func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 	type request struct {
-		Name        string `json:"name" validate:"required"`
-		Description string `json:"description" validate:"required"`
+		Name        string `json:"name,omitempty" validate:"omitempty,max=30,min=3"`
+		Description string `json:"description,omitempty" validate:"omitempty,max=300,min=5"`
 	}
 	return func(c echo.Context) error {
 		producerId, err := uuid.Parse(c.Param("id"))
@@ -144,6 +144,9 @@ func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 			switch {
 			case err == usecase.ErrProducerNotFound:
 				log.Println("Производителя с таким id не найдено", err)
+				return c.NoContent(http.StatusBadRequest)
+			case err == usecase.ErrProducerUsed:
+				log.Println("Производитель используется", err)
 				return c.NoContent(http.StatusBadRequest)
 			default:
 				log.Println("Ошибка удаления производителя", err)

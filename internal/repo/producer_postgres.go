@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -72,7 +73,15 @@ func (p *ProducerRepoPg) Create(ctx context.Context, producer entity.Producer) e
 	return nil
 }
 func (p *ProducerRepoPg) Update(ctx context.Context, producer entity.Producer) error {
-	_, err := p.db.ExecContext(ctx, "update producers set name = $1, description = $2 where id = $3", producer.Name, producer.Description, producer.Id)
+	set := []string{}
+	if producer.Name != "" {
+		set = append(set, "name = '"+producer.Name+"'")
+	}
+	if producer.Description != "" {
+		set = append(set, "description = '"+producer.Description+"'")
+	}
+
+	_, err := p.db.ExecContext(ctx, "update producers set "+strings.Join(set, ", ")+" where id = $1", producer.Id)
 	if err != nil {
 		return err
 	}

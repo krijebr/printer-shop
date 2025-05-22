@@ -10,12 +10,14 @@ import (
 )
 
 type producer struct {
-	repo repo.Producer
+	repo        repo.Producer
+	repoProduct repo.Product
 }
 
-func NewProducer(r repo.Producer) Producer {
+func NewProducer(r repo.Producer, p repo.Product) Producer {
 	return &producer{
-		repo: r,
+		repo:        r,
+		repoProduct: p,
 	}
 }
 func (p *producer) GetAll(ctx context.Context) ([]*entity.Producer, error) {
@@ -67,7 +69,17 @@ func (p *producer) Update(ctx context.Context, producer entity.Producer) (*entit
 	return updatedProducer, nil
 }
 func (p *producer) DeleteById(ctx context.Context, id uuid.UUID) error {
-	_, err := p.repo.GetById(ctx, id)
+	filter := &entity.ProductFilter{
+		ProducerId: &id,
+	}
+	products, err := p.repoProduct.GetAll(ctx, filter)
+	if err != nil {
+		return err
+	}
+	if len(products) != 0 {
+		return ErrProducerUsed
+	}
+	_, err = p.repo.GetById(ctx, id)
 	if err != nil {
 		switch {
 		case err == repo.ErrProducerNotFound:

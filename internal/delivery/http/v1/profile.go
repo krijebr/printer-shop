@@ -37,9 +37,9 @@ func (p *ProfileHandlers) getProfile() echo.HandlerFunc {
 }
 func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
 	type request struct {
-		FirstName string `json:"first_name,omitempty" validate:"max=25,min=3"`
-		LastName  string `json:"last_name,omitempty" validate:"max=25,min=3"`
-		Password  string `json:"password,omitempty" validate:"max=25,min=8"`
+		FirstName string `json:"first_name,omitempty" validate:"omitempty,max=25,min=3"`
+		LastName  string `json:"last_name,omitempty" validate:"omitempty,max=25,min=3"`
+		Password  string `json:"password,omitempty" validate:"omitempty,max=60,min=8"`
 	}
 	return func(c echo.Context) error {
 		var requestData request

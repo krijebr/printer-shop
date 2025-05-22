@@ -11,15 +11,13 @@ import (
 	"github.com/krijebr/printer-shop/internal/delivery/http"
 	"github.com/krijebr/printer-shop/internal/repo"
 	"github.com/krijebr/printer-shop/internal/usecase"
-	"github.com/redis/go-redis/v9"
-
 	_ "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 )
 
 const confpath string = "../config/config.json"
 
 func main() {
-
 	log.Println("starting app")
 
 	cfg, err := config.InitConfigFromJson(confpath)
@@ -43,10 +41,10 @@ func main() {
 	productRepo := repo.NewProductRepoPg(db)
 	tokenRepo := repo.NewTokenRedis(rdb)
 	userUseCase := usecase.NewUser(userRepo, cfg.Security.HashSalt)
-	producerUseCase := usecase.NewProducer(producerRepo)
+	producerUseCase := usecase.NewProducer(producerRepo, productRepo)
 	authUseCase := usecase.NewAuth(userRepo, tokenRepo, time.Duration(cfg.Security.TokenTTL), time.Duration(cfg.Security.RefreshTokenTTL), userUseCase)
 
-	u := usecase.NewUseCases(authUseCase, usecase.NewCart(), usecase.NewOrder(), producerUseCase, usecase.NewProduct(productRepo, producerUseCase), userUseCase)
+	u := usecase.NewUseCases(authUseCase, usecase.NewCart(), usecase.NewOrder(), producerUseCase, usecase.NewProduct(productRepo, producerRepo), userUseCase)
 	r := http.CreateNewEchoServer(u)
 
 	err = r.Start(":8000")

@@ -10,14 +10,14 @@ import (
 )
 
 type product struct {
-	repo            repo.Product
-	producerUseCase Producer
+	repo         repo.Product
+	repoProducer repo.Producer
 }
 
-func NewProduct(r repo.Product, p Producer) Product {
+func NewProduct(r repo.Product, p repo.Producer) Product {
 	return &product{
-		repo:            r,
-		producerUseCase: p,
+		repo:         r,
+		repoProducer: p,
 	}
 }
 
@@ -25,12 +25,26 @@ func (p *product) GetAll(ctx context.Context, filter *entity.ProductFilter) ([]*
 	return p.repo.GetAll(ctx, filter)
 }
 func (p *product) GetById(ctx context.Context, id uuid.UUID) (*entity.Product, error) {
-	return nil, ErrNotImplemented
+	product, err := p.repo.GetById(ctx, id)
+	if err != nil {
+		switch {
+		case err == repo.ErrProductNotFound:
+			return nil, ErrProductNotFound
+		default:
+			return nil, err
+		}
+	}
+	return product, nil
 }
 func (p *product) Create(ctx context.Context, product entity.Product) (*entity.Product, error) {
-	_, err := p.producerUseCase.GetById(ctx, product.Producer.Id)
+	_, err := p.repoProducer.GetById(ctx, product.Producer.Id)
 	if err != nil {
-		return nil, err
+		switch {
+		case err == repo.ErrProducerNotFound:
+			return nil, ErrProducerNotFound
+		default:
+			return nil, err
+		}
 	}
 	product.Id = uuid.New()
 	product.CreatedAt = time.Now()
@@ -44,9 +58,51 @@ func (p *product) Create(ctx context.Context, product entity.Product) (*entity.P
 	}
 	return newProduct, nil
 }
-func (p *product) UpdateById(ctx context.Context, id uuid.UUID, product entity.Product) (*entity.Product, error) {
-	return nil, ErrNotImplemented
+func (p *product) Update(ctx context.Context, product entity.Product) (*entity.Product, error) {
+	_, err := p.repo.GetById(ctx, product.Id)
+	if err != nil {
+		switch {
+		case err == repo.ErrProductNotFound:
+			return nil, ErrProductNotFound
+		default:
+			return nil, err
+		}
+	}
+	if product.Producer.Id != uuid.Nil {
+		_, err = p.repoProducer.GetById(ctx, product.Producer.Id)
+		if err != nil {
+			switch {
+			case err == repo.ErrProducerNotFound:
+				return nil, ErrProducerNotFound
+			default:
+				return nil, err
+			}
+		}
+	}
+	err = p.repo.Update(ctx, product)
+	if err != nil {
+		return nil, err
+	}
+	updatedProduct, err := p.repo.GetById(ctx, product.Id)
+	if err != nil {
+		return nil, err
+	}
+	return updatedProduct, nil
 }
 func (p *product) DeleteById(ctx context.Context, id uuid.UUID) error {
-	return ErrNotImplemented
+
+	_, err := p.repo.GetById(ctx, id)
+	if err != nil {
+		switch {
+		case err == repo.ErrProductNotFound:
+			return ErrProductNotFound
+		default:
+			return err
+		}
+	}
+	err = p.repo.DeleteById(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

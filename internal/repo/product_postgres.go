@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -97,8 +99,29 @@ func (p *ProductRepoPg) Create(ctx context.Context, product entity.Product) erro
 	return nil
 }
 func (p *ProductRepoPg) Update(ctx context.Context, product entity.Product) error {
+	set := []string{}
+	if product.Name != "" {
+		set = append(set, "name = '"+product.Name+"'")
+	}
+	if product.Price != 0 {
+		set = append(set, "price = "+strconv.FormatFloat(float64(product.Price), 'f', 2, 32))
+	}
+	if product.Producer.Id != uuid.Nil {
+		set = append(set, "producer_id = '"+product.Producer.Id.String()+"'")
+	}
+	if product.Status != "" {
+		set = append(set, "status = '"+string(product.Status)+"'")
+	}
+	_, err := p.db.ExecContext(ctx, "update products set "+strings.Join(set, ", ")+" where id = $1", product.Id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 func (p *ProductRepoPg) DeleteById(ctx context.Context, id uuid.UUID) error {
+	_, err := p.db.ExecContext(ctx, "delete from products where id = $1", id)
+	if err != nil {
+		return err
+	}
 	return nil
 }

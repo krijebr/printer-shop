@@ -26,7 +26,7 @@ type Product interface {
 	GetAll(ctx context.Context, filter *entity.ProductFilter) (allProducts []*entity.Product, err error)
 	GetById(ctx context.Context, id uuid.UUID) (product *entity.Product, err error)
 	Create(ctx context.Context, product entity.Product) (createdProduct *entity.Product, err error)
-	UpdateById(ctx context.Context, id uuid.UUID, product entity.Product) (updatedProduct *entity.Product, err error)
+	Update(ctx context.Context, product entity.Product) (updatedProduct *entity.Product, err error)
 	DeleteById(ctx context.Context, id uuid.UUID) (err error)
 }
 
