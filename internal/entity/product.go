@@ -18,17 +18,17 @@ type (
 		Id        uuid.UUID     `json:"id"`
 		Name      string        `json:"name"`
 		Price     float32       `jsone:"price"`
-		Producer  *Producer     `json:"omitempty"`
+		Producer  *Producer     `json:"producer"`
 		Status    ProductStatus `json:"status"`
 		CreatedAt time.Time     `json:"created_at"`
 	}
 
 	ProductInCart struct {
-		Product Product
-		Count   int `json:"count"`
+		Product Product `json:"product"`
+		Count   int     `json:"count"`
 	}
 
 	ProductFilter struct {
-		ProductId *uuid.UUID `json:"product_id"`
+		ProducerId *uuid.UUID `json:"producer_id"`
 	}
 )
