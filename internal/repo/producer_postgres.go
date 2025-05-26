@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"database/sql"
-	"log"
 	"strings"
 	"time"
 
@@ -29,17 +28,9 @@ func (p *ProducerRepoPg) GetAll(ctx context.Context) ([]*entity.Producer, error)
 	}
 	producers := []*entity.Producer{}
 	for rows.Next() {
-		var dateStr string
-		producer := new(entity.Producer)
-		err := rows.Scan(&producer.Id, &producer.Name, &producer.Description, &dateStr)
+		producer, err := p.scanProducer(rows)
 		if err != nil {
-			log.Println("Ошибка чтения строки", err)
-			continue
-		}
-		producer.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
-		if err != nil {
-			log.Println("Ошибка преобразования времени")
-			continue
+			return nil, err
 		}
 		producers = append(producers, producer)
 	}
@@ -47,9 +38,7 @@ func (p *ProducerRepoPg) GetAll(ctx context.Context) ([]*entity.Producer, error)
 }
 func (p *ProducerRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Producer, error) {
 	row := p.db.QueryRowContext(ctx, "select * from producers where id = $1", id)
-	var dateStr string
-	producer := new(entity.Producer)
-	err := row.Scan(&producer.Id, &producer.Name, &producer.Description, &dateStr)
+	producer, err := p.scanProducer(row)
 	if err != nil {
 		switch {
 		case err == sql.ErrNoRows:
@@ -57,10 +46,6 @@ func (p *ProducerRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Pro
 		default:
 			return nil, err
 		}
-	}
-	producer.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
-	if err != nil {
-		return nil, err
 	}
 	return producer, nil
 }
@@ -93,4 +78,18 @@ func (p *ProducerRepoPg) DeleteById(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+func (p *ProducerRepoPg) scanProducer(row Row) (*entity.Producer, error) {
+	var dateStr string
+	producer := new(entity.Producer)
+	err := row.Scan(&producer.Id, &producer.Name, &producer.Description, &dateStr)
+	if err != nil {
+		return nil, err
+	}
+	producer.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
+	if err != nil {
+		return nil, err
+	}
+	return producer, nil
 }

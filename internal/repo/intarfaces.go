@@ -44,3 +44,7 @@ type Cart interface {
 	AddProduct(ctx context.Context, productId uuid.UUID, count int) (err error)
 	UpdateCount(ctx context.Context, productId uuid.UUID, count int) (err error)
 }
+
+type Row interface {
+	Scan(dest ...interface{}) (err error)
+}

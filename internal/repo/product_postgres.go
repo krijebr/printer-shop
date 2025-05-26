@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"database/sql"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -37,27 +36,10 @@ func (p *ProductRepoPg) GetAll(ctx context.Context, filter *entity.ProductFilter
 	}
 	products := []*entity.Product{}
 	for rows.Next() {
-		var product_created_at string
-		var producer_created_at string
-		product := new(entity.Product)
-		producer := new(entity.Producer)
-		err := rows.Scan(&product.Id, &product.Name, &product.Price, &product.Status, &product_created_at,
-			&producer.Id, &producer.Name, &producer.Description, &producer_created_at)
+		product, err := p.scanProduct(rows)
 		if err != nil {
-			log.Println("Ошибка чтения строки", err)
-			continue
+			return nil, err
 		}
-		product.CreatedAt, err = time.Parse(time.RFC3339, product_created_at)
-		if err != nil {
-			log.Println("Ошибка преобразования времени")
-			continue
-		}
-		producer.CreatedAt, err = time.Parse(time.RFC3339, producer_created_at)
-		if err != nil {
-			log.Println("Ошибка преобразования времени")
-			continue
-		}
-		product.Producer = producer
 		products = append(products, product)
 	}
 	return products, nil
@@ -65,12 +47,7 @@ func (p *ProductRepoPg) GetAll(ctx context.Context, filter *entity.ProductFilter
 func (p *ProductRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Product, error) {
 	row := p.db.QueryRowContext(ctx,
 		"select products.id,products.name,products.price,products.status,products.created_at,producers.id,producers.name,producers.description,producers.created_at from products join producers on producers.id = producer_id where products.id=$1", id)
-	var product_created_at string
-	var producer_created_at string
-	product := new(entity.Product)
-	producer := new(entity.Producer)
-	err := row.Scan(&product.Id, &product.Name, &product.Price, &product.Status, &product_created_at,
-		&producer.Id, &producer.Name, &producer.Description, &producer_created_at)
+	product, err := p.scanProduct(row)
 	if err != nil {
 		switch {
 		case err == sql.ErrNoRows:
@@ -79,15 +56,6 @@ func (p *ProductRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Prod
 			return nil, err
 		}
 	}
-	product.CreatedAt, err = time.Parse(time.RFC3339, product_created_at)
-	if err != nil {
-		return nil, err
-	}
-	producer.CreatedAt, err = time.Parse(time.RFC3339, producer_created_at)
-	if err != nil {
-		return nil, err
-	}
-	product.Producer = producer
 	return product, nil
 }
 func (p *ProductRepoPg) Create(ctx context.Context, product entity.Product) error {
@@ -124,4 +92,26 @@ func (p *ProductRepoPg) DeleteById(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+func (p *ProductRepoPg) scanProduct(row Row) (*entity.Product, error) {
+	var product_created_at string
+	var producer_created_at string
+	product := new(entity.Product)
+	producer := new(entity.Producer)
+	err := row.Scan(&product.Id, &product.Name, &product.Price, &product.Status, &product_created_at,
+		&producer.Id, &producer.Name, &producer.Description, &producer_created_at)
+	if err != nil {
+		return nil, err
+	}
+	product.CreatedAt, err = time.Parse(time.RFC3339, product_created_at)
+	if err != nil {
+		return nil, err
+	}
+	producer.CreatedAt, err = time.Parse(time.RFC3339, producer_created_at)
+	if err != nil {
+		return nil, err
+	}
+	product.Producer = producer
+	return product, nil
 }

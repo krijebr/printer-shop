@@ -82,7 +82,7 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 				return c.NoContent(http.StatusInternalServerError)
 			}
 		}
-		log.Println("Продукт создан")
+		log.Println("Товар создан")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, newProduct)
 	}
@@ -106,6 +106,7 @@ func (p *ProductHandlers) getProductById() echo.HandlerFunc {
 				return c.NoContent(http.StatusInternalServerError)
 			}
 		}
+		log.Println("Товар получен")
 		return c.JSON(http.StatusOK, product)
 	}
 }

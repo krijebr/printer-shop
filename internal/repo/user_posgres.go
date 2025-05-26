@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"database/sql"
-	"log"
 	"strings"
 	"time"
 
@@ -39,17 +38,9 @@ func (u *UserRepoPg) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*
 	}
 	users := []*entity.User{}
 	for rows.Next() {
-		var dateStr string
-		user := new(entity.User)
-		err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
+		user, err := u.scanUser(rows)
 		if err != nil {
-			log.Println("Ошибка чтения строки", err)
-			continue
-		}
-		user.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
-		if err != nil {
-			log.Println("Ошибка преобразования времени")
-			continue
+			return nil, err
 		}
 		users = append(users, user)
 	}
@@ -57,9 +48,7 @@ func (u *UserRepoPg) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*
 }
 func (u *UserRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	row := u.db.QueryRowContext(ctx, "select * from users where id = $1", id)
-	var dateStr string
-	user := new(entity.User)
-	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
+	user, err := u.scanUser(row)
 	if err != nil {
 		switch {
 		case err == sql.ErrNoRows:
@@ -67,10 +56,6 @@ func (u *UserRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.User, e
 		default:
 			return nil, err
 		}
-	}
-	user.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
-	if err != nil {
-		return nil, err
 	}
 	return user, nil
 }
@@ -116,9 +101,7 @@ func (u *UserRepoPg) DeleteById(ctx context.Context, id uuid.UUID) error {
 }
 func (u *UserRepoPg) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	row := u.db.QueryRowContext(ctx, "select * from users where email = $1", email)
-	var dateStr string
-	user := new(entity.User)
-	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
+	user, err := u.scanUser(row)
 	if err != nil {
 		switch {
 		case err == sql.ErrNoRows:
@@ -126,6 +109,15 @@ func (u *UserRepoPg) GetByEmail(ctx context.Context, email string) (*entity.User
 		default:
 			return nil, err
 		}
+	}
+	return user, nil
+}
+func (u *UserRepoPg) scanUser(row Row) (*entity.User, error) {
+	var dateStr string
+	user := new(entity.User)
+	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Status, &user.Role, &dateStr)
+	if err != nil {
+		return nil, err
 	}
 	user.CreatedAt, err = time.Parse(time.RFC3339, dateStr)
 	if err != nil {
