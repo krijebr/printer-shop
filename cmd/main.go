@@ -40,10 +40,10 @@ func main() {
 	producerRepo := repo.NewProducerRepoPg(db)
 	productRepo := repo.NewProductRepoPg(db)
 	tokenRepo := repo.NewTokenRedis(rdb)
-	userUseCase := usecase.NewUser(userRepo, cfg.Security.HashSalt)
-	producerUseCase := usecase.NewProducer(producerRepo, productRepo)
-	authUseCase := usecase.NewAuth(userRepo, tokenRepo, time.Duration(cfg.Security.TokenTTL), time.Duration(cfg.Security.RefreshTokenTTL), userUseCase)
 
+	producerUseCase := usecase.NewProducer(producerRepo, productRepo)
+	authUseCase := usecase.NewAuth(userRepo, tokenRepo, time.Duration(cfg.Security.TokenTTL), time.Duration(cfg.Security.RefreshTokenTTL), cfg.Security.HashSalt)
+	userUseCase := usecase.NewUser(userRepo, authUseCase)
 	u := usecase.NewUseCases(authUseCase, usecase.NewCart(), usecase.NewOrder(), producerUseCase, usecase.NewProduct(productRepo, producerRepo), userUseCase)
 	r := http.CreateNewEchoServer(u)
 

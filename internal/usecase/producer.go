@@ -77,7 +77,7 @@ func (p *producer) DeleteById(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 	if len(products) != 0 {
-		return ErrProducerUsed
+		return ErrProducerIsUsed
 	}
 	_, err = p.repo.GetById(ctx, id)
 	if err != nil {

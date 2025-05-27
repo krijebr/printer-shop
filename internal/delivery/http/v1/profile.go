@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/krijebr/printer-shop/internal/delivery/http/common"
+	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
 	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/krijebr/printer-shop/internal/usecase"
 	"github.com/labstack/echo/v4"
@@ -22,7 +22,7 @@ func NewProfileHandlers(u usecase.User) *ProfileHandlers {
 
 func (p *ProfileHandlers) getProfile() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userId, ok := c.Get(common.UserIdContextKey).(uuid.UUID)
+		userId, ok := c.Get(UserIdContextKey).(uuid.UUID)
 		if !ok {
 			return c.NoContent(http.StatusInternalServerError)
 		}
@@ -46,16 +46,22 @@ func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
 		err := c.Bind(&requestData)
 		if err != nil {
 			log.Println("Ошибка чтения тела запроса ", err)
-			return c.String(http.StatusBadRequest, "")
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrInvalidRequestCode,
+				Message: ErrInvalidRequestMessage,
+			})
 		}
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Не валидные данные ", err)
-			return c.String(http.StatusBadRequest, "")
+			log.Println("Невалидные данные ", err)
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
 		}
 
-		userId, ok := c.Get(common.UserIdContextKey).(uuid.UUID)
+		userId, ok := c.Get(UserIdContextKey).(uuid.UUID)
 		if !ok {
 			return c.NoContent(http.StatusInternalServerError)
 		}

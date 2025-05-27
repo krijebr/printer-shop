@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
 	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/krijebr/printer-shop/internal/usecase"
 	"github.com/labstack/echo/v4"
@@ -24,7 +25,10 @@ func (p *ProducerHandlers) getAllProducers() echo.HandlerFunc {
 		producers, err := p.usecase.GetAll(c.Request().Context())
 		if err != nil {
 			log.Println("Ошибка получения производителей", err)
-			return c.NoContent(http.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
 		}
 		log.Println("Получение всех производителей")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
@@ -42,13 +46,19 @@ func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 		err := c.Bind(&requestData)
 		if err != nil {
 			log.Println("Ошибка чтения тела запроса ", err)
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrInvalidRequestCode,
+				Message: ErrInvalidRequestMessage,
+			})
 		}
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
 			log.Println("Невалидные данные ", err)
-			return c.String(http.StatusBadRequest, "")
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
 		}
 
 		producer := entity.Producer{
@@ -58,7 +68,10 @@ func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 		newProducer, err := p.usecase.Create(c.Request().Context(), producer)
 		if err != nil {
 			log.Println("Ошибка создания производителя", err)
-			return c.NoContent(http.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
 		}
 		log.Println("Производитель создан")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
@@ -71,17 +84,26 @@ func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
 		producerId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
 			log.Println("Невалидный id", err)
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusNotFound, ErrResponse{
+				Error:   ErrResourceNotFoundCode,
+				Message: ErrResourceNotFoundMessage,
+			})
 		}
 		producer, err := p.usecase.GetById(c.Request().Context(), producerId)
 		if err != nil {
 			switch {
 			case err == usecase.ErrProducerNotFound:
 				log.Println("Производитель с таким id не найден", err)
-				return c.NoContent(http.StatusBadRequest)
+				return c.JSON(http.StatusNotFound, ErrResponse{
+					Error:   ErrResourceNotFoundCode,
+					Message: ErrResourceNotFoundMessage,
+				})
 			default:
 				log.Println("Ошибка получения производителя", err)
-				return c.NoContent(http.StatusInternalServerError)
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
 			}
 		}
 		log.Println("Производитель получен")
@@ -97,19 +119,28 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 		producerId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
 			log.Println("Невалидный id", err)
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusNotFound, ErrResponse{
+				Error:   ErrResourceNotFoundCode,
+				Message: ErrResourceNotFoundMessage,
+			})
 		}
 		var requestData request
 		err = c.Bind(&requestData)
 		if err != nil {
 			log.Println("Ошибка чтения тела запроса ", err)
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrInvalidRequestCode,
+				Message: ErrInvalidRequestMessage,
+			})
 		}
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
 			log.Println("Невалидные данные ", err)
-			return c.String(http.StatusBadRequest, "")
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
 		}
 		producer := entity.Producer{
 			Id:          producerId,
@@ -121,10 +152,16 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 			switch {
 			case err == usecase.ErrProducerNotFound:
 				log.Println("Производителя с таким id не найдено", err)
-				return c.NoContent(http.StatusBadRequest)
+				return c.JSON(http.StatusNotFound, ErrResponse{
+					Error:   ErrResourceNotFoundCode,
+					Message: ErrResourceNotFoundMessage,
+				})
 			default:
 				log.Println("Ошибка обновления производителя", err)
-				return c.NoContent(http.StatusInternalServerError)
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
 			}
 		}
 		log.Println("Производитель обновлен")
@@ -137,20 +174,32 @@ func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 		producerId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
 			log.Println("Невалидный id", err)
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusNotFound, ErrResponse{
+				Error:   ErrResourceNotFoundCode,
+				Message: ErrResourceNotFoundMessage,
+			})
 		}
 		err = p.usecase.DeleteById(c.Request().Context(), producerId)
 		if err != nil {
 			switch {
 			case err == usecase.ErrProducerNotFound:
 				log.Println("Производителя с таким id не найдено", err)
-				return c.NoContent(http.StatusBadRequest)
-			case err == usecase.ErrProducerUsed:
+				return c.JSON(http.StatusNotFound, ErrResponse{
+					Error:   ErrResourceNotFoundCode,
+					Message: ErrResourceNotFoundMessage,
+				})
+			case err == usecase.ErrProducerIsUsed:
 				log.Println("Производитель используется", err)
-				return c.NoContent(http.StatusBadRequest)
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrProducerIsUsedCode,
+					Message: ErrProducerIsUsedMessage,
+				})
 			default:
 				log.Println("Ошибка удаления производителя", err)
-				return c.NoContent(http.StatusInternalServerError)
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
 			}
 		}
 		log.Println("Производитель удален")

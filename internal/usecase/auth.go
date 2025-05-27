@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -19,17 +20,25 @@ type auth struct {
 	tokenRepo       repo.Token
 	tokenTTL        time.Duration
 	refreshTokenTTL time.Duration
-	userUseCase     User
+	hashSalt        string
 }
 
-func NewAuth(u repo.User, t repo.Token, tokenTTL time.Duration, refreshTokenTTL time.Duration, user User) Auth {
+func NewAuth(u repo.User, t repo.Token, tokenTTL time.Duration, refreshTokenTTL time.Duration, salt string) Auth {
 	return &auth{
 		userRepo:        u,
 		tokenRepo:       t,
 		tokenTTL:        tokenTTL,
 		refreshTokenTTL: refreshTokenTTL,
-		userUseCase:     user,
+		hashSalt:        salt,
 	}
+}
+func (a *auth) HashPassword(pass string) string {
+	h := sha256.New()
+	h.Write([]byte(pass + a.hashSalt))
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+func (a *auth) ValidatePassword(password, hash string) bool {
+	return a.HashPassword(password) == hash
 }
 func (a *auth) generateRandomKey() string {
 	const (
@@ -58,6 +67,28 @@ func (a *auth) generateRandomKey() string {
 	return *(*string)(unsafe.Pointer(&b))
 }
 
+func (a *auth) Register(ctx context.Context, user entity.User) (*entity.User, error) {
+	someUser, err := a.userRepo.GetByEmail(ctx, user.Email)
+	if err != nil && err != repo.ErrUserNotFound {
+		return nil, err
+	}
+	if someUser != nil {
+		return nil, ErrEmailAlreadyExists
+	}
+	user.Id = uuid.New()
+	user.PasswordHash = a.HashPassword(user.PasswordHash)
+	user.CreatedAt = time.Now()
+	user.Status = entity.UserStatusActive
+	user.Role = entity.UserRoleCustomer
+	err = a.userRepo.Create(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	newUser, err := a.userRepo.GetById(ctx, user.Id)
+
+	return newUser, nil
+}
+
 func (a *auth) Login(ctx context.Context, email, password string) (string, string, error) {
 	user, err := a.userRepo.GetByEmail(ctx, email)
 	if err != nil {
@@ -68,7 +99,7 @@ func (a *auth) Login(ctx context.Context, email, password string) (string, strin
 			return "", "", err
 		}
 	}
-	if !a.userUseCase.ValidatePassword(password, user.PasswordHash) {
+	if !a.ValidatePassword(password, user.PasswordHash) {
 		return "", "", ErrWrongPassword
 	}
 	secret := a.generateRandomKey()

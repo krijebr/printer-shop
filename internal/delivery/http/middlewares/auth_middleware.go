@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/krijebr/printer-shop/internal/delivery/http/common"
+	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
 	"github.com/krijebr/printer-shop/internal/usecase"
 	"github.com/labstack/echo/v4"
 )
@@ -23,19 +23,28 @@ func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get("Authorization")
 		if authHeader == "" {
-			return c.NoContent(http.StatusUnauthorized)
+			return c.JSON(http.StatusUnauthorized, ErrResponse{
+				Error:   ErrUnauthorizedCode,
+				Message: ErrUnauthorizedMessage,
+			})
 		}
 		user, err := a.u.Auth.ValidateToken(c.Request().Context(), getToken(authHeader))
 		if err != nil {
 			switch {
 			case err == usecase.ErrInvalidToken:
-				return c.NoContent(http.StatusUnauthorized)
+				return c.JSON(http.StatusUnauthorized, ErrResponse{
+					Error:   ErrInvalidTokenCode,
+					Message: ErrInvalidTokenMessage,
+				})
 			default:
 				log.Println("Ошибка валидации токена", err)
-				c.NoContent(http.StatusInternalServerError)
+				c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
 			}
 		}
-		c.Set(common.UserIdContextKey, user.Id)
+		c.Set(UserIdContextKey, user.Id)
 		return next(c)
 	}
 

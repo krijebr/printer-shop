@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
+	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/krijebr/printer-shop/internal/usecase"
 	"github.com/labstack/echo/v4"
 )
@@ -15,6 +17,61 @@ type AuthHandlers struct {
 
 func NewAuthHandlers(u usecase.Auth) *AuthHandlers {
 	return &AuthHandlers{usecase: u}
+}
+func (a *AuthHandlers) register() echo.HandlerFunc {
+	type request struct {
+		FirstName string `json:"first_name" validate:"required,max=25,min=3"`
+		LastName  string `json:"last_name" validate:"required,max=25,min=3"`
+		Email     string `json:"email" validate:"required,email"`
+		Password  string `json:"password" validate:"required,max=60,min=8"`
+	}
+	return func(c echo.Context) error {
+		var requestData request
+		err := c.Bind(&requestData)
+		if err != nil {
+			log.Println("Ошибка чтения тела запроса ", err)
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrInvalidRequestCode,
+				Message: ErrInvalidRequestMessage,
+			})
+		}
+		validate := validator.New()
+		err = validate.Struct(requestData)
+		if err != nil {
+			log.Println("Невалидные данные ", err)
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
+		}
+
+		user := entity.User{
+			FirstName:    requestData.FirstName,
+			LastName:     requestData.LastName,
+			Email:        requestData.Email,
+			PasswordHash: requestData.Password,
+		}
+
+		newUser, err := a.usecase.Register(c.Request().Context(), user)
+		if err != nil {
+			switch {
+			case err == usecase.ErrEmailAlreadyExists:
+				log.Println("Пользователь с таким email уже существует", err)
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrEmailAlreadyExistsCode,
+					Message: ErrEmailAlreadyExistsMessage,
+				})
+			default:
+				log.Println("Ошибка создания ползьзователя", err)
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
+			}
+		}
+		log.Println("Регистрация нового пользователя")
+		return c.JSON(http.StatusOK, newUser)
+	}
 }
 func (a *AuthHandlers) login() echo.HandlerFunc {
 	type request struct {
@@ -30,23 +87,35 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 		err := c.Bind(&requestData)
 		if err != nil {
 			log.Println("Ошибка чтения тела запроса ", err)
-			return c.String(http.StatusBadRequest, "")
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrInvalidRequestCode,
+				Message: ErrInvalidRequestMessage,
+			})
 		}
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Не валидные данные ", err)
-			return c.String(http.StatusBadRequest, "")
+			log.Println("Невалидные данные ", err)
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
 		}
 		token, refreshToken, err := a.usecase.Login(c.Request().Context(), requestData.Email, requestData.Password)
 		if err != nil {
 			switch {
 			case err == usecase.ErrUserNotFound || err == usecase.ErrWrongPassword:
 				log.Println("Пользователь не правильно ввел пароль", err)
-				return c.String(http.StatusForbidden, "")
+				return c.JSON(http.StatusForbidden, ErrResponse{
+					Error:   ErrWrongEmailOrPasswordCode,
+					Message: ErrEmailAlreadyExistsMessage,
+				})
 			default:
 				log.Println("Ошибка авторизации", err)
-				return c.String(http.StatusInternalServerError, "")
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
 			}
 		}
 		responseData := response{
@@ -69,23 +138,35 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 		err := c.Bind(&requestData)
 		if err != nil {
 			log.Println("Ошибка чтения тела запроса ", err)
-			return c.String(http.StatusBadRequest, "")
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrInvalidRequestCode,
+				Message: ErrInvalidRequestMessage,
+			})
 		}
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Не валидные данные ", err)
-			return c.String(http.StatusBadRequest, "")
+			log.Println("Невалидные данные ", err)
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
 		}
 
 		token, refreshToken, err := a.usecase.RefreshToken(c.Request().Context(), requestData.RefreshToken)
 		if err != nil {
 			if err == usecase.ErrInvalidToken {
-				log.Println("Не валидный токен", err)
-				return c.String(http.StatusForbidden, "")
+				log.Println("Невалидный рефреш токен", err)
+				return c.JSON(http.StatusForbidden, ErrResponse{
+					Error:   ErrInvalidRefreshTokenCode,
+					Message: ErrInvalidRefreshTokenMessage,
+				})
 			}
 			log.Println("Ошибка обновления токенов", err)
-			return c.String(http.StatusInternalServerError, "")
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
 		}
 		responseData := response{
 			Token:        token,
@@ -96,6 +177,8 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 }
 func RegisterAuthRoutes(u usecase.Auth, g *echo.Group) {
 	a := NewAuthHandlers(u)
+
 	g.POST("", a.login())
+	g.POST("/register", a.register())
 	g.POST("/refresh-tokens", a.refreshTokens())
 }

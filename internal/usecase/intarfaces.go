@@ -8,18 +8,19 @@ import (
 )
 
 type Auth interface {
+	Register(ctx context.Context, user entity.User) (createdUser *entity.User, err error)
 	Login(ctx context.Context, email, password string) (token string, refreshToken string, err error)
 	ValidateToken(ctx context.Context, token string) (user *entity.User, err error)
 	RefreshToken(ctx context.Context, refreshToken string) (token string, newRefreshToken string, err error)
+	ValidatePassword(password, hash string) (result bool)
+	HashPassword(password string) (hashPassword string)
 }
 
 type User interface {
 	GetAll(ctx context.Context, filter *entity.UserFilter) (allUsers []*entity.User, err error)
 	GetById(ctx context.Context, id uuid.UUID) (user *entity.User, err error)
-	Register(ctx context.Context, user entity.User) (createdUser *entity.User, err error)
 	Update(ctx context.Context, user entity.User) (updatedUser *entity.User, err error)
 	DeleteById(ctx context.Context, id uuid.UUID) (err error)
-	ValidatePassword(password, hash string) (result bool)
 }
 
 type Product interface {

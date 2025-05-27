@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
+	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
 	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/krijebr/printer-shop/internal/usecase"
 	"github.com/labstack/echo/v4"
@@ -36,55 +36,14 @@ func (u *UserHandlers) allUsers() echo.HandlerFunc {
 		users, err := u.usecase.GetAll(c.Request().Context(), userFilter)
 		if err != nil {
 			log.Println("Ошибка получения пользователей", err)
-			return c.String(http.StatusInternalServerError, "")
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
 		}
 		log.Println("Получение всех пользователей")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, users)
-	}
-}
-
-func (u *UserHandlers) register() echo.HandlerFunc {
-	type request struct {
-		FirstName string `json:"first_name" validate:"required,max=25,min=3"`
-		LastName  string `json:"last_name" validate:"required,max=25,min=3"`
-		Email     string `json:"email" validate:"required,email"`
-		Password  string `json:"password" validate:"required,max=60,min=8"`
-	}
-	return func(c echo.Context) error {
-		var requestData request
-		err := c.Bind(&requestData)
-		if err != nil {
-			log.Println("Ошибка чтения тела запроса ", err)
-			return c.String(http.StatusBadRequest, "")
-		}
-		validate := validator.New()
-		err = validate.Struct(requestData)
-		if err != nil {
-			log.Println("Невалидные данные ", err)
-			return c.String(http.StatusBadRequest, "")
-		}
-
-		user := entity.User{
-			FirstName:    requestData.FirstName,
-			LastName:     requestData.LastName,
-			Email:        requestData.Email,
-			PasswordHash: requestData.Password,
-		}
-
-		newUser, err := u.usecase.Register(c.Request().Context(), user)
-		if err != nil {
-			switch {
-			case err == usecase.ErrEmailAlreadyExists:
-				log.Println("Пользователь с таким email уже существует", err)
-				return c.String(http.StatusBadRequest, "")
-			default:
-				log.Println("Ошибка создания ползьзователя", err)
-				return c.String(http.StatusInternalServerError, "")
-			}
-		}
-		log.Println("Регистрация нового пользователя")
-		return c.JSON(http.StatusOK, newUser)
 	}
 }
 
@@ -106,7 +65,6 @@ func (u *UserHandlers) deleteUserById() echo.HandlerFunc {
 func RegisterUserRoutes(u usecase.User, g *echo.Group) {
 	a := NewUserHandlers(u)
 	g.GET("", a.allUsers())
-	g.POST("", a.register())
 	g.GET("/:id", a.getUserById())
 	g.PUT("/:id", a.updateUserById())
 	g.DELETE("/:id", a.deleteUserById())
