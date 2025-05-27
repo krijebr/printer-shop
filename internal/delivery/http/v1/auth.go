@@ -108,7 +108,7 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 				log.Println("Пользователь не правильно ввел пароль", err)
 				return c.JSON(http.StatusForbidden, ErrResponse{
 					Error:   ErrWrongEmailOrPasswordCode,
-					Message: ErrEmailAlreadyExistsMessage,
+					Message: ErrWrongEmailOrPasswordMessage,
 				})
 			default:
 				log.Println("Ошибка авторизации", err)

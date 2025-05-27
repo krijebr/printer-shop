@@ -17,10 +17,21 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Verify Json values\", function () {\r",
-									"    pm.globals.set(\"refresh_token\", pm.response.json().refresh_token)\r",
-									"    pm.globals.set(\"token\", pm.response.json().token)\r",
-									"});"
+									"if (pm.response.json().refresh_token && pm.response.json().token)\r",
+									"    {\r",
+									"        pm.globals.set(\"refresh_token\", pm.response.json().refresh_token)\r",
+									"        pm.globals.set(\"token\", pm.response.json().token)\r",
+									"    }"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -32,7 +43,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"krijebr@list.ru\",\r\n    \"password\": \"12345678910\"\r\n}",
+							"raw": "{\r\n    \"email\": \"krijebr@list.ru1\",\r\n    \"password\": \"12345678910\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -44,16 +55,41 @@
 					"response": []
 				},
 				{
+					"name": "register",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": ""
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"first_name\": \"Pavel\",\r\n    \"last_name\": \"Barsukov\",\r\n    \"email\": \"krijebr123@gmail.com\",\r\n    \"password\": \"12345678910\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/v1/auth/register"
+					},
+					"response": []
+				},
+				{
 					"name": "refresh tokens",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Verify Json values\", function () {\r",
+									"if (pm.response.json().refresh_token && pm.response.json().token) \r",
+									"{\r",
 									"    pm.globals.set(\"refresh_token\", pm.response.json().refresh_token)\r",
 									"    pm.globals.set(\"token\", pm.response.json().token)\r",
-									"});"
+									"}"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -280,30 +316,6 @@
 		{
 			"name": "user",
 			"item": [
-				{
-					"name": "register",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": ""
-							}
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"first_name\": \"Pavel\",\r\n    \"last_name\": \"Barsukov\",\r\n    \"email\": \"krijebr@list.ui\",\r\n    \"password\": \"12345678910\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{url}}/api/v1/users"
-					},
-					"response": []
-				},
 				{
 					"name": "get all users",
 					"request": {
