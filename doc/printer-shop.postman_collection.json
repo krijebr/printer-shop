@@ -17,11 +17,19 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"isJson = true;\r",
+									"try {\r",
+									"    pm.response.json();\r",
+									"} catch (e) {\r",
+									"    isJson = false;\r",
+									"}\r",
+									"if (isJson){\r",
 									"if (pm.response.json().refresh_token && pm.response.json().token)\r",
 									"    {\r",
 									"        pm.globals.set(\"refresh_token\", pm.response.json().refresh_token)\r",
 									"        pm.globals.set(\"token\", pm.response.json().token)\r",
-									"    }"
+									"    }\r",
+									"}"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -43,7 +51,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"krijebr@list.ru1\",\r\n    \"password\": \"12345678910\"\r\n}",
+							"raw": "{\r\n    \"email\": \"krijebr@list.ru\",\r\n    \"password\": \"123456789101\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -85,10 +93,18 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"isJson = true;\r",
+									"try {\r",
+									"    pm.response.json();\r",
+									"} catch (e) {\r",
+									"    isJson = false;\r",
+									"}\r",
+									"if (isJson){\r",
 									"if (pm.response.json().refresh_token && pm.response.json().token) \r",
 									"{\r",
 									"    pm.globals.set(\"refresh_token\", pm.response.json().refresh_token)\r",
 									"    pm.globals.set(\"token\", pm.response.json().token)\r",
+									"}\r",
 									"}"
 								],
 								"type": "text/javascript",
