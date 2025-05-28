@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -29,7 +29,7 @@ func (a *AuthHandlers) register() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			log.Println("Ошибка чтения тела запроса ", err)
+			slog.Error("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -38,7 +38,7 @@ func (a *AuthHandlers) register() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Невалидные данные ", err)
+			slog.Error("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -56,20 +56,20 @@ func (a *AuthHandlers) register() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case err == usecase.ErrEmailAlreadyExists:
-				log.Println("Пользователь с таким email уже существует", err)
+				slog.Error("user with this email already exists", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrEmailAlreadyExistsCode,
 					Message: ErrEmailAlreadyExistsMessage,
 				})
 			default:
-				log.Println("Ошибка создания ползьзователя", err)
+				slog.Error("user creation error", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
 				})
 			}
 		}
-		log.Println("Регистрация нового пользователя")
+		slog.Info("new use registered")
 		return c.JSON(http.StatusOK, newUser)
 	}
 }
@@ -86,7 +86,7 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			log.Println("Ошибка чтения тела запроса ", err)
+			slog.Error("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -95,7 +95,7 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Невалидные данные ", err)
+			slog.Error("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -105,13 +105,13 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case err == usecase.ErrUserNotFound || err == usecase.ErrWrongPassword:
-				log.Println("Пользователь не правильно ввел пароль", err)
+				slog.Error("wrong email or password", slog.Any("error", err))
 				return c.JSON(http.StatusForbidden, ErrResponse{
 					Error:   ErrInvalidLoginCredentialsCode,
 					Message: ErrInvalidLoginCredentialsMessage,
 				})
 			default:
-				log.Println("Ошибка авторизации", err)
+				slog.Error("authentication error", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
@@ -137,7 +137,7 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			log.Println("Ошибка чтения тела запроса ", err)
+			slog.Error("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -146,7 +146,7 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Невалидные данные ", err)
+			slog.Error("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -156,13 +156,13 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 		token, refreshToken, err := a.usecase.RefreshToken(c.Request().Context(), requestData.RefreshToken)
 		if err != nil {
 			if err == usecase.ErrInvalidToken {
-				log.Println("Невалидный рефреш токен", err)
+				slog.Error("invalid refresh token", slog.Any("error", err))
 				return c.JSON(http.StatusForbidden, ErrResponse{
 					Error:   ErrInvalidRefreshTokenCode,
 					Message: ErrInvalidRefreshTokenMessage,
 				})
 			}
-			log.Println("Ошибка обновления токенов", err)
+			slog.Error("tokens refreshing error", slog.Any("error", err))
 			return c.JSON(http.StatusInternalServerError, ErrResponse{
 				Error:   ErrInternalErrorCode,
 				Message: ErrInternalErrorMessage,

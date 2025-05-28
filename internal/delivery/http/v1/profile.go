@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -28,10 +28,10 @@ func (p *ProfileHandlers) getProfile() echo.HandlerFunc {
 		}
 		user, err := p.usecase.GetById(c.Request().Context(), userId)
 		if err != nil {
-			log.Println("Ошибка полученя профиля", err)
+			slog.Error("profile receiving error", slog.Any("error", err))
 			return c.NoContent(http.StatusInternalServerError)
 		}
-		log.Printf("Профиль пользователя с id %s получен", userId)
+		slog.Info("profile received")
 		return c.JSON(http.StatusOK, user)
 	}
 }
@@ -45,7 +45,7 @@ func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			log.Println("Ошибка чтения тела запроса ", err)
+			slog.Error("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -54,7 +54,7 @@ func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Невалидные данные ", err)
+			slog.Error("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -73,10 +73,10 @@ func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
 		}
 		updatedUser, err := p.usecase.Update(c.Request().Context(), user)
 		if err != nil {
-			log.Println("Ошибка обновления профиля")
+			slog.Error("profile updating error", slog.Any("error", err))
 			return c.NoContent(http.StatusInternalServerError)
 		}
-		log.Printf("Профиль пользователя с id %s обновлен", userId)
+		slog.Info("profile updated")
 		return c.JSON(http.StatusOK, updatedUser)
 	}
 }

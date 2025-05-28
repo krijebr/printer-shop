@@ -54,8 +54,9 @@ func main() {
 	userUseCase := usecase.NewUser(userRepo, authUseCase)
 	u := usecase.NewUseCases(authUseCase, usecase.NewCart(), usecase.NewOrder(), producerUseCase, usecase.NewProduct(productRepo, producerRepo), userUseCase)
 	r := http.CreateNewEchoServer(u)
+	r.HideBanner = true
 	port := strconv.Itoa(cfg.HttpServer.Port)
-	slog.Info("starting server", slog.Any("port", port))
+	slog.Info("starting http server", slog.Any("port", port))
 	err = r.Start(":" + port)
 	if err != nil {
 		slog.Error("starting server error", slog.Any("error", err))

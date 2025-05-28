@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
@@ -35,13 +35,13 @@ func (u *UserHandlers) allUsers() echo.HandlerFunc {
 		}
 		users, err := u.usecase.GetAll(c.Request().Context(), userFilter)
 		if err != nil {
-			log.Println("Ошибка получения пользователей", err)
+			slog.Error("users receiving error", slog.Any("error", err))
 			return c.JSON(http.StatusInternalServerError, ErrResponse{
 				Error:   ErrInternalErrorCode,
 				Message: ErrInternalErrorMessage,
 			})
 		}
-		log.Println("Получение всех пользователей")
+		slog.Info("all users received")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, users)
 	}

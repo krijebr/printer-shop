@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -24,13 +24,13 @@ func (p *ProducerHandlers) getAllProducers() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		producers, err := p.usecase.GetAll(c.Request().Context())
 		if err != nil {
-			log.Println("Ошибка получения производителей", err)
+			slog.Error("producers receiving error", slog.Any("error", err))
 			return c.JSON(http.StatusInternalServerError, ErrResponse{
 				Error:   ErrInternalErrorCode,
 				Message: ErrInternalErrorMessage,
 			})
 		}
-		log.Println("Получение всех производителей")
+		slog.Info("all producers received")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, producers)
 	}
@@ -45,7 +45,7 @@ func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			log.Println("Ошибка чтения тела запроса ", err)
+			slog.Error("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -54,7 +54,7 @@ func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Невалидные данные ", err)
+			slog.Error("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -67,13 +67,13 @@ func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 		}
 		newProducer, err := p.usecase.Create(c.Request().Context(), producer)
 		if err != nil {
-			log.Println("Ошибка создания производителя", err)
+			slog.Error("producer creation error", slog.Any("error", err))
 			return c.JSON(http.StatusInternalServerError, ErrResponse{
 				Error:   ErrInternalErrorCode,
 				Message: ErrInternalErrorMessage,
 			})
 		}
-		log.Println("Производитель создан")
+		slog.Info("producer created")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, newProducer)
 	}
@@ -83,7 +83,7 @@ func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		producerId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			log.Println("Невалидный id", err)
+			slog.Error("invalid producer id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -93,20 +93,20 @@ func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case err == usecase.ErrProducerNotFound:
-				log.Println("Производитель с таким id не найден", err)
+				slog.Error("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			default:
-				log.Println("Ошибка получения производителя", err)
+				slog.Error("producer receiving error", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
 				})
 			}
 		}
-		log.Println("Производитель получен")
+		slog.Info("producer received")
 		return c.JSON(http.StatusOK, producer)
 	}
 }
@@ -118,7 +118,7 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		producerId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			log.Println("Невалидный id", err)
+			slog.Error("invalid producer id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -127,7 +127,7 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 		var requestData request
 		err = c.Bind(&requestData)
 		if err != nil {
-			log.Println("Ошибка чтения тела запроса ", err)
+			slog.Error("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -136,7 +136,7 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Невалидные данные ", err)
+			slog.Error("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -151,20 +151,20 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case err == usecase.ErrProducerNotFound:
-				log.Println("Производителя с таким id не найдено", err)
+				slog.Error("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			default:
-				log.Println("Ошибка обновления производителя", err)
+				slog.Error("producer updating", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
 				})
 			}
 		}
-		log.Println("Производитель обновлен")
+		slog.Info("producer updated")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, updatedProducer)
 	}
@@ -173,7 +173,7 @@ func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		producerId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			log.Println("Невалидный id", err)
+			slog.Error("invalid producer id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -183,26 +183,26 @@ func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case err == usecase.ErrProducerNotFound:
-				log.Println("Производителя с таким id не найдено", err)
+				slog.Error("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			case err == usecase.ErrProducerIsUsed:
-				log.Println("Производитель используется", err)
+				slog.Error("producer is used", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProducerIsUsedCode,
 					Message: ErrProducerIsUsedMessage,
 				})
 			default:
-				log.Println("Ошибка удаления производителя", err)
+				slog.Error("producer delete error", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
 				})
 			}
 		}
-		log.Println("Производитель удален")
+		slog.Info("Producer deleted")
 		return c.NoContent(http.StatusOK)
 	}
 }

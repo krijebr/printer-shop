@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
@@ -37,7 +37,7 @@ func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 					Message: ErrInvalidTokenMessage,
 				})
 			default:
-				log.Println("Ошибка валидации токена", err)
+				slog.Error("token validation error", slog.Any("error", err))
 				c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,

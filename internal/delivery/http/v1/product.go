@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -28,7 +28,7 @@ func (p *ProductHandlers) getAllProducts() echo.HandlerFunc {
 			filter = new(entity.ProductFilter)
 			producerId, err := uuid.Parse(c.QueryParam("producer_id"))
 			if err != nil {
-				log.Println("Ошибка преобразования uuid", err)
+				slog.Error("invalid producer id", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
@@ -38,13 +38,13 @@ func (p *ProductHandlers) getAllProducts() echo.HandlerFunc {
 		}
 		products, err := p.usecase.GetAll(c.Request().Context(), filter)
 		if err != nil {
-			log.Println("Ошибка получения товаров", err)
+			slog.Error("products receiving error", slog.Any("error", err))
 			return c.JSON(http.StatusInternalServerError, ErrResponse{
 				Error:   ErrInternalErrorCode,
 				Message: ErrInternalErrorMessage,
 			})
 		}
-		log.Println("Получение всех товаров")
+		slog.Info("all products received")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, products)
 	}
@@ -61,7 +61,7 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			log.Println("Ошибка чтения тела запроса ", err)
+			slog.Error("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -70,7 +70,7 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Невалидные данные ", err)
+			slog.Error("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -88,17 +88,17 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case err == usecase.ErrProducerNotFound:
-				log.Println("Производителя с таким id не найдено", err)
+				slog.Error("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProducerNotExistCode,
 					Message: ErrProducerNotExistMessage,
 				})
 			default:
-				log.Println("Ошибка создания продукта", err)
+				slog.Error("product creation error", slog.Any("error", err))
 				return c.NoContent(http.StatusInternalServerError)
 			}
 		}
-		log.Println("Товар создан")
+		slog.Info("product created")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, newProduct)
 	}
@@ -108,7 +108,7 @@ func (p *ProductHandlers) getProductById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		productId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			log.Println("Невалидный id", err)
+			slog.Error("invalid product id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -118,20 +118,20 @@ func (p *ProductHandlers) getProductById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case err == usecase.ErrProductNotFound:
-				log.Println("Товар с таким id не найден", err)
+				slog.Error("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			default:
-				log.Println("Ошибка получения товара", err)
+				slog.Error("product receiving error", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
 				})
 			}
 		}
-		log.Println("Товар получен")
+		slog.Info("product received")
 		return c.JSON(http.StatusOK, product)
 	}
 }
@@ -145,7 +145,7 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		productId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			log.Println("Невалидный id", err)
+			slog.Error("invalid product id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -154,7 +154,7 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 		var requestData request
 		err = c.Bind(&requestData)
 		if err != nil {
-			log.Println("Ошибка чтения тела запроса ", err)
+			slog.Error("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -163,7 +163,7 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			log.Println("Невалидные данные ", err)
+			slog.Error("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -182,26 +182,26 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case err == usecase.ErrProductNotFound:
-				log.Println("Товар с таким id не найдено", err)
+				slog.Error("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			case err == usecase.ErrProducerNotFound:
-				log.Println("Производителя с таким id не найдено", err)
+				slog.Error("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProducerNotExistCode,
 					Message: ErrProducerNotExistMessage,
 				})
 			default:
-				log.Println("Ошибка обновления товара", err)
+				slog.Error("product updating error", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
 				})
 			}
 		}
-		log.Println("Товар обновлен")
+		slog.Info("product updated")
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, updatedProduct)
 	}
@@ -210,7 +210,7 @@ func (p *ProductHandlers) deleteProductById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		productId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			log.Println("Невалидный id", err)
+			slog.Error("invalid product id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -220,20 +220,20 @@ func (p *ProductHandlers) deleteProductById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case err == usecase.ErrProductNotFound:
-				log.Println("Товар с таким id не найден", err)
+				slog.Error("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			default:
-				log.Println("Ошибка удаления товара", err)
+				slog.Error("product delete error", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
 				})
 			}
 		}
-		log.Println("Товар удален")
+		slog.Info("product deleted")
 		return c.NoContent(http.StatusOK)
 	}
 }
