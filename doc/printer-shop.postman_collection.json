@@ -51,7 +51,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"krijebr@list.ru\",\r\n    \"password\": \"123456789101\"\r\n}",
+							"raw": "{\r\n    \"email\": \"krijebr@list.ru\",\r\n    \"password\": \"12345678910\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

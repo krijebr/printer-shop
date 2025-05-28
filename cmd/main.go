@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
+	"log/slog"
+	"os"
 	"time"
 
 	"github.com/krijebr/printer-shop/internal/config"
@@ -18,22 +19,28 @@ import (
 const confpath string = "../config/config.json"
 
 func main() {
-	log.Println("starting app")
+
+	th := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})
+	logger := slog.New(th)
+	slog.SetDefault(logger)
+	slog.Info("starting app", slog.String("app-name", "printer shop"))
 
 	cfg, err := config.InitConfigFromJson(confpath)
 	if err != nil {
-		log.Println("Ошибка инициализации", err)
+		slog.Error("Ошибка инициализации", slog.Any("error", err))
 		return
 	}
 
 	db, err := initDB(&cfg.Postgres)
 	if err != nil {
-		log.Println("Ошибка инициализации базы данных", err)
+		slog.Error("Ошибка инициализации базы данных", slog.Any("error", err))
 		return
 	}
 	rdb, err := initRedis(&cfg.Redis)
 	if err != nil {
-		log.Println("Ошибка инициализации redis", err)
+		slog.Error("Ошибка инициализации redis", slog.Any("error", err))
 		return
 	}
 	userRepo := repo.NewUserRepoPg(db)
@@ -49,7 +56,7 @@ func main() {
 
 	err = r.Start(":8000")
 	if err != nil {
-		log.Println("Ошибка запуска сервера")
+		slog.Error("Ошибка запуска сервера", slog.Any("error", err))
 	}
 }
 

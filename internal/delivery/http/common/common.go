@@ -6,29 +6,31 @@ type ErrResponse struct {
 }
 
 const (
-	ErrInvalidTokenCode                   = 1
-	ErrInvalidTokenMessage                = "invalid token"
-	ErrInvalidRefreshTokenCode            = 2
-	ErrInvalidRefreshTokenMessage         = "invalid token"
-	ErrResourceNotFoundCode               = 3
-	ErrResourceNotFoundMessage            = "resource not found"
-	ErrInternalErrorCode                  = 4
-	ErrInternalErrorMessage               = "internal error"
-	ErrUnauthorizedCode                   = 5
-	ErrUnauthorizedMessage                = "unauthorized"
-	ErrForbiddenCode                      = 6
-	ErrForbiddenMessage                   = "forbidden"
-	ErrInvalidRequestCode                 = 7
-	ErrInvalidRequestMessage              = "invalid request"
-	ErrValidationErrorCode                = 8
-	ErrValidationErrorMessage             = "validation error"
-	ErrEmailAlreadyExistsCode             = 9
-	ErrEmailAlreadyExistsMessage          = "user with this email already exists"
-	ErrProducerNotExistCode               = 10
-	ErrProducerNotExistMessage            = "producer with this id doesn't exist"
-	ErrWrongEmailOrPasswordCode           = 11
-	ErrWrongEmailOrPasswordMessage        = "wrong email or password"
-	ErrProducerIsUsedCode                 = 12
-	ErrProducerIsUsedMessage              = "this producer is already used and can not be deleted"
-	UserIdContextKey               string = "userId"
+	ErrInvalidTokenCode            = 1
+	ErrInvalidRefreshTokenCode     = 2
+	ErrResourceNotFoundCode        = 3
+	ErrInternalErrorCode           = 4
+	ErrUnauthorizedCode            = 5
+	ErrForbiddenCode               = 6
+	ErrInvalidRequestCode          = 7
+	ErrValidationErrorCode         = 8
+	ErrEmailAlreadyExistsCode      = 9
+	ErrProducerNotExistCode        = 10
+	ErrInvalidLoginCredentialsCode = 11
+	ErrProducerIsUsedCode          = 12
+
+	ErrInvalidTokenMessage            = "invalid token"
+	ErrInvalidRefreshTokenMessage     = "invalid token"
+	ErrResourceNotFoundMessage        = "resource not found"
+	ErrInternalErrorMessage           = "internal error"
+	ErrUnauthorizedMessage            = "unauthorized"
+	ErrForbiddenMessage               = "forbidden"
+	ErrInvalidRequestMessage          = "invalid request"
+	ErrValidationErrorMessage         = "validation error"
+	ErrEmailAlreadyExistsMessage      = "user with this email already exists"
+	ErrProducerNotExistMessage        = "producer with this id doesn't exist"
+	ErrInvalidLoginCredentialsMessage = "wrong email or password"
+	ErrProducerIsUsedMessage          = "this producer is already used and can not be deleted"
+
+	UserIdContextKey string = "userId"
 )

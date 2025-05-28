@@ -106,11 +106,10 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 			switch {
 			case err == usecase.ErrUserNotFound || err == usecase.ErrWrongPassword:
 				log.Println("Пользователь не правильно ввел пароль", err)
-				/*return c.JSON(http.StatusForbidden, ErrResponse{
-					Error:   ErrWrongEmailOrPasswordCode,
-					Message: ErrWrongEmailOrPasswordMessage,
-				})*/
-				return c.NoContent(http.StatusForbidden)
+				return c.JSON(http.StatusForbidden, ErrResponse{
+					Error:   ErrInvalidLoginCredentialsCode,
+					Message: ErrInvalidLoginCredentialsMessage,
+				})
 			default:
 				log.Println("Ошибка авторизации", err)
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
