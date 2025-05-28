@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/krijebr/printer-shop/internal/config"
@@ -29,18 +30,18 @@ func main() {
 
 	cfg, err := config.InitConfigFromJson(confpath)
 	if err != nil {
-		slog.Error("Ошибка инициализации", slog.Any("error", err))
+		slog.Error("initialization error", slog.Any("error", err))
 		return
 	}
 
 	db, err := initDB(&cfg.Postgres)
 	if err != nil {
-		slog.Error("Ошибка инициализации базы данных", slog.Any("error", err))
+		slog.Error("database intialization error", slog.Any("error", err))
 		return
 	}
 	rdb, err := initRedis(&cfg.Redis)
 	if err != nil {
-		slog.Error("Ошибка инициализации redis", slog.Any("error", err))
+		slog.Error("redis initialization error", slog.Any("error", err))
 		return
 	}
 	userRepo := repo.NewUserRepoPg(db)
@@ -53,10 +54,11 @@ func main() {
 	userUseCase := usecase.NewUser(userRepo, authUseCase)
 	u := usecase.NewUseCases(authUseCase, usecase.NewCart(), usecase.NewOrder(), producerUseCase, usecase.NewProduct(productRepo, producerRepo), userUseCase)
 	r := http.CreateNewEchoServer(u)
-
-	err = r.Start(":8000")
+	port := strconv.Itoa(cfg.HttpServer.Port)
+	slog.Info("starting server", slog.Any("port", port))
+	err = r.Start(":" + port)
 	if err != nil {
-		slog.Error("Ошибка запуска сервера", slog.Any("error", err))
+		slog.Error("starting server error", slog.Any("error", err))
 	}
 }
 
