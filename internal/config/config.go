@@ -3,12 +3,14 @@ package config
 import (
 	"encoding/json"
 	"io"
+	"log/slog"
 	"os"
 	"time"
 )
 
 type (
 	Duration time.Duration
+
 	Postgres struct {
 		Host     string `json:"host"`
 		Port     int    `json:"port"`
@@ -31,11 +33,16 @@ type (
 		HashSalt        string   `json:"hash_salt"`
 	}
 
+	Logging struct {
+		Level slog.Level `json:"level"`
+	}
+
 	Config struct {
 		Postgres   Postgres   `json:"postgres"`
 		HttpServer HttpServer `json:"http_server"`
 		Redis      Redis      `json:"redis"`
 		Security   Security   `json:"security"`
+		Logging    Logging    `json:"logging"`
 	}
 )
 

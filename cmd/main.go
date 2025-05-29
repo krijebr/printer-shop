@@ -20,12 +20,6 @@ import (
 const confpath string = "../config/config.json"
 
 func main() {
-
-	th := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	})
-	logger := slog.New(th)
-	slog.SetDefault(logger)
 	slog.Info("starting app", slog.String("app-name", "printer shop"))
 
 	cfg, err := config.InitConfigFromJson(confpath)
@@ -34,16 +28,24 @@ func main() {
 		return
 	}
 
+	th := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: cfg.Logging.Level,
+	})
+	logger := slog.New(th)
+	slog.SetDefault(logger)
+
 	db, err := initDB(&cfg.Postgres)
 	if err != nil {
 		slog.Error("database intialization error", slog.Any("error", err))
 		return
 	}
+
 	rdb, err := initRedis(&cfg.Redis)
 	if err != nil {
 		slog.Error("redis initialization error", slog.Any("error", err))
 		return
 	}
+
 	userRepo := repo.NewUserRepoPg(db)
 	producerRepo := repo.NewProducerRepoPg(db)
 	productRepo := repo.NewProductRepoPg(db)
