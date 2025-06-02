@@ -1,4 +1,4 @@
-CREATE TYPE IF NOT EXISTS "product_status"
+CREATE TYPE "product_status"
 AS 
 ENUM('published', 'hidden');
 CREATE TABLE IF NOT EXISTS "products" (

@@ -2,37 +2,21 @@ services:
   postgres:
     image: postgres
     container_name: postgres
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_DB: postgres
     volumes:
       - db_pg:/var/lib/postgresql/data
-    networks:
-      - dbnet
   redis:
     image: redis
     container_name: redis
+    ports:
+      - "6379:6379"
     volumes:
       - redisdata:/data
-    networks:
-      - dbnet
-
-  server:
-    build: .
-    image: printer-shop_image
-    container_name: printer-shop
-    ports:
-      - "8000:8000"
-    networks: 
-      - dbnet
-    depends_on:
-      - postgres
-      - redis
-networks:
-  dbnet:
-    driver: bridge
-
 volumes:
   db_pg:
   redisdata:

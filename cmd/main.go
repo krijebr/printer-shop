@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -21,9 +22,10 @@ import (
 )
 
 const (
-	confPath         string = "../config/config.json"
-	_defaultAttempts        = 8
-	_defaultTimeout         = 1000 * time.Millisecond
+	confPath         string        = "./config/config.json"
+	migratePath      string        = "file://./migrations"
+	_defaultAttempts int           = 5
+	_defaultTimeout  time.Duration = 3 * time.Second
 )
 
 func main() {
@@ -109,12 +111,12 @@ func migration(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	m, err := migrate.NewWithDatabaseInstance("file://../migrations", "postgres", driver)
+	m, err := migrate.NewWithDatabaseInstance(migratePath, "postgres", driver)
 	if err != nil {
 		return err
 	}
 	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
+	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return err
 	}
 	if err == migrate.ErrNoChange {
@@ -127,8 +129,21 @@ func migration(db *sql.DB) error {
 func initRedis(cfg *config.Redis) (*redis.Client, error) {
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	ctx := context.Background()
-	client := redis.NewClient(&redis.Options{Addr: addr, Password: cfg.Password, DB: cfg.DB})
-	_, err := client.Ping(ctx).Result()
+	var (
+		attempts = _defaultAttempts
+		client   *redis.Client
+		err      error
+	)
+	for attempts > 0 {
+		client = redis.NewClient(&redis.Options{Addr: addr, Password: cfg.Password, DB: cfg.DB})
+		_, err = client.Ping(ctx).Result()
+		if err == nil {
+			break
+		}
+		slog.Info(fmt.Sprintf("trying to initialize redis, attempts left: %d", attempts))
+		time.Sleep(_defaultTimeout)
+		attempts--
+	}
 	if err != nil {
 		return nil, err
 	}

@@ -1,10 +1,10 @@
-CREATE TYPE IF NOT EXISTS user_role 
+CREATE TYPE user_role 
 AS 
 ENUM('customer', 'admin');
-CREATE TYPE IF NOT EXISTS "user_status" 
+CREATE TYPE "user_status" 
 AS 
 ENUM('active', 'blocked');
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
 	id uuid NOT NULL,
 	first_name varchar NOT NULL,
 	last_name varchar NOT NULL,
