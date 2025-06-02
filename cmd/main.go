@@ -50,7 +50,7 @@ func main() {
 	err = migration(db)
 
 	if err != nil {
-		slog.Error("Migrate: up error", slog.Any("error", err))
+		slog.Error("migrate up error", slog.Any("error", err))
 		return
 	}
 
@@ -109,7 +109,7 @@ func migration(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	m, err := migrate.NewWithDatabaseInstance("file://E:/GO_projects/printer-shop/migrations", "postgres", driver)
+	m, err := migrate.NewWithDatabaseInstance("file://../migrations", "postgres", driver)
 	if err != nil {
 		return err
 	}
@@ -118,10 +118,10 @@ func migration(db *sql.DB) error {
 		return err
 	}
 	if err == migrate.ErrNoChange {
-		slog.Info("Migrate: no changes")
+		slog.Info("migrate no changes")
 		return nil
 	}
-	slog.Info("Migrate: up success")
+	slog.Info("migrate up success")
 	return nil
 }
 func initRedis(cfg *config.Redis) (*redis.Client, error) {
