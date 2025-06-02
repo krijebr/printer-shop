@@ -10,6 +10,7 @@ import (
 func CreateNewEchoServer(u *usecase.UseCases) *echo.Echo {
 	authMw := middlewares.NewAuthMiddleware(u)
 	server := echo.New()
+	server.HideBanner = true
 	g := server.Group("/api/v1/")
 	v1.RegisterAuthRoutes(u.Auth, g.Group("auth"))
 	v1.RegisterCartRoutes(u.Cart, g.Group("cart"))

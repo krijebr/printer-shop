@@ -9,6 +9,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/krijebr/printer-shop/internal/config"
 	"github.com/krijebr/printer-shop/internal/delivery/http"
 	"github.com/krijebr/printer-shop/internal/repo"
@@ -17,12 +20,15 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-const confpath string = "../config/config.json"
+const (
+	confPath         string = "../config/config.json"
+	_defaultAttempts        = 8
+	_defaultTimeout         = 1000 * time.Millisecond
+)
 
 func main() {
-	slog.Info("starting app", slog.String("app-name", "printer shop"))
 
-	cfg, err := config.InitConfigFromJson(confpath)
+	cfg, err := config.InitConfigFromJson(confPath)
 	if err != nil {
 		slog.Error("initialization error", slog.Any("error", err))
 		return
@@ -34,9 +40,17 @@ func main() {
 	logger := slog.New(th)
 	slog.SetDefault(logger)
 
+	slog.Info("starting app", slog.String("app-name", "printer shop"))
+
 	db, err := initDB(&cfg.Postgres)
 	if err != nil {
 		slog.Error("database intialization error", slog.Any("error", err))
+		return
+	}
+	err = migration(db)
+
+	if err != nil {
+		slog.Error("Migrate: up error", slog.Any("error", err))
 		return
 	}
 
@@ -56,7 +70,6 @@ func main() {
 	userUseCase := usecase.NewUser(userRepo, authUseCase)
 	u := usecase.NewUseCases(authUseCase, usecase.NewCart(), usecase.NewOrder(), producerUseCase, usecase.NewProduct(productRepo, producerRepo), userUseCase)
 	r := http.CreateNewEchoServer(u)
-	r.HideBanner = true
 	port := strconv.Itoa(cfg.HttpServer.Port)
 	slog.Info("starting http server", slog.Any("port", port))
 	err = r.Start(":" + port)
@@ -68,7 +81,20 @@ func main() {
 func initDB(cfg *config.Postgres) (*sql.DB, error) {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", cfg.Host, cfg.Port, cfg.UserName, cfg.Password, cfg.DBName)
 
-	db, err := sql.Open("postgres", connStr)
+	var (
+		attempts = _defaultAttempts
+		err      error
+		db       *sql.DB
+	)
+	for attempts > 0 {
+		db, err = sql.Open("postgres", connStr)
+		if err == nil {
+			break
+		}
+		slog.Info(fmt.Sprintf("trying to initialize database, attempts left: %d", attempts))
+		time.Sleep(_defaultTimeout)
+		attempts--
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +103,26 @@ func initDB(cfg *config.Postgres) (*sql.DB, error) {
 		return nil, err
 	}
 	return db, nil
+}
+func migration(db *sql.DB) error {
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return err
+	}
+	m, err := migrate.NewWithDatabaseInstance("file://E:/GO_projects/printer-shop/migrations", "postgres", driver)
+	if err != nil {
+		return err
+	}
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+	if err == migrate.ErrNoChange {
+		slog.Info("Migrate: no changes")
+		return nil
+	}
+	slog.Info("Migrate: up success")
+	return nil
 }
 func initRedis(cfg *config.Redis) (*redis.Client, error) {
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
