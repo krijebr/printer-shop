@@ -4,7 +4,7 @@
 		"name": "printer-shop",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "44307423",
-		"_collection_link": "https://pavel-8504133.postman.co/workspace/c3608d51-e164-4e23-8220-192127c1deab/collection/44307423-359516b7-1d37-4573-bda6-1c4a60774f1b?action=share&source=collection_link&creator=44307423"
+		"_collection_link": "https://pavel-8504133.postman.co/workspace/Pavel's-Workspace~c3608d51-e164-4e23-8220-192127c1deab/collection/44307423-359516b7-1d37-4573-bda6-1c4a60774f1b?action=share&source=collection_link&creator=44307423"
 	},
 	"item": [
 		{
@@ -51,7 +51,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"krijebr@list.ru\",\r\n    \"password\": \"12345678910\"\r\n}",
+							"raw": "{\r\n    \"email\": \"krijebr123@gmail.com\",\r\n    \"password\": \"12345678910\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -336,7 +336,64 @@
 					"name": "get all users",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": "{{url}}/api/v1/users"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "cart",
+			"item": [
+				{
+					"name": "get all products in cart",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/v1/cart"
+					},
+					"response": []
+				},
+				{
+					"name": "add product to cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"product_id\": \"24caae8c-23e0-44be-ae88-e0e4912ef48e\",\r\n    \"count\": 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/v1/cart"
 					},
 					"response": []
 				}
