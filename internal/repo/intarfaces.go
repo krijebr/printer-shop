@@ -40,9 +40,9 @@ type Product interface {
 	DeleteById(ctx context.Context, id uuid.UUID) (err error)
 }
 type Cart interface {
-	GetAllProducts(ctx context.Context) (allProducts []*entity.ProductInCart, err error)
-	AddProduct(ctx context.Context, productId uuid.UUID, count int) (err error)
-	UpdateCount(ctx context.Context, productId uuid.UUID, count int) (err error)
+	GetAllProducts(ctx context.Context, userId uuid.UUID) (allProducts []*entity.ProductInCart, err error)
+	AddProduct(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) (err error)
+	UpdateCount(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) (err error)
 }
 
 type Row interface {

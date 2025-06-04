@@ -20,7 +20,7 @@ type (
 		UserId    *User       `json:"omitempty"`
 		Status    OrderStatus `json:"status"`
 		CreatedAt time.Time   `json:"created_at"`
-		Products  []*ProductInCart
+		Products  []*ProductInOrder
 	}
 	OrderFilter struct {
 		UserId *uuid.UUID   `json:"user_id"`

@@ -23,12 +23,19 @@ func NewProductRepoPg(db *sql.DB) Product {
 }
 
 func (p *ProductRepoPg) GetAll(ctx context.Context, filter *entity.ProductFilter) ([]*entity.Product, error) {
+
 	where := ""
 	if filter != nil {
+		whereS := []string{}
 		if filter.ProducerId != nil {
-			where = " where producers.id = '" + (*filter.ProducerId).String() + "'"
+			whereS = append(whereS, "producers.id = '"+(*filter.ProducerId).String()+"'")
 		}
+		if filter.Status != nil {
+			whereS = append(whereS, "products.status = '"+string(*filter.Status)+"'")
+		}
+		where = " where " + strings.Join(whereS, " and ")
 	}
+
 	rows, err := p.db.QueryContext(ctx,
 		"select products.id,products.name,products.price,products.status,products.created_at,producers.id,producers.name,producers.description,producers.created_at from products join producers on producers.id = producer_id"+where)
 	if err != nil {

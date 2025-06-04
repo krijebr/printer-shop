@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -25,7 +24,7 @@ const (
 	confPath         string        = "./config/config.json"
 	migratePath      string        = "file://./migrations"
 	_defaultAttempts int           = 5
-	_defaultTimeout  time.Duration = 3 * time.Second
+	_defaultTimeout  time.Duration = 5 * time.Second
 )
 
 func main() {
@@ -66,15 +65,15 @@ func main() {
 	producerRepo := repo.NewProducerRepoPg(db)
 	productRepo := repo.NewProductRepoPg(db)
 	tokenRepo := repo.NewTokenRedis(rdb)
+	cartRepo := repo.NewCartRepoPg(db)
 
 	producerUseCase := usecase.NewProducer(producerRepo, productRepo)
 	authUseCase := usecase.NewAuth(userRepo, tokenRepo, time.Duration(cfg.Security.TokenTTL), time.Duration(cfg.Security.RefreshTokenTTL), cfg.Security.HashSalt)
 	userUseCase := usecase.NewUser(userRepo, authUseCase)
-	u := usecase.NewUseCases(authUseCase, usecase.NewCart(), usecase.NewOrder(), producerUseCase, usecase.NewProduct(productRepo, producerRepo), userUseCase)
+	u := usecase.NewUseCases(authUseCase, usecase.NewCart(cartRepo, productRepo), usecase.NewOrder(), producerUseCase, usecase.NewProduct(productRepo, producerRepo), userUseCase)
 	r := http.CreateNewEchoServer(u)
-	port := strconv.Itoa(cfg.HttpServer.Port)
-	slog.Info("starting http server", slog.Any("port", port))
-	err = r.Start(":" + port)
+	slog.Info("starting http server", slog.Any("port", cfg.HttpServer.Port))
+	err = r.Start(fmt.Sprintf(":%d", cfg.HttpServer.Port))
 	if err != nil {
 		slog.Error("starting server error", slog.Any("error", err))
 	}
@@ -89,21 +88,21 @@ func initDB(cfg *config.Postgres) (*sql.DB, error) {
 		db       *sql.DB
 	)
 	for attempts > 0 {
+		slog.Info(fmt.Sprintf("trying to initialize database, attempts left: %d", attempts))
 		db, err = sql.Open("postgres", connStr)
 		if err == nil {
-			break
+			_, err = db.Exec("select 1")
+			if err == nil {
+				break
+			}
 		}
-		slog.Info(fmt.Sprintf("trying to initialize database, attempts left: %d", attempts))
 		time.Sleep(_defaultTimeout)
 		attempts--
 	}
 	if err != nil {
 		return nil, err
 	}
-	_, err = db.Exec("select 1")
-	if err != nil {
-		return nil, err
-	}
+
 	return db, nil
 }
 func migration(db *sql.DB) error {
@@ -135,12 +134,12 @@ func initRedis(cfg *config.Redis) (*redis.Client, error) {
 		err      error
 	)
 	for attempts > 0 {
+		slog.Info(fmt.Sprintf("trying to initialize redis, attempts left: %d", attempts))
 		client = redis.NewClient(&redis.Options{Addr: addr, Password: cfg.Password, DB: cfg.DB})
 		_, err = client.Ping(ctx).Result()
 		if err == nil {
 			break
 		}
-		slog.Info(fmt.Sprintf("trying to initialize redis, attempts left: %d", attempts))
 		time.Sleep(_defaultTimeout)
 		attempts--
 	}
