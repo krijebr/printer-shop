@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/krijebr/printer-shop/internal/entity"
@@ -27,6 +28,43 @@ func (c *cart) GetAllProducts(ctx context.Context, userId uuid.UUID) ([]*entity.
 	return ProductsInCart, nil
 }
 func (c *cart) AddProduct(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) error {
+	_, err := c.repoProduct.GetById(ctx, productId)
+	if err != nil {
+		switch {
+		case errors.Is(err, repo.ErrProductNotFound):
+			return ErrProductNotFound
+		default:
+			return err
+		}
+	}
+	existingCount, err := c.repo.GetProductCountById(ctx, userId, productId)
+	if err != nil {
+		return err
+	}
+
+	switch existingCount {
+	case 0:
+		if count == 0 {
+			return nil
+		}
+		err = c.repo.AddProduct(ctx, userId, productId, count)
+		if err != nil {
+			return err
+		}
+	default:
+		switch count {
+		case 0:
+			err = c.repo.DeleteByProductId(ctx, userId, productId)
+			if err != nil {
+				return err
+			}
+		default:
+			err = c.repo.UpdateCount(ctx, userId, productId, count)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 func (c *cart) UpdateCount(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) error {

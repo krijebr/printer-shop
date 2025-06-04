@@ -43,6 +43,8 @@ type Cart interface {
 	GetAllProducts(ctx context.Context, userId uuid.UUID) (allProducts []*entity.ProductInCart, err error)
 	AddProduct(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) (err error)
 	UpdateCount(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) (err error)
+	DeleteByProductId(ctx context.Context, userId uuid.UUID, productId uuid.UUID) (err error)
+	GetProductCountById(ctx context.Context, userId uuid.UUID, productId uuid.UUID) (count int, err error)
 }
 
 type Row interface {

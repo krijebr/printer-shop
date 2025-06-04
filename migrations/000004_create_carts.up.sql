@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS "carts" (
 	user_id uuid NOT NULL,
 	product_id uuid NOT NULL,
-	count integer
+	count integer NOT NULL,
 );
 ALTER TABLE carts ADD CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE carts ADD CONSTRAINT fk_products FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT ON UPDATE CASCADE;

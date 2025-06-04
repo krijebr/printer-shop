@@ -24,7 +24,10 @@ func (p *ProfileHandlers) getProfile() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, ok := c.Get(UserIdContextKey).(uuid.UUID)
 		if !ok {
-			return c.NoContent(http.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
 		}
 		user, err := p.usecase.GetById(c.Request().Context(), userId)
 		if err != nil {

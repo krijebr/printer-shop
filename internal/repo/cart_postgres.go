@@ -37,10 +37,40 @@ func (c *CartRepoPg) GetAllProducts(ctx context.Context, userId uuid.UUID) ([]*e
 	return productsInCart, nil
 }
 func (c *CartRepoPg) AddProduct(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) error {
+	_, err := c.db.ExecContext(ctx, "insert into carts (user_id, product_id, count) values ($1,$2,$3)", userId, productId, count)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 func (c *CartRepoPg) UpdateCount(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) error {
+	_, err := c.db.ExecContext(ctx, "update carts set count = $1 where user_id = $2 and product_id = $3", count, userId, productId)
+	if err != nil {
+		return err
+	}
 	return nil
+}
+
+func (c *CartRepoPg) DeleteByProductId(ctx context.Context, userId uuid.UUID, productId uuid.UUID) error {
+	_, err := c.db.ExecContext(ctx, "delete from carts where user_id = $1 and product_id = $2", userId, productId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (c *CartRepoPg) GetProductCountById(ctx context.Context, userId uuid.UUID, productId uuid.UUID) (int, error) {
+	row := c.db.QueryRowContext(ctx, "select count from carts where user_id=$1 and product_id = $2", userId, productId)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		switch {
+		case err == sql.ErrNoRows:
+			return 0, nil
+		default:
+			return 0, err
+		}
+	}
+	return count, nil
 }
 func (c *CartRepoPg) scanProductInCart(row Row) (*entity.ProductInCart, error) {
 	var product_created_at string
