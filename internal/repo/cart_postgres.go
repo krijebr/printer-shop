@@ -72,6 +72,19 @@ func (c *CartRepoPg) GetProductCountById(ctx context.Context, userId uuid.UUID, 
 	}
 	return count, nil
 }
+func (c *CartRepoPg) CheckIfExistsById(ctx context.Context, productId uuid.UUID) (bool, error) {
+	row := c.db.QueryRowContext(ctx, "select count(count) from carts where product_id = $1", productId)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return true, nil
+	}
+	return false, nil
+}
+
 func (c *CartRepoPg) scanProductInCart(row Row) (*entity.ProductInCart, error) {
 	var product_created_at string
 	var producer_created_at string

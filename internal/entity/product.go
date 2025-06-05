@@ -28,12 +28,6 @@ type (
 		Count   int      `json:"count"`
 	}
 
-	ProductInOrder struct {
-		Product *Product `json:"product"`
-		Count   int      `json:"count"`
-		Price   float32  `jsone:"price"`
-	}
-
 	ProductFilter struct {
 		ProducerId *uuid.UUID     `json:"producer_id"`
 		Status     *ProductStatus `json:"status"`

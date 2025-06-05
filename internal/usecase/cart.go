@@ -42,8 +42,7 @@ func (c *cart) AddProduct(ctx context.Context, userId uuid.UUID, productId uuid.
 		return err
 	}
 
-	switch existingCount {
-	case 0:
+	if existingCount == 0 {
 		if count == 0 {
 			return nil
 		}
@@ -51,20 +50,18 @@ func (c *cart) AddProduct(ctx context.Context, userId uuid.UUID, productId uuid.
 		if err != nil {
 			return err
 		}
-	default:
-		switch count {
-		case 0:
-			err = c.repo.DeleteByProductId(ctx, userId, productId)
-			if err != nil {
-				return err
-			}
-		default:
-			err = c.repo.UpdateCount(ctx, userId, productId, count)
-			if err != nil {
-				return err
-			}
+	}
+	if count == 0 {
+		err = c.repo.DeleteByProductId(ctx, userId, productId)
+		if err != nil {
+			return err
 		}
 	}
+	err = c.repo.UpdateCount(ctx, userId, productId, count)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 func (c *cart) UpdateCount(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) error {

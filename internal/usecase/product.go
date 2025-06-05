@@ -12,12 +12,14 @@ import (
 type product struct {
 	repo         repo.Product
 	repoProducer repo.Producer
+	repoCart     repo.Cart
 }
 
-func NewProduct(r repo.Product, p repo.Producer) Product {
+func NewProduct(r repo.Product, p repo.Producer, c repo.Cart) Product {
 	return &product{
 		repo:         r,
 		repoProducer: p,
+		repoCart:     c,
 	}
 }
 
@@ -90,8 +92,14 @@ func (p *product) Update(ctx context.Context, product entity.Product) (*entity.P
 	return updatedProduct, nil
 }
 func (p *product) DeleteById(ctx context.Context, id uuid.UUID) error {
-
-	_, err := p.repo.GetById(ctx, id)
+	productExists, err := p.repoCart.CheckIfExistsById(ctx, id)
+	if err != nil {
+		return err
+	}
+	if productExists {
+		return ErrProductIsUsed
+	}
+	_, err = p.repo.GetById(ctx, id)
 	if err != nil {
 		switch {
 		case err == repo.ErrProductNotFound:

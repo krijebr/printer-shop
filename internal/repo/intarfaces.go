@@ -45,6 +45,14 @@ type Cart interface {
 	UpdateCount(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) (err error)
 	DeleteByProductId(ctx context.Context, userId uuid.UUID, productId uuid.UUID) (err error)
 	GetProductCountById(ctx context.Context, userId uuid.UUID, productId uuid.UUID) (count int, err error)
+	CheckIfExistsById(ctx context.Context, productId uuid.UUID) (exists bool, err error)
+}
+type Order interface {
+	Create(ctx context.Context, userId uuid.UUID, products []*entity.ProductInCart) (err error)
+	GetAll(ctx context.Context, filter *entity.OrderFilter) (allOrders []*entity.Order, err error)
+	GetById(ctx context.Context, id uuid.UUID) (order *entity.Order, err error)
+	DeleteById(ctx context.Context, id uuid.UUID) (err error)
+	UpdateById(ctx context.Context, id uuid.UUID) (err error)
 }
 
 type Row interface {

@@ -18,6 +18,7 @@ const (
 	ErrProducerNotExistCode        = 10
 	ErrInvalidLoginCredentialsCode = 11
 	ErrProducerIsUsedCode          = 12
+	ErrProductIsUsedCode           = 13
 
 	ErrInvalidTokenMessage            = "invalid token"
 	ErrInvalidRefreshTokenMessage     = "invalid token"
@@ -30,7 +31,8 @@ const (
 	ErrEmailAlreadyExistsMessage      = "user with this email already exists"
 	ErrProducerNotExistMessage        = "producer with this id doesn't exist"
 	ErrInvalidLoginCredentialsMessage = "wrong email or password"
-	ErrProducerIsUsedMessage          = "this producer is already used and can not be deleted"
+	ErrProducerIsUsedMessage          = "this producer is already used and can't be deleted"
+	ErrProductIsUsedMessage           = "this product is already used and can't be deleted"
 
 	UserIdContextKey string = "userId"
 )

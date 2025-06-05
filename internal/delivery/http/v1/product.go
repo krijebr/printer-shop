@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -219,11 +220,17 @@ func (p *ProductHandlers) deleteProductById() echo.HandlerFunc {
 		err = p.usecase.DeleteById(c.Request().Context(), productId)
 		if err != nil {
 			switch {
-			case err == usecase.ErrProductNotFound:
+			case errors.Is(err, usecase.ErrProductNotFound):
 				slog.Error("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
+				})
+			case errors.Is(err, usecase.ErrProductIsUsed):
+				slog.Error("product is used", slog.Any("error", err))
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrProductIsUsedCode,
+					Message: ErrProductIsUsedMessage,
 				})
 			default:
 				slog.Error("product delete error", slog.Any("error", err))
