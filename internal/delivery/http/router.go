@@ -14,7 +14,7 @@ func CreateNewEchoServer(u *usecase.UseCases) *echo.Echo {
 	g := server.Group("/api/v1/")
 	v1.RegisterAuthRoutes(u.Auth, g.Group("auth"))
 	v1.RegisterCartRoutes(u.Cart, g.Group("cart", authMw.Handle))
-	v1.RegisterOrderRoutes(u.Order, g.Group("orders"))
+	v1.RegisterOrderRoutes(u.Order, g.Group("orders", authMw.Handle))
 	v1.RegisterProducerRoutes(u.Producer, g.Group("producers"))
 	v1.RegisterProductRoutes(u.Product, g.Group("products"))
 	v1.RegisterProfileRoutes(u.User, g.Group("profile", authMw.Handle))

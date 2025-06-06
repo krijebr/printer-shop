@@ -19,6 +19,7 @@ const (
 	ErrInvalidLoginCredentialsCode = 11
 	ErrProducerIsUsedCode          = 12
 	ErrProductIsUsedCode           = 13
+	ErrCartIsEmptyCode             = 14
 
 	ErrInvalidTokenMessage            = "invalid token"
 	ErrInvalidRefreshTokenMessage     = "invalid token"
@@ -33,6 +34,7 @@ const (
 	ErrInvalidLoginCredentialsMessage = "wrong email or password"
 	ErrProducerIsUsedMessage          = "this producer is already used and can't be deleted"
 	ErrProductIsUsedMessage           = "this product is already used and can't be deleted"
+	ErrCartIsEmptyMessage             = "cart is empty"
 
 	UserIdContextKey string = "userId"
 )

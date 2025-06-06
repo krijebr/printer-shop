@@ -46,7 +46,7 @@ type Cart interface {
 }
 
 type Order interface {
-	Create(ctx context.Context, userId uuid.UUID) (err error)
+	Create(ctx context.Context, userId uuid.UUID) (order *entity.Order, err error)
 	GetAll(ctx context.Context, filter *entity.OrderFilter) (allOrders []*entity.Order, err error)
 	GetById(ctx context.Context, id uuid.UUID) (order *entity.Order, err error)
 	DeleteById(ctx context.Context, id uuid.UUID) (err error)

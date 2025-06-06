@@ -3,7 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
-	"log/slog"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,8 +23,26 @@ func NewOrderRepoPg(db *sql.DB) Order {
 }
 
 func (o *OrderRepoPg) Create(ctx context.Context, order *entity.Order) error {
-	_, err := o.db.ExecContext(ctx, "insert into orders(id, user_id, status, created_at) values ($1,$2,$3,$4)",
+	tx, err := o.db.Begin()
+	if err != nil {
+		return err
+	}
+	_, err = tx.ExecContext(ctx, "insert into orders(id, user_id, status, created_at) values ($1,$2,$3,$4)",
 		order.Id, order.UserId, order.Status, order.CreatedAt)
+	if err != nil {
+		return err
+	}
+	values := []string{}
+	for _, product := range order.Products {
+		values = append(values, "('"+product.Product.Id.String()+"','"+order.Id.String()+
+			"',"+strconv.Itoa(product.Count)+","+strconv.FormatFloat(float64(product.Product.Price), 'f', 2, 32)+")")
+	}
+	_, err = tx.ExecContext(ctx, "insert into order_products(product_id,order_id,product_count,product_price) values "+strings.Join(values, ","))
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
 	if err != nil {
 		return err
 	}
@@ -68,7 +86,6 @@ func (o *OrderRepoPg) GetAll(ctx context.Context, filter *entity.OrderFilter) ([
 			if err != nil {
 				return nil, err
 			}
-			slog.Debug(string(order.Status) + string(order.Status))
 
 			orders = append(orders, &order)
 			previousOrderId = order.Id
@@ -86,8 +103,50 @@ func (o *OrderRepoPg) GetAll(ctx context.Context, filter *entity.OrderFilter) ([
 	}
 	return orders, nil
 }
-func (o *OrderRepoPg) GetById(ctx context.Context, id uuid.UUID) (order *entity.Order, err error) {
-	return nil, nil
+func (o *OrderRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Order, error) {
+	var orderCreatedAt string
+	var productCreatedAt string
+	var producerCreatedAt string
+	rows, err := o.db.QueryContext(ctx, "select orders.id, orders.user_id, orders.status, orders.created_at, products.id, products.name, order_products.product_price, producers.id, producers.name, producers.description, producers.created_at, products.status, products.created_at, order_products.product_count from orders join order_products on order_products.order_id = orders.id join products on order_products.product_id = products.id join producers on products.producer_id = producers.id where orders.id = $1", id)
+	if err != nil {
+		return nil, err
+	}
+	order := &entity.Order{}
+	first := true
+	for rows.Next() {
+		product := &entity.ProductInCart{
+			Product: &entity.Product{},
+		}
+		producer := new(entity.Producer)
+		err := rows.Scan(&order.Id, &order.UserId, &order.Status, &orderCreatedAt, &product.Product.Id, &product.Product.Name,
+			&product.Product.Price, &producer.Id, &producer.Name, &producer.Description, &producerCreatedAt,
+			&product.Product.Status, &productCreatedAt, &product.Count)
+		if err != nil {
+			return nil, err
+		}
+		if first {
+			order.CreatedAt, err = time.Parse(time.RFC3339, orderCreatedAt)
+			if err != nil {
+				return nil, err
+			}
+			first = false
+		}
+
+		product.Product.CreatedAt, err = time.Parse(time.RFC3339, productCreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		producer.CreatedAt, err = time.Parse(time.RFC3339, producerCreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		product.Product.Producer = producer
+		order.Products = append(order.Products, product)
+	}
+	if first {
+		return nil, ErrOrderNotFound
+	}
+	return order, nil
 }
 func (o *OrderRepoPg) DeleteById(ctx context.Context, id uuid.UUID) (err error) {
 	return nil

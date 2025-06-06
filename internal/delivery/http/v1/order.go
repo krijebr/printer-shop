@@ -68,13 +68,61 @@ func (o *OrderHandlers) getAllOrders() echo.HandlerFunc {
 
 func (o *OrderHandlers) createOrder() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.String(http.StatusNotImplemented, "Not Implemented")
+		userId, ok := c.Get(UserIdContextKey).(uuid.UUID)
+		if !ok {
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
+		}
+		order, err := o.usecase.Create(c.Request().Context(), userId)
+		if err != nil {
+			switch {
+			case err == usecase.ErrCartIsEmpty:
+				slog.Error("producer not found", slog.Any("error", err))
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrCartIsEmptyCode,
+					Message: ErrCartIsEmptyMessage,
+				})
+			default:
+				slog.Error("product creation error", slog.Any("error", err))
+				return c.NoContent(http.StatusInternalServerError)
+			}
+		}
+		c.Response().Header().Set(echo.HeaderContentType, "application/json")
+		return c.JSON(http.StatusOK, order)
 	}
 }
 
 func (o *OrderHandlers) getOrderById() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.String(http.StatusNotImplemented, "Not Implemented")
+		orderId, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			slog.Error("invalid order id", slog.Any("error", err))
+			return c.JSON(http.StatusNotFound, ErrResponse{
+				Error:   ErrResourceNotFoundCode,
+				Message: ErrResourceNotFoundMessage,
+			})
+		}
+		order, err := o.usecase.GetById(c.Request().Context(), orderId)
+		if err != nil {
+			switch {
+			case err == usecase.ErrOrderNotFound:
+				slog.Error("order not found", slog.Any("error", err))
+				return c.JSON(http.StatusNotFound, ErrResponse{
+					Error:   ErrResourceNotFoundCode,
+					Message: ErrResourceNotFoundMessage,
+				})
+			default:
+				slog.Error("order receiving error", slog.Any("error", err))
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
+			}
+		}
+		slog.Info("product received")
+		return c.JSON(http.StatusOK, order)
 	}
 }
 func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
