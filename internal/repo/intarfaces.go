@@ -48,7 +48,7 @@ type Cart interface {
 	CheckIfExistsById(ctx context.Context, productId uuid.UUID) (exists bool, err error)
 }
 type Order interface {
-	Create(ctx context.Context, userId uuid.UUID, products []*entity.ProductInCart) (err error)
+	Create(ctx context.Context, order *entity.Order) (err error)
 	GetAll(ctx context.Context, filter *entity.OrderFilter) (allOrders []*entity.Order, err error)
 	GetById(ctx context.Context, id uuid.UUID) (order *entity.Order, err error)
 	DeleteById(ctx context.Context, id uuid.UUID) (err error)

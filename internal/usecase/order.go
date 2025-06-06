@@ -5,19 +5,24 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/krijebr/printer-shop/internal/entity"
+	"github.com/krijebr/printer-shop/internal/repo"
 )
 
 type order struct {
+	repo repo.Order
 }
 
-func NewOrder() Order {
-	return &order{}
+func NewOrder(r repo.Order) Order {
+	return &order{
+		repo: r,
+	}
 }
 func (o *order) Create(ctx context.Context, userId uuid.UUID) (err error) {
+
 	return ErrNotImplemented
 }
 func (o *order) GetAll(ctx context.Context, filter *entity.OrderFilter) ([]*entity.Order, error) {
-	return nil, ErrNotImplemented
+	return o.repo.GetAll(ctx, filter)
 }
 func (o *order) GetById(ctx context.Context, id uuid.UUID) (*entity.Order, error) {
 	return nil, ErrNotImplemented

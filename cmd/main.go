@@ -66,11 +66,12 @@ func main() {
 	productRepo := repo.NewProductRepoPg(db)
 	tokenRepo := repo.NewTokenRedis(rdb)
 	cartRepo := repo.NewCartRepoPg(db)
+	orderRepo := repo.NewOrderRepoPg(db)
 
 	producerUseCase := usecase.NewProducer(producerRepo, productRepo)
 	authUseCase := usecase.NewAuth(userRepo, tokenRepo, time.Duration(cfg.Security.TokenTTL), time.Duration(cfg.Security.RefreshTokenTTL), cfg.Security.HashSalt)
 	userUseCase := usecase.NewUser(userRepo, authUseCase)
-	u := usecase.NewUseCases(authUseCase, usecase.NewCart(cartRepo, productRepo), usecase.NewOrder(), producerUseCase, usecase.NewProduct(productRepo, producerRepo, cartRepo), userUseCase)
+	u := usecase.NewUseCases(authUseCase, usecase.NewCart(cartRepo, productRepo), usecase.NewOrder(orderRepo), producerUseCase, usecase.NewProduct(productRepo, producerRepo, cartRepo), userUseCase)
 	r := http.CreateNewEchoServer(u)
 	slog.Info("starting http server", slog.Int("port", cfg.HttpServer.Port))
 	err = r.Start(fmt.Sprintf(":%d", cfg.HttpServer.Port))
