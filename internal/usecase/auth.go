@@ -93,7 +93,7 @@ func (a *auth) Login(ctx context.Context, email, password string) (string, strin
 	user, err := a.userRepo.GetByEmail(ctx, email)
 	if err != nil {
 		switch {
-		case err == repo.ErrUserNotFound:
+		case errors.Is(err, repo.ErrUserNotFound):
 			return "", "", ErrUserNotFound
 		default:
 			return "", "", err

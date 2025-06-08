@@ -88,7 +88,7 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 		newProduct, err := p.usecase.Create(c.Request().Context(), product)
 		if err != nil {
 			switch {
-			case err == usecase.ErrProducerNotFound:
+			case errors.Is(err, usecase.ErrProducerNotFound):
 				slog.Error("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProducerNotExistCode,
@@ -118,7 +118,7 @@ func (p *ProductHandlers) getProductById() echo.HandlerFunc {
 		product, err := p.usecase.GetById(c.Request().Context(), productId)
 		if err != nil {
 			switch {
-			case err == usecase.ErrProductNotFound:
+			case errors.Is(err, usecase.ErrProductNotFound):
 				slog.Error("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
@@ -182,13 +182,13 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 		updatedProduct, err := p.usecase.Update(c.Request().Context(), product)
 		if err != nil {
 			switch {
-			case err == usecase.ErrProductNotFound:
+			case errors.Is(err, usecase.ErrProductNotFound):
 				slog.Error("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
-			case err == usecase.ErrProducerNotFound:
+			case errors.Is(err, usecase.ErrProducerNotFound):
 				slog.Error("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProducerNotExistCode,

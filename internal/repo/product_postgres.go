@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strconv"
 	"strings"
 	"time"
@@ -57,7 +58,7 @@ func (p *ProductRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Prod
 	product, err := p.scanProduct(row)
 	if err != nil {
 		switch {
-		case err == sql.ErrNoRows:
+		case errors.Is(err, sql.ErrNoRows):
 			return nil, ErrProductNotFound
 		default:
 			return nil, err

@@ -28,7 +28,7 @@ func (c *cart) GetAllProducts(ctx context.Context, userId uuid.UUID) ([]*entity.
 	return ProductsInCart, nil
 }
 func (c *cart) AddProduct(ctx context.Context, userId uuid.UUID, productId uuid.UUID, count int) error {
-	_, err := c.repoProduct.GetById(ctx, productId)
+	product, err := c.repoProduct.GetById(ctx, productId)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrProductNotFound):
@@ -36,6 +36,9 @@ func (c *cart) AddProduct(ctx context.Context, userId uuid.UUID, productId uuid.
 		default:
 			return err
 		}
+	}
+	if product.Status == entity.ProductStatusHidden && count > 0 {
+		return ErrProductIsHidden
 	}
 	existingCount, err := c.repo.GetProductCountById(ctx, userId, productId)
 	if err != nil {

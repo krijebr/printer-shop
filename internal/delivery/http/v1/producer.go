@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -92,7 +93,7 @@ func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
 		producer, err := p.usecase.GetById(c.Request().Context(), producerId)
 		if err != nil {
 			switch {
-			case err == usecase.ErrProducerNotFound:
+			case errors.Is(err, usecase.ErrProducerNotFound):
 				slog.Error("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
@@ -150,7 +151,7 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 		updatedProducer, err := p.usecase.Update(c.Request().Context(), producer)
 		if err != nil {
 			switch {
-			case err == usecase.ErrProducerNotFound:
+			case errors.Is(err, usecase.ErrProducerNotFound):
 				slog.Error("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
@@ -182,13 +183,13 @@ func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 		err = p.usecase.DeleteById(c.Request().Context(), producerId)
 		if err != nil {
 			switch {
-			case err == usecase.ErrProducerNotFound:
+			case errors.Is(err, usecase.ErrProducerNotFound):
 				slog.Error("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
-			case err == usecase.ErrProducerIsUsed:
+			case errors.Is(err, usecase.ErrProducerIsUsed):
 				slog.Error("producer is used", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProducerIsUsedCode,

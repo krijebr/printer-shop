@@ -20,6 +20,8 @@ const (
 	ErrProducerIsUsedCode          = 12
 	ErrProductIsUsedCode           = 13
 	ErrCartIsEmptyCode             = 14
+	ErrProductNotExistCode         = 15
+	ErrOrderNotExistCode           = 16
 
 	ErrInvalidTokenMessage            = "invalid token"
 	ErrInvalidRefreshTokenMessage     = "invalid token"
@@ -35,6 +37,8 @@ const (
 	ErrProducerIsUsedMessage          = "this producer is already used and can't be deleted"
 	ErrProductIsUsedMessage           = "this product is already used and can't be deleted"
 	ErrCartIsEmptyMessage             = "cart is empty"
+	ErrProductNotExistMessage         = "product with this id doesn't exist"
+	ErrOrderNotExistMessage           = "order with this id doesn't exist"
 
 	UserIdContextKey string = "userId"
 )

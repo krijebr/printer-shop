@@ -398,6 +398,122 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "order",
+			"item": [
+				{
+					"name": "get all orders",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "    {\r\n    \"name\": \"МФУ лазерное HP LaserJet M141w (7MD74A)\",\r\n    \"price\": 16444,\r\n\t\"producer_id\": \"1380ab8b-9939-4af1-8e54-0b0733ee250d\",\r\n\t\"status\": \"published\"\r\n    }"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/orders?user_id=612dd971-d743-4552-906e-c7f2edb9bc7&order_status=new",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orders"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "612dd971-d743-4552-906e-c7f2edb9bc7"
+								},
+								{
+									"key": "order_status",
+									"value": "new"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"url": "{{url}}/api/v1/orders"
+					},
+					"response": []
+				},
+				{
+					"name": "get order by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/v1/orders/{{order_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "delete order by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": "{{url}}/api/v1/orders/{{order_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "update order by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\": \"new\",\r\n    \"products\": [\r\n        {\r\n            \"id\":\"741b0efa-c35a-4243-8538-db7545ccfa75\",\r\n            \"count\": 5\r\n        },\r\n                {\r\n            \"id\":\"725d0a38-ab30-4fdb-a14f-1a14b35e9b35\",\r\n            \"count\": 1\r\n        },\r\n                {\r\n            \"id\":\"725d0a38-ab30-4fdb-a14f-1a14b35e9b35\",\r\n            \"count\": 5\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/v1/orders/{{order_id}}"
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [

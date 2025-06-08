@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -64,7 +65,7 @@ func (c *CartRepoPg) GetProductCountById(ctx context.Context, userId uuid.UUID, 
 	err := row.Scan(&count)
 	if err != nil {
 		switch {
-		case err == sql.ErrNoRows:
+		case errors.Is(err, sql.ErrNoRows):
 			return 0, nil
 		default:
 			return 0, err
@@ -106,4 +107,11 @@ func (c *CartRepoPg) scanProductInCart(row Row) (*entity.ProductInCart, error) {
 	product.Producer = producer
 	productInCart.Product = product
 	return productInCart, nil
+}
+func (c *CartRepoPg) ClearCart(ctx context.Context, userId uuid.UUID) error {
+	_, err := c.db.ExecContext(ctx, "delete from carts where user_id = $1", userId)
+	if err != nil {
+		return err
+	}
+	return nil
 }

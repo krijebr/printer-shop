@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strings"
 	"time"
 
@@ -41,7 +42,7 @@ func (p *ProducerRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Pro
 	producer, err := p.scanProducer(row)
 	if err != nil {
 		switch {
-		case err == sql.ErrNoRows:
+		case errors.Is(err, sql.ErrNoRows):
 			return nil, ErrProducerNotFound
 		default:
 			return nil, err

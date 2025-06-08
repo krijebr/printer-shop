@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
 	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/krijebr/printer-shop/internal/usecase"
@@ -26,10 +27,29 @@ func (u *UserHandlers) allUsers() echo.HandlerFunc {
 			userFilter = new(entity.UserFilter)
 		}
 		if c.QueryParam("user_status") != "" {
+			validate := validator.New()
+			err := validate.Var(c.QueryParam("user_status"), "oneof=active blocked")
+			if err != nil {
+				slog.Error("validation error", slog.Any("error", err))
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrValidationErrorCode,
+					Message: ErrValidationErrorMessage,
+				})
+			}
 			userStatus := entity.UserStatus(c.QueryParam("user_status"))
 			userFilter.UserStatus = &userStatus
 		}
+
 		if c.QueryParam("user_role") != "" {
+			validate := validator.New()
+			err := validate.Var(c.QueryParam("user_role"), "oneof=customer admin")
+			if err != nil {
+				slog.Error("validation error", slog.Any("error", err))
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrValidationErrorCode,
+					Message: ErrValidationErrorMessage,
+				})
+			}
 			userRole := entity.UserRole(c.QueryParam("user_role"))
 			userFilter.UserRole = &userRole
 		}

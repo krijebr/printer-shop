@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,13 +14,15 @@ type product struct {
 	repo         repo.Product
 	repoProducer repo.Producer
 	repoCart     repo.Cart
+	repoOrder    repo.Order
 }
 
-func NewProduct(r repo.Product, p repo.Producer, c repo.Cart) Product {
+func NewProduct(r repo.Product, p repo.Producer, c repo.Cart, o repo.Order) Product {
 	return &product{
 		repo:         r,
 		repoProducer: p,
 		repoCart:     c,
+		repoOrder:    o,
 	}
 }
 
@@ -30,7 +33,7 @@ func (p *product) GetById(ctx context.Context, id uuid.UUID) (*entity.Product, e
 	product, err := p.repo.GetById(ctx, id)
 	if err != nil {
 		switch {
-		case err == repo.ErrProductNotFound:
+		case errors.Is(err, repo.ErrProductNotFound):
 			return nil, ErrProductNotFound
 		default:
 			return nil, err
@@ -42,7 +45,7 @@ func (p *product) Create(ctx context.Context, product entity.Product) (*entity.P
 	_, err := p.repoProducer.GetById(ctx, product.Producer.Id)
 	if err != nil {
 		switch {
-		case err == repo.ErrProducerNotFound:
+		case errors.Is(err, repo.ErrProducerNotFound):
 			return nil, ErrProducerNotFound
 		default:
 			return nil, err
@@ -64,7 +67,7 @@ func (p *product) Update(ctx context.Context, product entity.Product) (*entity.P
 	_, err := p.repo.GetById(ctx, product.Id)
 	if err != nil {
 		switch {
-		case err == repo.ErrProductNotFound:
+		case errors.Is(err, repo.ErrProductNotFound):
 			return nil, ErrProductNotFound
 		default:
 			return nil, err
@@ -74,7 +77,7 @@ func (p *product) Update(ctx context.Context, product entity.Product) (*entity.P
 		_, err = p.repoProducer.GetById(ctx, product.Producer.Id)
 		if err != nil {
 			switch {
-			case err == repo.ErrProducerNotFound:
+			case errors.Is(err, repo.ErrProducerNotFound):
 				return nil, ErrProducerNotFound
 			default:
 				return nil, err
@@ -92,6 +95,15 @@ func (p *product) Update(ctx context.Context, product entity.Product) (*entity.P
 	return updatedProduct, nil
 }
 func (p *product) DeleteById(ctx context.Context, id uuid.UUID) error {
+	_, err := p.repo.GetById(ctx, id)
+	if err != nil {
+		switch {
+		case errors.Is(err, repo.ErrProductNotFound):
+			return ErrProductNotFound
+		default:
+			return err
+		}
+	}
 	productExists, err := p.repoCart.CheckIfExistsById(ctx, id)
 	if err != nil {
 		return err
@@ -99,14 +111,12 @@ func (p *product) DeleteById(ctx context.Context, id uuid.UUID) error {
 	if productExists {
 		return ErrProductIsUsed
 	}
-	_, err = p.repo.GetById(ctx, id)
+	productExists, err = p.repoOrder.CheckIfExistsByProductId(ctx, id)
 	if err != nil {
-		switch {
-		case err == repo.ErrProductNotFound:
-			return ErrProductNotFound
-		default:
-			return err
-		}
+		return err
+	}
+	if productExists {
+		return ErrProductIsUsed
 	}
 	err = p.repo.DeleteById(ctx, id)
 	if err != nil {

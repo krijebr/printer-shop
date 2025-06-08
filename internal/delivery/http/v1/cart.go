@@ -30,7 +30,7 @@ func (h *CartHandlers) getAllProductsInCart() echo.HandlerFunc {
 		}
 		productsInCart, err := h.usecase.GetAllProducts(c.Request().Context(), userId)
 		if err != nil {
-			slog.Error("profile receiving error", slog.Any("error", err))
+			slog.Error("cart receiving error", slog.Any("error", err))
 			return c.JSON(http.StatusInternalServerError, ErrResponse{
 				Error:   ErrInternalErrorCode,
 				Message: ErrInternalErrorMessage,
@@ -76,12 +76,18 @@ func (h *CartHandlers) addProductToCart() echo.HandlerFunc {
 			switch {
 			case errors.Is(err, usecase.ErrProductNotFound):
 				slog.Error("product not found", slog.Any("error", err))
-				return c.JSON(http.StatusNotFound, ErrResponse{
-					Error:   ErrResourceNotFoundCode,
-					Message: ErrResourceNotFoundMessage,
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrProductNotExistCode,
+					Message: ErrProductNotExistMessage,
+				})
+			case errors.Is(err, usecase.ErrProductIsHidden):
+				slog.Error("product is hidden", slog.Any("error", err))
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrProductNotExistCode,
+					Message: ErrProductNotExistMessage,
 				})
 			default:
-				slog.Info("product added to cart")
+				slog.Error("adding product to cart error", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,

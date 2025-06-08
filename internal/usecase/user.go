@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/krijebr/printer-shop/internal/entity"
@@ -31,7 +32,7 @@ func (u *user) Update(ctx context.Context, user entity.User) (*entity.User, erro
 	_, err := u.repo.GetById(ctx, user.Id)
 	if err != nil {
 		switch {
-		case err == repo.ErrUserNotFound:
+		case errors.Is(err, repo.ErrUserNotFound):
 			return nil, ErrUserNotFound
 		default:
 			return nil, err

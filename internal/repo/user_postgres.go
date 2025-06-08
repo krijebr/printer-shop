@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strings"
 	"time"
 
@@ -51,7 +52,7 @@ func (u *UserRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.User, e
 	user, err := u.scanUser(row)
 	if err != nil {
 		switch {
-		case err == sql.ErrNoRows:
+		case errors.Is(err, sql.ErrNoRows):
 			return nil, ErrUserNotFound
 		default:
 			return nil, err
@@ -104,7 +105,7 @@ func (u *UserRepoPg) GetByEmail(ctx context.Context, email string) (*entity.User
 	user, err := u.scanUser(row)
 	if err != nil {
 		switch {
-		case err == sql.ErrNoRows:
+		case errors.Is(err, sql.ErrNoRows):
 			return nil, ErrUserNotFound
 		default:
 			return nil, err

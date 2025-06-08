@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,7 +28,7 @@ func (p *producer) GetById(ctx context.Context, id uuid.UUID) (*entity.Producer,
 	producer, err := p.repo.GetById(ctx, id)
 	if err != nil {
 		switch {
-		case err == repo.ErrProducerNotFound:
+		case errors.Is(err, repo.ErrProducerNotFound):
 			return nil, ErrProducerNotFound
 		default:
 			return nil, err
@@ -52,7 +53,7 @@ func (p *producer) Update(ctx context.Context, producer entity.Producer) (*entit
 	_, err := p.repo.GetById(ctx, producer.Id)
 	if err != nil {
 		switch {
-		case err == repo.ErrProducerNotFound:
+		case errors.Is(err, repo.ErrProducerNotFound):
 			return nil, ErrProducerNotFound
 		default:
 			return nil, err
@@ -82,7 +83,7 @@ func (p *producer) DeleteById(ctx context.Context, id uuid.UUID) error {
 	_, err = p.repo.GetById(ctx, id)
 	if err != nil {
 		switch {
-		case err == repo.ErrProducerNotFound:
+		case errors.Is(err, repo.ErrProducerNotFound):
 			return ErrProducerNotFound
 		default:
 			return err

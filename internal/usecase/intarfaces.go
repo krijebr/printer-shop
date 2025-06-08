@@ -50,5 +50,5 @@ type Order interface {
 	GetAll(ctx context.Context, filter *entity.OrderFilter) (allOrders []*entity.Order, err error)
 	GetById(ctx context.Context, id uuid.UUID) (order *entity.Order, err error)
 	DeleteById(ctx context.Context, id uuid.UUID) (err error)
-	UpdateById(ctx context.Context, id uuid.UUID) (order *entity.Order, err error)
+	UpdateById(ctx context.Context, order *entity.Order) (updatedOrder *entity.Order, err error)
 }

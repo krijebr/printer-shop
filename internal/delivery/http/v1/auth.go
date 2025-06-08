@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -55,7 +56,7 @@ func (a *AuthHandlers) register() echo.HandlerFunc {
 		newUser, err := a.usecase.Register(c.Request().Context(), user)
 		if err != nil {
 			switch {
-			case err == usecase.ErrEmailAlreadyExists:
+			case errors.Is(err, usecase.ErrEmailAlreadyExists):
 				slog.Error("user with this email already exists", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrEmailAlreadyExistsCode,
@@ -104,7 +105,7 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 		token, refreshToken, err := a.usecase.Login(c.Request().Context(), requestData.Email, requestData.Password)
 		if err != nil {
 			switch {
-			case err == usecase.ErrUserNotFound || err == usecase.ErrWrongPassword:
+			case errors.Is(err, usecase.ErrUserNotFound) || errors.Is(err, usecase.ErrWrongPassword):
 				slog.Error("wrong email or password", slog.Any("error", err))
 				return c.JSON(http.StatusForbidden, ErrResponse{
 					Error:   ErrInvalidLoginCredentialsCode,
@@ -155,7 +156,7 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 
 		token, refreshToken, err := a.usecase.RefreshToken(c.Request().Context(), requestData.RefreshToken)
 		if err != nil {
-			if err == usecase.ErrInvalidToken {
+			if errors.Is(err, usecase.ErrInvalidToken) {
 				slog.Error("invalid refresh token", slog.Any("error", err))
 				return c.JSON(http.StatusForbidden, ErrResponse{
 					Error:   ErrInvalidRefreshTokenCode,
