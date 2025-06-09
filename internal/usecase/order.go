@@ -28,20 +28,21 @@ func (o *order) Create(ctx context.Context, userId uuid.UUID) (*entity.Order, er
 	if len(productsInCart) == 0 {
 		return nil, ErrCartIsEmpty
 	}
-	order := &entity.Order{}
-	order.Id = uuid.New()
-	order.UserId = userId
-	order.Status = entity.OrderStatusNew
-	order.CreatedAt = time.Now()
-	publishedProducts := []*entity.ProductInCart{}
-	for _, product := range productsInCart {
-		if product.Product.Status != entity.ProductStatusHidden {
-			publishedProducts = append(publishedProducts, product)
+	newOrder := &entity.Order{
+		Id:        uuid.New(),
+		UserId:    userId,
+		Status:    entity.OrderStatusNew,
+		CreatedAt: time.Now(),
+	}
+	publishedProducts := make([]*entity.ProductInCart, 0, len(productsInCart))
+	for _, p := range productsInCart {
+		if p.Product.Status != entity.ProductStatusHidden {
+			publishedProducts = append(publishedProducts, p)
 		}
 	}
-	order.Products = publishedProducts
+	newOrder.Products = publishedProducts
 
-	err = o.repo.Create(ctx, order)
+	err = o.repo.Create(ctx, newOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -49,11 +50,11 @@ func (o *order) Create(ctx context.Context, userId uuid.UUID) (*entity.Order, er
 	if err != nil {
 		return nil, err
 	}
-	newOrder, err := o.repo.GetById(ctx, order.Id)
+	createdOrder, err := o.repo.GetById(ctx, newOrder.Id)
 	if err != nil {
 		return nil, err
 	}
-	return newOrder, nil
+	return createdOrder, nil
 }
 func (o *order) GetAll(ctx context.Context, filter *entity.OrderFilter) ([]*entity.Order, error) {
 	order, err := o.repo.GetAll(ctx, filter)
@@ -86,8 +87,8 @@ func (o *order) DeleteById(ctx context.Context, id uuid.UUID) error {
 	}
 	return nil
 }
-func (o *order) UpdateById(ctx context.Context, order *entity.Order) (*entity.Order, error) {
-	_, err := o.repo.GetById(ctx, order.Id)
+func (o *order) UpdateById(ctx context.Context, upOrder *entity.Order) (*entity.Order, error) {
+	existingOrder, err := o.repo.GetById(ctx, upOrder.Id)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrOrderNotFound):
@@ -96,9 +97,12 @@ func (o *order) UpdateById(ctx context.Context, order *entity.Order) (*entity.Or
 			return nil, err
 		}
 	}
-	if order.Products != nil {
-		publishedProducts := []*entity.ProductInCart{}
-		for i, newProduct := range order.Products {
+	if upOrder.Products != nil {
+		if existingOrder.Status != entity.OrderStatusNew {
+			return nil, ErrOrderCantBeUpdated
+		}
+		publishedProducts := make([]*entity.ProductInCart, 0, len(upOrder.Products))
+		for _, newProduct := range upOrder.Products {
 			product, err := o.repoProduct.GetById(ctx, newProduct.Product.Id)
 			if err != nil {
 				switch {
@@ -108,18 +112,19 @@ func (o *order) UpdateById(ctx context.Context, order *entity.Order) (*entity.Or
 					return nil, err
 				}
 			}
+			newProduct.Product.Price = product.Price
 			if product.Status != entity.ProductStatusHidden {
 				publishedProducts = append(publishedProducts, newProduct)
 			}
-			order.Products[i].Product.Price = product.Price
+
 		}
-		order.Products = publishedProducts
+		upOrder.Products = publishedProducts
 	}
-	err = o.repo.UpdateById(ctx, order)
+	err = o.repo.UpdateById(ctx, upOrder)
 	if err != nil {
 		return nil, err
 	}
-	updatedOrder, err := o.repo.GetById(ctx, order.Id)
+	updatedOrder, err := o.repo.GetById(ctx, upOrder.Id)
 	if err != nil {
 		return nil, err
 	}

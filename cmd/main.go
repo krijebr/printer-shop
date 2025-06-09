@@ -23,6 +23,7 @@ import (
 const (
 	confPath         string        = "./config/config.json"
 	migratePath      string        = "file://./migrations"
+	roleConfPath     string        = "./config/role_config.json"
 	_defaultAttempts int           = 5
 	_defaultTimeout  time.Duration = 5 * time.Second
 )
@@ -34,13 +35,15 @@ func main() {
 		slog.Error("initialization error", slog.Any("error", err))
 		return
 	}
-
 	th := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: cfg.Logging.Level,
 	})
 	logger := slog.New(th)
 	slog.SetDefault(logger)
-
+	roleConf, err := config.InitRoleConfigFromJson("./config/role_config.json")
+	if err != nil {
+		slog.Error("role config parsing error", slog.Any("error", err))
+	}
 	slog.Info("starting app", slog.String("app-name", "printer shop"))
 
 	db, err := initDB(&cfg.Postgres)
@@ -72,7 +75,7 @@ func main() {
 	authUseCase := usecase.NewAuth(userRepo, tokenRepo, time.Duration(cfg.Security.TokenTTL), time.Duration(cfg.Security.RefreshTokenTTL), cfg.Security.HashSalt)
 	userUseCase := usecase.NewUser(userRepo, authUseCase)
 	u := usecase.NewUseCases(authUseCase, usecase.NewCart(cartRepo, productRepo), usecase.NewOrder(orderRepo, cartRepo, productRepo), producerUseCase, usecase.NewProduct(productRepo, producerRepo, cartRepo, orderRepo), userUseCase)
-	r := http.CreateNewEchoServer(u)
+	r := http.CreateNewEchoServer(u, roleConf)
 	slog.Info("starting http server", slog.Int("port", cfg.HttpServer.Port))
 	err = r.Start(fmt.Sprintf(":%d", cfg.HttpServer.Port))
 	if err != nil {

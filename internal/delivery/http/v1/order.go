@@ -63,7 +63,6 @@ func (o *OrderHandlers) getAllOrders() echo.HandlerFunc {
 			})
 		}
 		slog.Info("all orders received")
-		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, orders)
 	}
 }
@@ -91,7 +90,6 @@ func (o *OrderHandlers) createOrder() echo.HandlerFunc {
 				return c.NoContent(http.StatusInternalServerError)
 			}
 		}
-		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, order)
 	}
 }
@@ -222,9 +220,20 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 					Error:   ErrProductNotExistCode,
 					Message: ErrProductNotExistMessage,
 				})
+			case errors.Is(err, usecase.ErrOrderCantBeUpdated):
+				slog.Error("order can't be updated", slog.Any("error", err))
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrOrderCantBeUpdatedCode,
+					Message: ErrOrderCantBeUpdatedMessage,
+				})
+			default:
+				slog.Error("order updating error", slog.Any("error", err))
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
 			}
 		}
-		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, updatedOrder)
 	}
 }

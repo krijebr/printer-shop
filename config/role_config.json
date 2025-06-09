@@ -1,0 +1,31 @@
+{
+    "users":{
+        "GET":["admin"],
+        "PUT":["admin"],
+        "DELETE":["admin"]
+    },
+    "users/:id":{
+        "GET":["admin"]
+    },
+    "products":{
+        "GET":["customer","admin"],
+        "POST":["admin"],
+        "PUT":["admin"],
+        "DELETE":["admin"]
+    },
+    "producers":{
+        "GET":["customer","admin"],
+        "POST":["admin"],
+        "PUT":["admin"],
+        "DELETE":["admin"]
+    },
+    "orders":{
+        "GET":["customer","admin"],
+        "POST":["admin"],
+        "PUT":["admin"],
+        "DELETE":["admin"]
+    },
+        "orders/:id":{
+        "GET":["admin","customer"]
+    }
+}

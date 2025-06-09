@@ -1,10 +1,12 @@
 package v1
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
 	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/krijebr/printer-shop/internal/usecase"
@@ -62,14 +64,39 @@ func (u *UserHandlers) allUsers() echo.HandlerFunc {
 			})
 		}
 		slog.Info("all users received")
-		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, users)
 	}
 }
 
 func (u *UserHandlers) getUserById() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.String(http.StatusNotImplemented, "Not Implemented")
+		userId, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			slog.Error("invalid user id", slog.Any("error", err))
+			return c.JSON(http.StatusNotFound, ErrResponse{
+				Error:   ErrResourceNotFoundCode,
+				Message: ErrResourceNotFoundMessage,
+			})
+		}
+		user, err := u.usecase.GetById(c.Request().Context(), userId)
+		if err != nil {
+			switch {
+			case errors.Is(err, usecase.ErrUserNotFound):
+				slog.Error("user not found", slog.Any("error", err))
+				return c.JSON(http.StatusNotFound, ErrResponse{
+					Error:   ErrResourceNotFoundCode,
+					Message: ErrResourceNotFoundMessage,
+				})
+			default:
+				slog.Error("user receiving error", slog.Any("error", err))
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
+			}
+		}
+		slog.Info("product received")
+		return c.JSON(http.StatusOK, user)
 	}
 }
 func (u *UserHandlers) updateUserById() echo.HandlerFunc {

@@ -46,7 +46,6 @@ func (p *ProductHandlers) getAllProducts() echo.HandlerFunc {
 			})
 		}
 		slog.Info("all products received")
-		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, products)
 	}
 }
@@ -100,7 +99,6 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 			}
 		}
 		slog.Info("product created")
-		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, newProduct)
 	}
 }
@@ -203,7 +201,6 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 			}
 		}
 		slog.Info("product updated")
-		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, updatedProduct)
 	}
 }

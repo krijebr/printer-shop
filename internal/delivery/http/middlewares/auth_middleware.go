@@ -45,6 +45,7 @@ func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 		c.Set(UserIdContextKey, user.Id)
+		c.Set(UserRoleContextKey, user.Role)
 		return next(c)
 	}
 

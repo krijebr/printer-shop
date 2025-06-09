@@ -335,9 +335,57 @@
 				{
 					"name": "get all users",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "GET",
 						"header": [],
-						"url": "{{url}}/api/v1/users"
+						"url": {
+							"raw": "{{url}}/api/v1/users?user_role=customer&user_status=blocked",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							],
+							"query": [
+								{
+									"key": "user_role",
+									"value": "customer"
+								},
+								{
+									"key": "user_status",
+									"value": "blocked"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get user by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"first_name\": \"Pavel\",\r\n    \"last_name\": \"Barsukov\",\r\n    \"email\": \"krijebr@list.ru\",\r\n    \"password\": \"12345678910\"\r\n}"
+						},
+						"url": "{{url}}/api/v1/users/{{user_id}}"
 					},
 					"response": []
 				}

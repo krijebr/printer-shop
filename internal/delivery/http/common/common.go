@@ -22,6 +22,7 @@ const (
 	ErrCartIsEmptyCode             = 14
 	ErrProductNotExistCode         = 15
 	ErrOrderNotExistCode           = 16
+	ErrOrderCantBeUpdatedCode      = 17
 
 	ErrInvalidTokenMessage            = "invalid token"
 	ErrInvalidRefreshTokenMessage     = "invalid token"
@@ -39,6 +40,8 @@ const (
 	ErrCartIsEmptyMessage             = "cart is empty"
 	ErrProductNotExistMessage         = "product with this id doesn't exist"
 	ErrOrderNotExistMessage           = "order with this id doesn't exist"
+	ErrOrderCantBeUpdatedMessage      = "order can't be updated"
 
-	UserIdContextKey string = "userId"
+	UserIdContextKey   string = "userId"
+	UserRoleContextKey string = "userRole"
 )

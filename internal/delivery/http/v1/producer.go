@@ -32,7 +32,6 @@ func (p *ProducerHandlers) getAllProducers() echo.HandlerFunc {
 			})
 		}
 		slog.Info("all producers received")
-		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, producers)
 	}
 }
@@ -75,7 +74,6 @@ func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 			})
 		}
 		slog.Info("producer created")
-		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, newProducer)
 	}
 }
@@ -166,7 +164,6 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 			}
 		}
 		slog.Info("producer updated")
-		c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return c.JSON(http.StatusOK, updatedProducer)
 	}
 }
