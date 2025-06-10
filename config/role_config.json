@@ -1,15 +1,17 @@
 {
     "users":{
+        "GET":["admin"]
+    },
+    "users/:id":{
         "GET":["admin"],
         "PUT":["admin"],
         "DELETE":["admin"]
     },
-    "users/:id":{
-        "GET":["admin"]
-    },
     "products":{
         "GET":["customer","admin"],
-        "POST":["admin"],
+        "POST":["admin"]
+    },
+    "products/:id":{
         "PUT":["admin"],
         "DELETE":["admin"]
     },
@@ -19,13 +21,17 @@
         "PUT":["admin"],
         "DELETE":["admin"]
     },
-    "orders":{
-        "GET":["customer","admin"],
-        "POST":["admin"],
+    "producers/:id":{
         "PUT":["admin"],
         "DELETE":["admin"]
+    },    
+    "orders":{
+        "GET":["customer","admin"],
+        "POST":["admin","customer"]
     },
         "orders/:id":{
-        "GET":["admin","customer"]
+        "GET":["admin","customer"],
+        "PUT":["admin"],
+        "DELETE":["admin"]
     }
 }

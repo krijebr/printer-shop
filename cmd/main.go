@@ -73,7 +73,7 @@ func main() {
 
 	producerUseCase := usecase.NewProducer(producerRepo, productRepo)
 	authUseCase := usecase.NewAuth(userRepo, tokenRepo, time.Duration(cfg.Security.TokenTTL), time.Duration(cfg.Security.RefreshTokenTTL), cfg.Security.HashSalt)
-	userUseCase := usecase.NewUser(userRepo, authUseCase)
+	userUseCase := usecase.NewUser(userRepo, cartRepo, orderRepo, authUseCase)
 	u := usecase.NewUseCases(authUseCase, usecase.NewCart(cartRepo, productRepo), usecase.NewOrder(orderRepo, cartRepo, productRepo), producerUseCase, usecase.NewProduct(productRepo, producerRepo, cartRepo, orderRepo), userUseCase)
 	r := http.CreateNewEchoServer(u, roleConf)
 	slog.Info("starting http server", slog.Int("port", cfg.HttpServer.Port))

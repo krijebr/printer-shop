@@ -102,6 +102,9 @@ func (a *auth) Login(ctx context.Context, email, password string) (string, strin
 	if !a.ValidatePassword(password, user.PasswordHash) {
 		return "", "", ErrWrongPassword
 	}
+	if user.Status == entity.UserStatusBlocked {
+		return "", "", ErrUserIsBlocked
+	}
 	secret := a.generateRandomKey()
 	expTime := time.Now().Add(a.tokenTTL)
 	tokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

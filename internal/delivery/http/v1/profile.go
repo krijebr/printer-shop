@@ -32,7 +32,10 @@ func (p *ProfileHandlers) getProfile() echo.HandlerFunc {
 		user, err := p.usecase.GetById(c.Request().Context(), userId)
 		if err != nil {
 			slog.Error("profile receiving error", slog.Any("error", err))
-			return c.NoContent(http.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
 		}
 		slog.Info("profile received")
 		return c.JSON(http.StatusOK, user)
@@ -66,7 +69,10 @@ func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
 
 		userId, ok := c.Get(UserIdContextKey).(uuid.UUID)
 		if !ok {
-			return c.NoContent(http.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
 		}
 		user := entity.User{
 			Id:           userId,
@@ -77,7 +83,10 @@ func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
 		updatedUser, err := p.usecase.Update(c.Request().Context(), user)
 		if err != nil {
 			slog.Error("profile updating error", slog.Any("error", err))
-			return c.NoContent(http.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
 		}
 		slog.Info("profile updated")
 		return c.JSON(http.StatusOK, updatedUser)

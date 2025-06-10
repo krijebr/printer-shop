@@ -2,7 +2,6 @@ package v1
 
 import (
 	"errors"
-	"strconv"
 
 	"log/slog"
 	"net/http"
@@ -196,12 +195,6 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 					Count: count,
 				}
 				order.Products = append(order.Products, product)
-			}
-			slog.Debug(order.Id.String())
-			slog.Debug(string(order.Status))
-			for _, product := range order.Products {
-				slog.Debug(product.Product.Id.String())
-				slog.Debug(strconv.Itoa(product.Count))
 			}
 		}
 

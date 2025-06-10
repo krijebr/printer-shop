@@ -111,6 +111,12 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 					Error:   ErrInvalidLoginCredentialsCode,
 					Message: ErrInvalidLoginCredentialsMessage,
 				})
+			case errors.Is(err, usecase.ErrUserIsBlocked):
+				slog.Error("user is blocked", slog.Any("error", err))
+				return c.JSON(http.StatusForbidden, ErrResponse{
+					Error:   ErrUserIsBlockedCode,
+					Message: ErrUserIsBlockedMessage,
+				})
 			default:
 				slog.Error("authentication error", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{

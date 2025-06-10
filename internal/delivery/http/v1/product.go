@@ -95,7 +95,10 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 				})
 			default:
 				slog.Error("product creation error", slog.Any("error", err))
-				return c.NoContent(http.StatusInternalServerError)
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
 			}
 		}
 		slog.Info("product created")
@@ -168,6 +171,7 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 				Message: ErrValidationErrorMessage,
 			})
 		}
+
 		product := entity.Product{
 			Id:    productId,
 			Name:  requestData.Name,

@@ -23,6 +23,8 @@ const (
 	ErrProductNotExistCode         = 15
 	ErrOrderNotExistCode           = 16
 	ErrOrderCantBeUpdatedCode      = 17
+	ErrUserIsUsedCode              = 18
+	ErrUserIsBlockedCode           = 19
 
 	ErrInvalidTokenMessage            = "invalid token"
 	ErrInvalidRefreshTokenMessage     = "invalid token"
@@ -41,6 +43,8 @@ const (
 	ErrProductNotExistMessage         = "product with this id doesn't exist"
 	ErrOrderNotExistMessage           = "order with this id doesn't exist"
 	ErrOrderCantBeUpdatedMessage      = "order can't be updated"
+	ErrUserIsUsedMessage              = "this user can't be deleted"
+	ErrUserIsBlockedMessage           = "user id blocked"
 
 	UserIdContextKey   string = "userId"
 	UserRoleContextKey string = "userRole"

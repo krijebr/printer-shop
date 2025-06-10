@@ -100,13 +100,102 @@ func (u *UserHandlers) getUserById() echo.HandlerFunc {
 	}
 }
 func (u *UserHandlers) updateUserById() echo.HandlerFunc {
+	type request struct {
+		FirstName string            `json:"first_name,omitempty" validate:"omitempty,max=25,min=3"`
+		LastName  string            `json:"last_name,omitempty" validate:"omitempty,max=25,min=3"`
+		Status    entity.UserStatus `json:"user_status,omitempty" validate:"omitempty,oneof=active blocked"`
+		Role      entity.UserRole   `json:"user_role,omitempty" validate:"omitempty,oneof=customer admin"`
+	}
 	return func(c echo.Context) error {
-		return c.String(http.StatusNotImplemented, "Not Implemented")
+		userId, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			slog.Error("invalid user id", slog.Any("error", err))
+			return c.JSON(http.StatusNotFound, ErrResponse{
+				Error:   ErrResourceNotFoundCode,
+				Message: ErrResourceNotFoundMessage,
+			})
+		}
+		var requestData request
+		err = c.Bind(&requestData)
+		if err != nil {
+			slog.Error("invalid request", slog.Any("error", err))
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrInvalidRequestCode,
+				Message: ErrInvalidRequestMessage,
+			})
+		}
+		validate := validator.New()
+		err = validate.Struct(requestData)
+		if err != nil {
+			slog.Error("validation error", slog.Any("error", err))
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
+		}
+		user := entity.User{
+			Id:        userId,
+			FirstName: requestData.FirstName,
+			LastName:  requestData.LastName,
+			Status:    requestData.Status,
+			Role:      requestData.Role,
+		}
+		updatedUser, err := u.usecase.Update(c.Request().Context(), user)
+		if err != nil {
+			switch {
+			case errors.Is(err, usecase.ErrUserNotFound):
+				slog.Error("user not found", slog.Any("error", err))
+				return c.JSON(http.StatusNotFound, ErrResponse{
+					Error:   ErrResourceNotFoundCode,
+					Message: ErrResourceNotFoundMessage,
+				})
+			default:
+
+				slog.Error("user updating error", slog.Any("error", err))
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
+			}
+		}
+		slog.Info("user updated")
+		return c.JSON(http.StatusOK, updatedUser)
 	}
 }
 func (u *UserHandlers) deleteUserById() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.String(http.StatusNotImplemented, "Not Implemented")
+		userId, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			slog.Error("invalid user id", slog.Any("error", err))
+			return c.JSON(http.StatusNotFound, ErrResponse{
+				Error:   ErrResourceNotFoundCode,
+				Message: ErrResourceNotFoundMessage,
+			})
+		}
+		err = u.usecase.DeleteById(c.Request().Context(), userId)
+		if err != nil {
+			switch {
+			case errors.Is(err, usecase.ErrUserNotFound):
+				slog.Error("user not found", slog.Any("error", err))
+				return c.JSON(http.StatusNotFound, ErrResponse{
+					Error:   ErrResourceNotFoundCode,
+					Message: ErrResourceNotFoundMessage,
+				})
+			case errors.Is(err, usecase.ErrUserIsUsed):
+				slog.Error("user is used", slog.Any("error", err))
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrUserIsUsedCode,
+					Message: ErrUserIsUsedMessage,
+				})
+			default:
+				slog.Error("user receiving error", slog.Any("error", err))
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
+			}
+		}
+		return c.NoContent(http.StatusOK)
 	}
 }
 func RegisterUserRoutes(u usecase.User, g *echo.Group) {
