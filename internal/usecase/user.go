@@ -32,8 +32,8 @@ func (u *user) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) 
 	return u.repo.GetById(ctx, id)
 }
 
-func (u *user) Update(ctx context.Context, user entity.User) (*entity.User, error) {
-	_, err := u.repo.GetById(ctx, user.Id)
+func (u *user) Update(ctx context.Context, userToUpdate entity.User) (*entity.User, error) {
+	_, err := u.repo.GetById(ctx, userToUpdate.Id)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrUserNotFound):
@@ -42,14 +42,14 @@ func (u *user) Update(ctx context.Context, user entity.User) (*entity.User, erro
 			return nil, err
 		}
 	}
-	if user.PasswordHash != "" {
-		user.PasswordHash = u.authUseCase.HashPassword(user.PasswordHash)
+	if userToUpdate.PasswordHash != "" {
+		userToUpdate.PasswordHash = u.authUseCase.HashPassword(userToUpdate.PasswordHash)
 	}
-	err = u.repo.Update(ctx, user)
+	err = u.repo.Update(ctx, userToUpdate)
 	if err != nil {
 		return nil, err
 	}
-	updatedUser, err := u.repo.GetById(ctx, user.Id)
+	updatedUser, err := u.repo.GetById(ctx, userToUpdate.Id)
 	if err != nil {
 		return nil, err
 	}

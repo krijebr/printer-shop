@@ -38,30 +38,34 @@ func (o *OrderHandlers) getAllOrders() echo.HandlerFunc {
 					Message: ErrValidationErrorMessage,
 				})
 			}
-			userRole, ok := c.Get(UserRoleContextKey).(entity.UserRole)
+			filter.UserId = &userId
+		}
+		userRole, ok := c.Get(UserRoleContextKey).(entity.UserRole)
+		if !ok {
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
+		}
+		if userRole != entity.UserRoleAdmin {
+			userIdCtx, ok := c.Get(UserIdContextKey).(uuid.UUID)
 			if !ok {
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
 				})
 			}
-			if userRole != entity.UserRoleAdmin {
-				userIdCtx, ok := c.Get(UserIdContextKey).(uuid.UUID)
-				if !ok {
-					return c.JSON(http.StatusInternalServerError, ErrResponse{
-						Error:   ErrInternalErrorCode,
-						Message: ErrInternalErrorMessage,
-					})
-				}
-				if userIdCtx != userId {
+			if filter.UserId != nil {
+				if userIdCtx != *filter.UserId {
 					return c.JSON(http.StatusForbidden, ErrResponse{
 						Error:   ErrForbiddenCode,
 						Message: ErrForbiddenMessage,
 					})
 				}
 			}
-			filter.UserId = &userId
+			filter.UserId = &userIdCtx
 		}
+
 		if c.QueryParam("order_status") != "" {
 			validate := validator.New()
 			err := validate.Var(c.QueryParam("order_status"), "oneof=new in_progress done")
@@ -299,6 +303,12 @@ func (o *OrderHandlers) deleteOrderById() echo.HandlerFunc {
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
+				})
+			case errors.Is(err, usecase.ErrOrderCantBeDeleted):
+				slog.Error("order can't be deleted", slog.Any("error", err))
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrOrderCantBeDeletedCode,
+					Message: ErrOrderCantBeDeletedMessage,
 				})
 			default:
 				slog.Error("order receiving error", slog.Any("error", err))

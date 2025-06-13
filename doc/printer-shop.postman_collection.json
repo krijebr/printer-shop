@@ -145,6 +145,12 @@
 				{
 					"name": "new product",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -166,6 +172,12 @@
 						"disableBodyPruning": true
 					},
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "GET",
 						"header": [],
 						"body": {
@@ -179,6 +191,12 @@
 				{
 					"name": "update product by id",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -197,6 +215,12 @@
 				{
 					"name": "delete product by id",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": "{{url}}/api/v1/products/{{product_id}}"
@@ -220,6 +244,12 @@
 				{
 					"name": "new Request",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -238,6 +268,12 @@
 				{
 					"name": "get producer by id",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "GET",
 						"header": [],
 						"url": "{{url}}/api/v1/producers/{{producer_id}}"
@@ -247,6 +283,12 @@
 				{
 					"name": "update producer by id",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -265,6 +307,12 @@
 				{
 					"name": "delete producer by id",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": "{{url}}/api/v1/producers/{{producer_id}}"
@@ -380,6 +428,49 @@
 							}
 						},
 						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"first_name\": \"Pavel\",\r\n    \"last_name\": \"Barsukov\",\r\n    \"email\": \"krijebr@list.ru\",\r\n    \"password\": \"12345678910\"\r\n}"
+						},
+						"url": "{{url}}/api/v1/users/{{user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"first_name\":\"\",\r\n\t\"last_name\":\"\",\r\n\t\"user_status\":\"\",\r\n\t\"user_role\":\"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/v1/users/{{user_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "delete user by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "DELETE",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -523,21 +614,6 @@
 					"response": []
 				},
 				{
-					"name": "delete order by id",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{token}}"
-							}
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": "{{url}}/api/v1/orders/{{order_id}}"
-					},
-					"response": []
-				},
-				{
 					"name": "update order by id",
 					"request": {
 						"auth": {
@@ -551,6 +627,30 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"status\": \"new\",\r\n    \"products\": [\r\n        {\r\n            \"id\":\"741b0efa-c35a-4243-8538-db7545ccfa75\",\r\n            \"count\": 5\r\n        },\r\n                {\r\n            \"id\":\"725d0a38-ab30-4fdb-a14f-1a14b35e9b35\",\r\n            \"count\": 1\r\n        },\r\n                {\r\n            \"id\":\"725d0a38-ab30-4fdb-a14f-1a14b35e9b35\",\r\n            \"count\": 5\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/v1/orders/{{order_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "delete order by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"

@@ -25,6 +25,7 @@ const (
 	ErrOrderCantBeUpdatedCode      = 17
 	ErrUserIsUsedCode              = 18
 	ErrUserIsBlockedCode           = 19
+	ErrOrderCantBeDeletedCode      = 20
 
 	ErrInvalidTokenMessage            = "invalid token"
 	ErrInvalidRefreshTokenMessage     = "invalid token"
@@ -45,6 +46,7 @@ const (
 	ErrOrderCantBeUpdatedMessage      = "order can't be updated"
 	ErrUserIsUsedMessage              = "this user can't be deleted"
 	ErrUserIsBlockedMessage           = "user id blocked"
+	ErrOrderCantBeDeletedMessage      = "order can't be deleted"
 
 	UserIdContextKey   string = "userId"
 	UserRoleContextKey string = "userRole"

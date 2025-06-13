@@ -25,7 +25,7 @@ func (p *producer) GetAll(ctx context.Context) ([]*entity.Producer, error) {
 	return p.repo.GetAll(ctx)
 }
 func (p *producer) GetById(ctx context.Context, id uuid.UUID) (*entity.Producer, error) {
-	producer, err := p.repo.GetById(ctx, id)
+	receivedProducer, err := p.repo.GetById(ctx, id)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrProducerNotFound):
@@ -34,23 +34,23 @@ func (p *producer) GetById(ctx context.Context, id uuid.UUID) (*entity.Producer,
 			return nil, err
 		}
 	}
-	return producer, nil
+	return receivedProducer, nil
 }
-func (p *producer) Create(ctx context.Context, producer entity.Producer) (*entity.Producer, error) {
-	producer.Id = uuid.New()
-	producer.CreatedAt = time.Now()
-	err := p.repo.Create(ctx, producer)
+func (p *producer) Create(ctx context.Context, producerToCreate entity.Producer) (*entity.Producer, error) {
+	producerToCreate.Id = uuid.New()
+	producerToCreate.CreatedAt = time.Now()
+	err := p.repo.Create(ctx, producerToCreate)
 	if err != nil {
 		return nil, err
 	}
-	newProducer, err := p.repo.GetById(ctx, producer.Id)
+	newProducer, err := p.repo.GetById(ctx, producerToCreate.Id)
 	if err != nil {
 		return nil, err
 	}
 	return newProducer, nil
 }
-func (p *producer) Update(ctx context.Context, producer entity.Producer) (*entity.Producer, error) {
-	_, err := p.repo.GetById(ctx, producer.Id)
+func (p *producer) Update(ctx context.Context, producerToUpdate entity.Producer) (*entity.Producer, error) {
+	_, err := p.repo.GetById(ctx, producerToUpdate.Id)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrProducerNotFound):
@@ -59,11 +59,11 @@ func (p *producer) Update(ctx context.Context, producer entity.Producer) (*entit
 			return nil, err
 		}
 	}
-	err = p.repo.Update(ctx, producer)
+	err = p.repo.Update(ctx, producerToUpdate)
 	if err != nil {
 		return nil, err
 	}
-	updatedProducer, err := p.repo.GetById(ctx, producer.Id)
+	updatedProducer, err := p.repo.GetById(ctx, producerToUpdate.Id)
 	if err != nil {
 		return nil, err
 	}

@@ -57,7 +57,7 @@ func (o *order) Create(ctx context.Context, userId uuid.UUID) (*entity.Order, er
 	return createdOrder, nil
 }
 func (o *order) GetAll(ctx context.Context, filter *entity.OrderFilter) ([]*entity.Order, error) {
-	order, err := o.repo.GetAll(ctx, filter)
+	orders, err := o.repo.GetAll(ctx, filter)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrOrderNotFound):
@@ -66,10 +66,10 @@ func (o *order) GetAll(ctx context.Context, filter *entity.OrderFilter) ([]*enti
 			return nil, err
 		}
 	}
-	return order, nil
+	return orders, nil
 }
 func (o *order) GetById(ctx context.Context, id uuid.UUID) (*entity.Order, error) {
-	order, err := o.repo.GetById(ctx, id)
+	orderToReceive, err := o.repo.GetById(ctx, id)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrOrderNotFound):
@@ -78,10 +78,10 @@ func (o *order) GetById(ctx context.Context, id uuid.UUID) (*entity.Order, error
 			return nil, err
 		}
 	}
-	return order, nil
+	return orderToReceive, nil
 }
 func (o *order) DeleteById(ctx context.Context, id uuid.UUID) error {
-	_, err := o.repo.GetById(ctx, id)
+	orderToDelete, err := o.repo.GetById(ctx, id)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrOrderNotFound):
@@ -90,14 +90,17 @@ func (o *order) DeleteById(ctx context.Context, id uuid.UUID) error {
 			return err
 		}
 	}
+	if orderToDelete.Status != entity.OrderStatusNew {
+		return ErrOrderCantBeDeleted
+	}
 	err = o.repo.DeleteById(ctx, id)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func (o *order) UpdateById(ctx context.Context, upOrder *entity.Order) (*entity.Order, error) {
-	existingOrder, err := o.repo.GetById(ctx, upOrder.Id)
+func (o *order) UpdateById(ctx context.Context, orderToUpdate *entity.Order) (*entity.Order, error) {
+	existingOrder, err := o.repo.GetById(ctx, orderToUpdate.Id)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrOrderNotFound):
@@ -106,12 +109,12 @@ func (o *order) UpdateById(ctx context.Context, upOrder *entity.Order) (*entity.
 			return nil, err
 		}
 	}
-	if upOrder.Products != nil {
+	if orderToUpdate.Products != nil {
 		if existingOrder.Status != entity.OrderStatusNew {
 			return nil, ErrOrderCantBeUpdated
 		}
-		publishedProducts := make([]*entity.ProductInCart, 0, len(upOrder.Products))
-		for _, newProduct := range upOrder.Products {
+		publishedProducts := make([]*entity.ProductInCart, 0, len(orderToUpdate.Products))
+		for _, newProduct := range orderToUpdate.Products {
 			product, err := o.repoProduct.GetById(ctx, newProduct.Product.Id)
 			if err != nil {
 				switch {
@@ -127,15 +130,15 @@ func (o *order) UpdateById(ctx context.Context, upOrder *entity.Order) (*entity.
 			}
 
 		}
-		upOrder.Products = publishedProducts
+		orderToUpdate.Products = publishedProducts
 	}
-	err = o.repo.UpdateById(ctx, upOrder)
+	err = o.repo.UpdateById(ctx, orderToUpdate)
 	if err != nil {
 		return nil, err
 	}
-	updatedOrder, err := o.repo.GetById(ctx, upOrder.Id)
+	updatedOrder, err := o.repo.GetById(ctx, orderToUpdate.Id)
 	if err != nil {
 		return nil, err
 	}
-	return updatedOrder, ErrNotImplemented
+	return updatedOrder, nil
 }

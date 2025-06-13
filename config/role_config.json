@@ -37,5 +37,9 @@
         "profile":{
         "GET":["customer","admin"],
         "PUT":["admin","customer"]
-    }
+    },
+        "cart":{
+            "GET":["customer","admin"],
+            "POST":["customer","admin"]
+    }   
 }

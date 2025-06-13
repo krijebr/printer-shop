@@ -30,7 +30,7 @@ func (p *product) GetAll(ctx context.Context, filter *entity.ProductFilter) ([]*
 	return p.repo.GetAll(ctx, filter)
 }
 func (p *product) GetById(ctx context.Context, id uuid.UUID) (*entity.Product, error) {
-	product, err := p.repo.GetById(ctx, id)
+	receivedProduct, err := p.repo.GetById(ctx, id)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrProductNotFound):
@@ -39,10 +39,10 @@ func (p *product) GetById(ctx context.Context, id uuid.UUID) (*entity.Product, e
 			return nil, err
 		}
 	}
-	return product, nil
+	return receivedProduct, nil
 }
-func (p *product) Create(ctx context.Context, product entity.Product) (*entity.Product, error) {
-	_, err := p.repoProducer.GetById(ctx, product.Producer.Id)
+func (p *product) Create(ctx context.Context, productToCreate entity.Product) (*entity.Product, error) {
+	_, err := p.repoProducer.GetById(ctx, productToCreate.Producer.Id)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrProducerNotFound):
@@ -51,20 +51,20 @@ func (p *product) Create(ctx context.Context, product entity.Product) (*entity.P
 			return nil, err
 		}
 	}
-	product.Id = uuid.New()
-	product.CreatedAt = time.Now()
-	err = p.repo.Create(ctx, product)
+	productToCreate.Id = uuid.New()
+	productToCreate.CreatedAt = time.Now()
+	err = p.repo.Create(ctx, productToCreate)
 	if err != nil {
 		return nil, err
 	}
-	newProduct, err := p.repo.GetById(ctx, product.Id)
+	newProduct, err := p.repo.GetById(ctx, productToCreate.Id)
 	if err != nil {
 		return nil, err
 	}
 	return newProduct, nil
 }
-func (p *product) Update(ctx context.Context, product entity.Product) (*entity.Product, error) {
-	_, err := p.repo.GetById(ctx, product.Id)
+func (p *product) Update(ctx context.Context, productToUpdate entity.Product) (*entity.Product, error) {
+	_, err := p.repo.GetById(ctx, productToUpdate.Id)
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrProductNotFound):
@@ -73,8 +73,8 @@ func (p *product) Update(ctx context.Context, product entity.Product) (*entity.P
 			return nil, err
 		}
 	}
-	if product.Producer.Id != uuid.Nil {
-		_, err = p.repoProducer.GetById(ctx, product.Producer.Id)
+	if productToUpdate.Producer.Id != uuid.Nil {
+		_, err = p.repoProducer.GetById(ctx, productToUpdate.Producer.Id)
 		if err != nil {
 			switch {
 			case errors.Is(err, repo.ErrProducerNotFound):
@@ -84,11 +84,11 @@ func (p *product) Update(ctx context.Context, product entity.Product) (*entity.P
 			}
 		}
 	}
-	err = p.repo.Update(ctx, product)
+	err = p.repo.Update(ctx, productToUpdate)
 	if err != nil {
 		return nil, err
 	}
-	updatedProduct, err := p.repo.GetById(ctx, product.Id)
+	updatedProduct, err := p.repo.GetById(ctx, productToUpdate.Id)
 	if err != nil {
 		return nil, err
 	}
