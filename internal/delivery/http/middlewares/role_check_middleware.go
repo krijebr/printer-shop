@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/krijebr/printer-shop/internal/config"
 	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
 	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/labstack/echo/v4"
@@ -11,27 +12,37 @@ import (
 )
 
 type RoleCheckMiddleware struct {
-	roles map[string]map[string][]string
+	roles   config.RoleConf
+	baseUrl string
 }
 
-func NewRoleCheckMiddleware(r *map[string]map[string][]string) *RoleCheckMiddleware {
+func NewRoleCheckMiddleware(r *config.RoleConf, baseUrl string) *RoleCheckMiddleware {
 	return &RoleCheckMiddleware{
-		roles: *r,
+		roles:   *r,
+		baseUrl: baseUrl,
 	}
 }
 
 func (r *RoleCheckMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userRole, ok := c.Get(UserRoleContextKey).(entity.UserRole)
-		if !ok {
-			return c.JSON(http.StatusInternalServerError, ErrResponse{
-				Error:   ErrInternalErrorCode,
-				Message: ErrInternalErrorMessage,
-			})
+		var (
+			userRole entity.UserRole
+			ok       bool
+		)
+		if val := c.Get(UserRoleContextKey); val != nil {
+			userRole, ok = c.Get(UserRoleContextKey).(entity.UserRole)
+			if !ok {
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
+			}
+		} else {
+			userRole = entity.UserRoleGuest
 		}
-		path := strings.Trim(c.Path(), "/api/v1")
-		if methods, inMap := r.roles[path]; inMap {
-			if roles, inMap := methods[c.Request().Method]; inMap {
+		path := strings.TrimPrefix(c.Path(), r.baseUrl)
+		if methods, inMapPaths := r.roles[path]; inMapPaths {
+			if roles, inMapMethods := methods[c.Request().Method]; inMapMethods {
 				if slices.Contains(roles, string(userRole)) {
 					return next(c)
 				}

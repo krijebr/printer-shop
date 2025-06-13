@@ -38,6 +38,28 @@ func (o *OrderHandlers) getAllOrders() echo.HandlerFunc {
 					Message: ErrValidationErrorMessage,
 				})
 			}
+			userRole, ok := c.Get(UserRoleContextKey).(entity.UserRole)
+			if !ok {
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
+			}
+			if userRole != entity.UserRoleAdmin {
+				userIdCtx, ok := c.Get(UserIdContextKey).(uuid.UUID)
+				if !ok {
+					return c.JSON(http.StatusInternalServerError, ErrResponse{
+						Error:   ErrInternalErrorCode,
+						Message: ErrInternalErrorMessage,
+					})
+				}
+				if userIdCtx != userId {
+					return c.JSON(http.StatusForbidden, ErrResponse{
+						Error:   ErrForbiddenCode,
+						Message: ErrForbiddenMessage,
+					})
+				}
+			}
 			filter.UserId = &userId
 		}
 		if c.QueryParam("order_status") != "" {
@@ -53,6 +75,7 @@ func (o *OrderHandlers) getAllOrders() echo.HandlerFunc {
 			orderStatus := entity.OrderStatus(c.QueryParam("order_status"))
 			filter.Status = &orderStatus
 		}
+
 		orders, err := o.usecase.GetAll(c.Request().Context(), filter)
 		if err != nil {
 			slog.Error("orders receiving error", slog.Any("error", err))
@@ -119,6 +142,34 @@ func (o *OrderHandlers) getOrderById() echo.HandlerFunc {
 					Message: ErrInternalErrorMessage,
 				})
 			}
+		}
+		userRole, ok := c.Get(UserRoleContextKey).(entity.UserRole)
+		if !ok {
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
+		}
+		if userRole != entity.UserRoleAdmin {
+			userId, ok := c.Get(UserIdContextKey).(uuid.UUID)
+			if !ok {
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
+			}
+			if userId != order.UserId {
+				return c.JSON(http.StatusForbidden, ErrResponse{
+					Error:   ErrForbiddenCode,
+					Message: ErrForbiddenMessage,
+				})
+			}
+		}
+		if !ok {
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
 		}
 		slog.Info("order received")
 		return c.JSON(http.StatusOK, order)

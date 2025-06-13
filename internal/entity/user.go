@@ -15,6 +15,7 @@ const (
 	UserStatusActive  UserStatus = "active"
 	UserStatusBlocked UserStatus = "blocked"
 
+	UserRoleGuest    UserRole = "guest"
 	UserRoleCustomer UserRole = "customer"
 	UserRoleAdmin    UserRole = "admin"
 )

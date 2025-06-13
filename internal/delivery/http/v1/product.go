@@ -245,11 +245,11 @@ func (p *ProductHandlers) deleteProductById() echo.HandlerFunc {
 		return c.NoContent(http.StatusOK)
 	}
 }
-func RegisterProductRoutes(u usecase.Product, g *echo.Group) {
+func RegisterProductRoutes(u usecase.Product, g *echo.Group, m echo.MiddlewareFunc, r echo.MiddlewareFunc) {
 	a := NewProductHandlers(u)
-	g.GET("", a.getAllProducts())
-	g.POST("", a.createProduct())
-	g.GET("/:id", a.getProductById())
-	g.PUT("/:id", a.updateProductById())
-	g.DELETE("/:id", a.deleteProductById())
+	g.GET("", a.getAllProducts(), r)
+	g.POST("", a.createProduct(), m, r)
+	g.GET("/:id", a.getProductById(), r)
+	g.PUT("/:id", a.updateProductById(), m, r)
+	g.DELETE("/:id", a.deleteProductById(), m, r)
 }

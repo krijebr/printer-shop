@@ -11,6 +11,8 @@ import (
 type (
 	Duration time.Duration
 
+	//RoleConf map[path]map[method][]roles
+	RoleConf map[string]map[string][]string
 	Postgres struct {
 		Host     string `json:"host"`
 		Port     int    `json:"port"`
@@ -72,7 +74,7 @@ func InitConfigFromJson(path string) (*Config, error) {
 	}
 	return &config, nil
 }
-func InitRoleConfigFromJson(path string) (*map[string]map[string][]string, error) {
+func InitRoleConfigFromJson(path string) (*RoleConf, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -81,19 +83,10 @@ func InitRoleConfigFromJson(path string) (*map[string]map[string][]string, error
 	if err != nil {
 		return nil, err
 	}
-	role_config := make(map[string]map[string][]string)
-	err = json.Unmarshal(data, &role_config)
+	roleConfig := make(RoleConf)
+	err = json.Unmarshal(data, &roleConfig)
 	if err != nil {
 		return nil, err
 	}
-	/*for path, methods := range role_config {
-		slog.Debug(path)
-		for method, roles := range methods {
-			slog.Debug(method)
-			for _, role := range roles {
-				slog.Debug(role)
-			}
-		}
-	}*/
-	return &role_config, nil
+	return &roleConfig, nil
 }

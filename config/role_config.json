@@ -8,20 +8,20 @@
         "DELETE":["admin"]
     },
     "products":{
-        "GET":["customer","admin"],
+        "GET":["customer","admin","guest"],
         "POST":["admin"]
     },
     "products/:id":{
+        "GET":["customer","admin","guest"],
         "PUT":["admin"],
         "DELETE":["admin"]
     },
     "producers":{
-        "GET":["customer","admin"],
-        "POST":["admin"],
-        "PUT":["admin"],
-        "DELETE":["admin"]
+        "GET":["customer","admin","guest"],
+        "POST":["admin"]
     },
     "producers/:id":{
+        "GET":["customer","admin","guest"],
         "PUT":["admin"],
         "DELETE":["admin"]
     },    
@@ -33,5 +33,9 @@
         "GET":["admin","customer"],
         "PUT":["admin"],
         "DELETE":["admin"]
+    },
+        "profile":{
+        "GET":["customer","admin"],
+        "PUT":["admin","customer"]
     }
 }

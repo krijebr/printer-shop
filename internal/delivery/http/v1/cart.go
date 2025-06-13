@@ -17,7 +17,9 @@ type CartHandlers struct {
 }
 
 func NewCartHandlers(u usecase.Cart) *CartHandlers {
-	return &CartHandlers{usecase: u}
+	return &CartHandlers{
+		usecase: u,
+	}
 }
 func (h *CartHandlers) getAllProductsInCart() echo.HandlerFunc {
 	return func(c echo.Context) error {

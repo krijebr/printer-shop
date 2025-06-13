@@ -18,7 +18,9 @@ type UserHandlers struct {
 }
 
 func NewUserHandlers(u usecase.User) *UserHandlers {
-	return &UserHandlers{usecase: u}
+	return &UserHandlers{
+		usecase: u,
+	}
 }
 
 func (u *UserHandlers) allUsers() echo.HandlerFunc {

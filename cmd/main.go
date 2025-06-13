@@ -26,6 +26,7 @@ const (
 	roleConfPath     string        = "./config/role_config.json"
 	_defaultAttempts int           = 5
 	_defaultTimeout  time.Duration = 5 * time.Second
+	baseUrl          string        = "/api/v1/"
 )
 
 func main() {
@@ -40,7 +41,7 @@ func main() {
 	})
 	logger := slog.New(th)
 	slog.SetDefault(logger)
-	roleConf, err := config.InitRoleConfigFromJson("./config/role_config.json")
+	roleConf, err := config.InitRoleConfigFromJson(roleConfPath)
 	if err != nil {
 		slog.Error("role config parsing error", slog.Any("error", err))
 	}
@@ -75,7 +76,7 @@ func main() {
 	authUseCase := usecase.NewAuth(userRepo, tokenRepo, time.Duration(cfg.Security.TokenTTL), time.Duration(cfg.Security.RefreshTokenTTL), cfg.Security.HashSalt)
 	userUseCase := usecase.NewUser(userRepo, cartRepo, orderRepo, authUseCase)
 	u := usecase.NewUseCases(authUseCase, usecase.NewCart(cartRepo, productRepo), usecase.NewOrder(orderRepo, cartRepo, productRepo), producerUseCase, usecase.NewProduct(productRepo, producerRepo, cartRepo, orderRepo), userUseCase)
-	r := http.CreateNewEchoServer(u, roleConf)
+	r := http.CreateNewEchoServer(u, roleConf, baseUrl)
 	slog.Info("starting http server", slog.Int("port", cfg.HttpServer.Port))
 	err = r.Start(fmt.Sprintf(":%d", cfg.HttpServer.Port))
 	if err != nil {

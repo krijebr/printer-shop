@@ -69,7 +69,16 @@ func (o *order) GetAll(ctx context.Context, filter *entity.OrderFilter) ([]*enti
 	return order, nil
 }
 func (o *order) GetById(ctx context.Context, id uuid.UUID) (*entity.Order, error) {
-	return o.repo.GetById(ctx, id)
+	order, err := o.repo.GetById(ctx, id)
+	if err != nil {
+		switch {
+		case errors.Is(err, repo.ErrOrderNotFound):
+			return nil, ErrOrderNotFound
+		default:
+			return nil, err
+		}
+	}
+	return order, nil
 }
 func (o *order) DeleteById(ctx context.Context, id uuid.UUID) error {
 	_, err := o.repo.GetById(ctx, id)
