@@ -3,22 +3,22 @@
         "host":"postgres",
         "port":5432,
         "user_name":"postgres",
-        "password":"mysecretpassword",
+        "password":"password",
         "db_name":"postgres"
     },
     "http_server":{
-        "port":8000
+        "port":80
     },
     "redis":{
         "host":"redis",
 		"port":6379,
-		"password":"",
+		"password":"password",
 		"db":0
     },
     "security":{
         "token_ttl":"5m",
 		"refrsh_token_ttl":"1h",
-		"hash_salt":"qwerty"
+		"hash_salt":"salt_example"
     },
     "logging":{
         "level": "DEBUG"

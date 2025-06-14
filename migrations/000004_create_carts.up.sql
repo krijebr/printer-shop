@@ -1,6 +1,5 @@
 
 CREATE TABLE IF NOT EXISTS "carts" (
-	id uuid NOT NULL,
 	user_id uuid NOT NULL,
 	product_id uuid NOT NULL,
 	count integer NOT NULL

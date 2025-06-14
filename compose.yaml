@@ -36,6 +36,11 @@ services:
       - "8000:8000"
     networks: 
       - dbnet
+    healthcheck:
+      test: ["CMD", "curl","-f","http://localhost:8000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     depends_on:
       postgres:
         condition: service_healthy
