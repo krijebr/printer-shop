@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
+	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/krijebr/printer-shop/internal/usecase"
 	"github.com/labstack/echo/v4"
 )
@@ -38,11 +39,17 @@ func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 				})
 			default:
 				slog.Error("token validation error", slog.Any("error", err))
-				c.JSON(http.StatusInternalServerError, ErrResponse{
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
 				})
 			}
+		}
+		if user.Status == entity.UserStatusBlocked {
+			return c.JSON(http.StatusForbidden, ErrResponse{
+				Error:   ErrForbiddenCode,
+				Message: ErrForbiddenMessage,
+			})
 		}
 		c.Set(UserIdContextKey, user.Id)
 		c.Set(UserRoleContextKey, user.Role)

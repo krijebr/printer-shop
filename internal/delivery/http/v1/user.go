@@ -135,6 +135,12 @@ func (u *UserHandlers) updateUserById() echo.HandlerFunc {
 				Message: ErrValidationErrorMessage,
 			})
 		}
+		if requestData.FirstName == "" && requestData.LastName == "" && requestData.Status == "" && requestData.Role == "" {
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
+		}
 		user := entity.User{
 			Id:        userId,
 			FirstName: requestData.FirstName,

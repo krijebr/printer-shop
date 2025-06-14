@@ -171,7 +171,12 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 				Message: ErrValidationErrorMessage,
 			})
 		}
-
+		if requestData.Name == "" && requestData.Price == 0 && requestData.ProducerId == uuid.Nil && requestData.Status == "" {
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
+		}
 		product := entity.Product{
 			Id:    productId,
 			Name:  requestData.Name,

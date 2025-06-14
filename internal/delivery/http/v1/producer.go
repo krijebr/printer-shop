@@ -141,6 +141,12 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 				Message: ErrValidationErrorMessage,
 			})
 		}
+		if requestData.Name == "" && requestData.Description == "" {
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
+		}
 		producer := entity.Producer{
 			Id:          producerId,
 			Name:        requestData.Name,

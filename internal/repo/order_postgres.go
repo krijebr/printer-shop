@@ -183,10 +183,10 @@ func (o *OrderRepoPg) UpdateById(ctx context.Context, order *entity.Order) (err 
 			tx.Rollback()
 			return err
 		}
-		err = tx.Commit()
-		if err != nil {
-			return err
-		}
+	}
+	err = tx.Commit()
+	if err != nil {
+		return err
 	}
 	return nil
 }

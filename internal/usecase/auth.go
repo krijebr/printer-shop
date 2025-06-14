@@ -158,7 +158,6 @@ func (a *auth) ValidateToken(ctx context.Context, token string) (*entity.User, e
 			}
 			return nil, err
 		}
-
 		return []byte(secret), nil
 	})
 

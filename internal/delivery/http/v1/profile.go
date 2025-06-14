@@ -66,7 +66,12 @@ func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
 				Message: ErrValidationErrorMessage,
 			})
 		}
-
+		if requestData.FirstName == "" && requestData.LastName == "" && requestData.Password == "" {
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
+		}
 		userId, ok := c.Get(UserIdContextKey).(uuid.UUID)
 		if !ok {
 			return c.JSON(http.StatusInternalServerError, ErrResponse{

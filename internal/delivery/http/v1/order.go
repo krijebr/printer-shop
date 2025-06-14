@@ -182,8 +182,8 @@ func (o *OrderHandlers) getOrderById() echo.HandlerFunc {
 func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 	type (
 		Product struct {
-			Id    uuid.UUID `json:"id"`
-			Count int       `json:"count" validate:"gt=0"`
+			Id    uuid.UUID `json:"id" validate:"required,uuid"`
+			Count int       `json:"count" validate:"required,gt=0"`
 		}
 		request struct {
 			Status   entity.OrderStatus `json:"status" validate:"omitempty,oneof=new in_progress done"`
@@ -219,6 +219,12 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 		}
 		order := &entity.Order{}
 		order.Id = orderId
+		if requestData.Status == "" && len(requestData.Products) == 0 {
+			return c.JSON(http.StatusBadRequest, ErrResponse{
+				Error:   ErrValidationErrorCode,
+				Message: ErrValidationErrorMessage,
+			})
+		}
 		if requestData.Status != "" {
 			order.Status = requestData.Status
 		}
