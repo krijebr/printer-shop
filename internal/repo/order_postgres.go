@@ -48,6 +48,7 @@ func (o *OrderRepoPg) Create(ctx context.Context, order *entity.Order) error {
 	}
 	return nil
 }
+
 func (o *OrderRepoPg) GetAll(ctx context.Context, filter *entity.OrderFilter) ([]*entity.Order, error) {
 	var orderCreatedAt string
 	var productCreatedAt string
@@ -63,7 +64,12 @@ func (o *OrderRepoPg) GetAll(ctx context.Context, filter *entity.OrderFilter) ([
 		}
 		where = " where " + strings.Join(whereS, " and ")
 	}
-	rows, err := o.db.QueryContext(ctx, "select orders.id, orders.user_id, orders.status, orders.created_at, products.id, products.name, order_products.product_price, producers.id, producers.name, producers.description, producers.created_at, products.status, products.created_at, order_products.product_count from orders join order_products on order_products.order_id = orders.id join products on order_products.product_id = products.id join producers on products.producer_id = producers.id"+where)
+	rows, err := o.db.QueryContext(ctx,
+		"select "+
+			"orders.id, orders.user_id, orders.status, orders.created_at, products.id, products.name, order_products.product_price, producers.id, producers.name, producers.description, producers.created_at, products.status, products.created_at, order_products.product_count "+
+			"from "+
+			"orders join order_products on order_products.order_id = orders.id join products on order_products.product_id = products.id join producers on products.producer_id = producers.id"+
+			where)
 	if err != nil {
 		return nil, err
 	}
@@ -103,11 +109,18 @@ func (o *OrderRepoPg) GetAll(ctx context.Context, filter *entity.OrderFilter) ([
 	}
 	return orders, nil
 }
+
 func (o *OrderRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Order, error) {
 	var orderCreatedAt string
 	var productCreatedAt string
 	var producerCreatedAt string
-	rows, err := o.db.QueryContext(ctx, "select orders.id, orders.user_id, orders.status, orders.created_at, products.id, products.name, order_products.product_price, producers.id, producers.name, producers.description, producers.created_at, products.status, products.created_at, order_products.product_count from orders join order_products on order_products.order_id = orders.id join products on order_products.product_id = products.id join producers on products.producer_id = producers.id where orders.id = $1", id)
+	rows, err := o.db.QueryContext(ctx,
+		"select "+
+			"orders.id, orders.user_id, orders.status, orders.created_at, products.id, products.name, order_products.product_price, producers.id, producers.name, producers.description, producers.created_at, products.status, products.created_at, order_products.product_count "+
+			"from "+
+			"orders join order_products on order_products.order_id = orders.id join products on order_products.product_id = products.id join producers on products.producer_id = producers.id "+
+			"where orders.id = $1",
+		id)
 	if err != nil {
 		return nil, err
 	}
@@ -148,6 +161,7 @@ func (o *OrderRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Order,
 	}
 	return order, nil
 }
+
 func (o *OrderRepoPg) DeleteById(ctx context.Context, id uuid.UUID) (err error) {
 	_, err = o.db.ExecContext(ctx, "delete from orders where id = $1", id)
 	if err != nil {
@@ -155,6 +169,7 @@ func (o *OrderRepoPg) DeleteById(ctx context.Context, id uuid.UUID) (err error) 
 	}
 	return nil
 }
+
 func (o *OrderRepoPg) UpdateById(ctx context.Context, order *entity.Order) (err error) {
 	tx, err := o.db.Begin()
 	if err != nil {
@@ -178,7 +193,10 @@ func (o *OrderRepoPg) UpdateById(ctx context.Context, order *entity.Order) (err 
 			values = append(values, "('"+product.Product.Id.String()+"','"+order.Id.String()+
 				"',"+strconv.Itoa(product.Count)+","+strconv.FormatFloat(float64(product.Product.Price), 'f', 2, 32)+")")
 		}
-		_, err = tx.ExecContext(ctx, "insert into order_products(product_id,order_id,product_count,product_price) values "+strings.Join(values, ","))
+		_, err = tx.ExecContext(
+			ctx,
+			"insert into order_products(product_id,order_id,product_count,product_price) values "+
+				strings.Join(values, ","))
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -190,8 +208,11 @@ func (o *OrderRepoPg) UpdateById(ctx context.Context, order *entity.Order) (err 
 	}
 	return nil
 }
+
 func (o *OrderRepoPg) CheckIfExistsByProductId(ctx context.Context, productId uuid.UUID) (bool, error) {
-	row := o.db.QueryRowContext(ctx, "select count(orders.id) from orders join order_products on order_products.order_id = orders.id where order_products.product_id = $1", productId)
+	row := o.db.QueryRowContext(ctx,
+		"select count(orders.id) from orders join order_products on order_products.order_id = orders.id where order_products.product_id = $1",
+		productId)
 	var count int
 	err := row.Scan(&count)
 	if err != nil {

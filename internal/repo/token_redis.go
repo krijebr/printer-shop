@@ -23,13 +23,16 @@ func NewTokenRedis(rdb *redis.Client) Token {
 		rdb: rdb,
 	}
 }
+
 func (a *TokenRedis) SetToken(ctx context.Context, userId uuid.UUID, secret string, ttl time.Duration) error {
 	return a.rdb.Set(ctx, tokenPrefix+userId.String(), secret, ttl).Err()
 
 }
+
 func (a *TokenRedis) SetRefreshToken(ctx context.Context, userId uuid.UUID, secret string, ttl time.Duration) error {
 	return a.rdb.Set(ctx, refreshTokenPrefix+userId.String(), secret, ttl).Err()
 }
+
 func (a *TokenRedis) GetTokenByUserId(ctx context.Context, userId uuid.UUID) (string, error) {
 	result, err := a.rdb.Get(ctx, tokenPrefix+userId.String()).Result()
 	if err != nil {
@@ -40,6 +43,7 @@ func (a *TokenRedis) GetTokenByUserId(ctx context.Context, userId uuid.UUID) (st
 	}
 	return result, nil
 }
+
 func (a *TokenRedis) GetRefreshTokenByUserId(ctx context.Context, userId uuid.UUID) (string, error) {
 	result, err := a.rdb.Get(ctx, refreshTokenPrefix+userId.String()).Result()
 	if err != nil {
@@ -50,6 +54,7 @@ func (a *TokenRedis) GetRefreshTokenByUserId(ctx context.Context, userId uuid.UU
 	}
 	return result, nil
 }
+
 func (a *TokenRedis) DeleteToken(ctx context.Context, userId uuid.UUID) error {
 	_, err := a.rdb.Del(ctx, tokenPrefix+userId.String()).Result()
 	if err != nil {
@@ -57,6 +62,7 @@ func (a *TokenRedis) DeleteToken(ctx context.Context, userId uuid.UUID) error {
 	}
 	return nil
 }
+
 func (a *TokenRedis) DeleteRefreshToken(ctx context.Context, userId uuid.UUID) error {
 	_, err := a.rdb.Del(ctx, refreshTokenPrefix+userId.String()).Result()
 	if err != nil {

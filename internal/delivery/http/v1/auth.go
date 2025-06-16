@@ -19,6 +19,7 @@ type AuthHandlers struct {
 func NewAuthHandlers(u usecase.Auth) *AuthHandlers {
 	return &AuthHandlers{usecase: u}
 }
+
 func (a *AuthHandlers) register() echo.HandlerFunc {
 	type request struct {
 		FirstName string `json:"first_name" validate:"required,max=25,min=3"`
@@ -74,6 +75,7 @@ func (a *AuthHandlers) register() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, newUser)
 	}
 }
+
 func (a *AuthHandlers) login() echo.HandlerFunc {
 	type request struct {
 		Email    string `json:"email" validate:"required,email"`
@@ -132,6 +134,7 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, responseData)
 	}
 }
+
 func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 	type request struct {
 		RefreshToken string `json:"refresh_token" validate:"required,jwt"`
@@ -182,6 +185,7 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, responseData)
 	}
 }
+
 func RegisterAuthRoutes(u usecase.Auth, g *echo.Group) {
 	a := NewAuthHandlers(u)
 

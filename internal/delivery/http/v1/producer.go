@@ -109,6 +109,7 @@ func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, producer)
 	}
 }
+
 func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 	type request struct {
 		Name        string `json:"name,omitempty" validate:"omitempty,max=30,min=3"`
@@ -173,6 +174,7 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, updatedProducer)
 	}
 }
+
 func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		producerId, err := uuid.Parse(c.Param("id"))
@@ -210,6 +212,7 @@ func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 		return c.NoContent(http.StatusOK)
 	}
 }
+
 func RegisterProducerRoutes(u usecase.Producer, g *echo.Group, m echo.MiddlewareFunc, r echo.MiddlewareFunc) {
 	a := NewProducerHandlers(u)
 	g.GET("", a.getAllProducers(), r)

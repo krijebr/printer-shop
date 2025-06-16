@@ -32,14 +32,17 @@ func NewAuth(u repo.User, t repo.Token, tokenTTL time.Duration, refreshTokenTTL 
 		hashSalt:        salt,
 	}
 }
+
 func (a *auth) HashPassword(pass string) string {
 	h := sha256.New()
 	h.Write([]byte(pass + a.hashSalt))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
+
 func (a *auth) ValidatePassword(password, hash string) bool {
 	return a.HashPassword(password) == hash
 }
+
 func (a *auth) generateRandomKey() string {
 	const (
 		n             = 10                                                     // key length
@@ -136,6 +139,7 @@ func (a *auth) Login(ctx context.Context, email, password string) (string, strin
 	}
 	return token, refreshToken, nil
 }
+
 func (a *auth) ValidateToken(ctx context.Context, token string) (*entity.User, error) {
 
 	jwToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
@@ -179,6 +183,7 @@ func (a *auth) ValidateToken(ctx context.Context, token string) (*entity.User, e
 	}
 	return user, nil
 }
+
 func (a *auth) RefreshToken(ctx context.Context, refreshToken string) (string, string, error) {
 	jwToken, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -203,7 +208,6 @@ func (a *auth) RefreshToken(ctx context.Context, refreshToken string) (string, s
 
 		return []byte(secret), nil
 	})
-
 	if err != nil {
 		return "", "", ErrInvalidToken
 	}

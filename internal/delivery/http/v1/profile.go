@@ -41,6 +41,7 @@ func (p *ProfileHandlers) getProfile() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, user)
 	}
 }
+
 func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
 	type request struct {
 		FirstName string `json:"first_name,omitempty" validate:"omitempty,max=25,min=3"`
@@ -97,6 +98,7 @@ func (p *ProfileHandlers) updateProfile() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, updatedUser)
 	}
 }
+
 func RegisterProfileRoutes(u usecase.User, g *echo.Group) {
 	a := NewProfileHandlers(u)
 	g.GET("", a.getProfile())

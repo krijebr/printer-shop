@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -73,14 +75,42 @@ func main() {
 	orderRepo := repo.NewOrderRepoPg(db)
 
 	producerUseCase := usecase.NewProducer(producerRepo, productRepo)
-	authUseCase := usecase.NewAuth(userRepo, tokenRepo, time.Duration(cfg.Security.TokenTTL), time.Duration(cfg.Security.RefreshTokenTTL), cfg.Security.HashSalt)
+	authUseCase := usecase.NewAuth(
+		userRepo,
+		tokenRepo,
+		time.Duration(cfg.Security.TokenTTL),
+		time.Duration(cfg.Security.RefreshTokenTTL),
+		cfg.Security.HashSalt)
 	userUseCase := usecase.NewUser(userRepo, cartRepo, orderRepo, authUseCase)
-	u := usecase.NewUseCases(authUseCase, usecase.NewCart(cartRepo, productRepo), usecase.NewOrder(orderRepo, cartRepo, productRepo), producerUseCase, usecase.NewProduct(productRepo, producerRepo, cartRepo, orderRepo), userUseCase)
+	u := usecase.NewUseCases(
+		authUseCase,
+		usecase.NewCart(cartRepo, productRepo),
+		usecase.NewOrder(orderRepo, cartRepo, productRepo),
+		producerUseCase,
+		usecase.NewProduct(productRepo, producerRepo, cartRepo, orderRepo),
+		userUseCase)
 	r := http.CreateNewEchoServer(u, roleConf, baseUrl)
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	slog.Info("starting http server", slog.Int("port", cfg.HttpServer.Port))
-	err = r.Start(fmt.Sprintf(":%d", cfg.HttpServer.Port))
+	go func() {
+		err = r.Start(fmt.Sprintf(":%d", cfg.HttpServer.Port))
+		if err != nil {
+			slog.Error("starting server error", slog.Any("error", err))
+			return
+		}
+	}()
+
+	<-ctx.Done()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	slog.Info("shutting down")
+	err = r.Shutdown(ctx)
 	if err != nil {
-		slog.Error("starting server error", slog.Any("error", err))
+		slog.Error("shutting down error", slog.Any("error", err))
+		return
 	}
 }
 

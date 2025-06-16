@@ -57,6 +57,7 @@ func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 
 }
+
 func getToken(header string) string {
 	return header[7:]
 }

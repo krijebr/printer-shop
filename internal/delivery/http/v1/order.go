@@ -55,6 +55,9 @@ func (o *OrderHandlers) getAllOrders() echo.HandlerFunc {
 					Message: ErrInternalErrorMessage,
 				})
 			}
+			if filter == nil {
+				filter = new(entity.OrderFilter)
+			}
 			if filter.UserId != nil {
 				if userIdCtx != *filter.UserId {
 					return c.JSON(http.StatusForbidden, ErrResponse{
@@ -179,6 +182,7 @@ func (o *OrderHandlers) getOrderById() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, order)
 	}
 }
+
 func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 	type (
 		Product struct {
@@ -258,7 +262,6 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 				order.Products = append(order.Products, product)
 			}
 		}
-
 		updatedOrder, err := o.usecase.UpdateById(c.Request().Context(), order)
 		if err != nil {
 			switch {
@@ -291,6 +294,7 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, updatedOrder)
 	}
 }
+
 func (o *OrderHandlers) deleteOrderById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		orderId, err := uuid.Parse(c.Param("id"))
@@ -328,6 +332,7 @@ func (o *OrderHandlers) deleteOrderById() echo.HandlerFunc {
 		return c.NoContent(http.StatusOK)
 	}
 }
+
 func RegisterOrderRoutes(u usecase.Order, g *echo.Group) {
 	a := NewOrderHandlers(u)
 	g.GET("", a.getAllOrders())

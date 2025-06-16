@@ -37,6 +37,7 @@ func (p *ProducerRepoPg) GetAll(ctx context.Context) ([]*entity.Producer, error)
 	}
 	return producers, nil
 }
+
 func (p *ProducerRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Producer, error) {
 	row := p.db.QueryRowContext(ctx, "select * from producers where id = $1", id)
 	producer, err := p.scanProducer(row)
@@ -50,6 +51,7 @@ func (p *ProducerRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.Pro
 	}
 	return producer, nil
 }
+
 func (p *ProducerRepoPg) Create(ctx context.Context, producer entity.Producer) error {
 	_, err := p.db.ExecContext(ctx, "insert into producers (id, name, description, created_at) values ($1,$2,$3,$4)",
 		producer.Id, producer.Name, producer.Description, producer.CreatedAt)
@@ -58,6 +60,7 @@ func (p *ProducerRepoPg) Create(ctx context.Context, producer entity.Producer) e
 	}
 	return nil
 }
+
 func (p *ProducerRepoPg) Update(ctx context.Context, producer entity.Producer) error {
 	set := []string{}
 	if producer.Name != "" {
@@ -73,6 +76,7 @@ func (p *ProducerRepoPg) Update(ctx context.Context, producer entity.Producer) e
 	}
 	return nil
 }
+
 func (p *ProducerRepoPg) DeleteById(ctx context.Context, id uuid.UUID) error {
 	_, err := p.db.ExecContext(ctx, "delete from producers where id = $1", id)
 	if err != nil {

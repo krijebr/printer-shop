@@ -29,6 +29,7 @@ func NewProduct(r repo.Product, p repo.Producer, c repo.Cart, o repo.Order) Prod
 func (p *product) GetAll(ctx context.Context, filter *entity.ProductFilter) ([]*entity.Product, error) {
 	return p.repo.GetAll(ctx, filter)
 }
+
 func (p *product) GetById(ctx context.Context, id uuid.UUID) (*entity.Product, error) {
 	receivedProduct, err := p.repo.GetById(ctx, id)
 	if err != nil {
@@ -41,6 +42,7 @@ func (p *product) GetById(ctx context.Context, id uuid.UUID) (*entity.Product, e
 	}
 	return receivedProduct, nil
 }
+
 func (p *product) Create(ctx context.Context, productToCreate entity.Product) (*entity.Product, error) {
 	_, err := p.repoProducer.GetById(ctx, productToCreate.Producer.Id)
 	if err != nil {
@@ -63,6 +65,7 @@ func (p *product) Create(ctx context.Context, productToCreate entity.Product) (*
 	}
 	return newProduct, nil
 }
+
 func (p *product) Update(ctx context.Context, productToUpdate entity.Product) (*entity.Product, error) {
 	_, err := p.repo.GetById(ctx, productToUpdate.Id)
 	if err != nil {
@@ -94,6 +97,7 @@ func (p *product) Update(ctx context.Context, productToUpdate entity.Product) (*
 	}
 	return updatedProduct, nil
 }
+
 func (p *product) DeleteById(ctx context.Context, id uuid.UUID) error {
 	_, err := p.repo.GetById(ctx, id)
 	if err != nil {

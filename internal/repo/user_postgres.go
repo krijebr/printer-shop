@@ -21,6 +21,7 @@ func NewUserRepoPg(db *sql.DB) User {
 		db: db,
 	}
 }
+
 func (u *UserRepoPg) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*entity.User, error) {
 	where := ""
 	if filter != nil {
@@ -47,6 +48,7 @@ func (u *UserRepoPg) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*
 	}
 	return users, nil
 }
+
 func (u *UserRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	row := u.db.QueryRowContext(ctx, "select * from users where id = $1", id)
 	user, err := u.scanUser(row)
@@ -60,6 +62,7 @@ func (u *UserRepoPg) GetById(ctx context.Context, id uuid.UUID) (*entity.User, e
 	}
 	return user, nil
 }
+
 func (u *UserRepoPg) Create(ctx context.Context, user entity.User) error {
 	_, err := u.db.ExecContext(ctx,
 		"insert into users (id, first_name, last_name, email, password_hash, status, role, created_at) values ($1,$2,$3,$4,$5,$6,$7,$8)",
@@ -69,6 +72,7 @@ func (u *UserRepoPg) Create(ctx context.Context, user entity.User) error {
 	}
 	return nil
 }
+
 func (u *UserRepoPg) Update(ctx context.Context, user entity.User) error {
 	set := []string{}
 	if user.FirstName != "" {
@@ -93,6 +97,7 @@ func (u *UserRepoPg) Update(ctx context.Context, user entity.User) error {
 	}
 	return nil
 }
+
 func (u *UserRepoPg) DeleteById(ctx context.Context, id uuid.UUID) error {
 	_, err := u.db.ExecContext(ctx, "delete from users where id = $1", id)
 	if err != nil {
@@ -100,6 +105,7 @@ func (u *UserRepoPg) DeleteById(ctx context.Context, id uuid.UUID) error {
 	}
 	return nil
 }
+
 func (u *UserRepoPg) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	row := u.db.QueryRowContext(ctx, "select * from users where email = $1", email)
 	user, err := u.scanUser(row)
@@ -113,6 +119,7 @@ func (u *UserRepoPg) GetByEmail(ctx context.Context, email string) (*entity.User
 	}
 	return user, nil
 }
+
 func (u *UserRepoPg) scanUser(row Row) (*entity.User, error) {
 	var user_created_at string
 	user := new(entity.User)

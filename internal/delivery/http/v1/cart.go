@@ -21,6 +21,7 @@ func NewCartHandlers(u usecase.Cart) *CartHandlers {
 		usecase: u,
 	}
 }
+
 func (h *CartHandlers) getAllProductsInCart() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, ok := c.Get(UserIdContextKey).(uuid.UUID)
@@ -42,6 +43,7 @@ func (h *CartHandlers) getAllProductsInCart() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, productsInCart)
 	}
 }
+
 func (h *CartHandlers) addProductToCart() echo.HandlerFunc {
 	type request struct {
 		ProductId uuid.UUID `json:"product_id" validate:"required,uuid"`
@@ -100,6 +102,7 @@ func (h *CartHandlers) addProductToCart() echo.HandlerFunc {
 		return c.NoContent(http.StatusOK)
 	}
 }
+
 func RegisterCartRoutes(u usecase.Cart, g *echo.Group) {
 	a := NewCartHandlers(u)
 	g.GET("", a.getAllProductsInCart())

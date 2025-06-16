@@ -28,6 +28,7 @@ func NewUser(r repo.User, c repo.Cart, o repo.Order, authUseCase Auth) User {
 func (u *user) GetAll(ctx context.Context, filter *entity.UserFilter) ([]*entity.User, error) {
 	return u.repo.GetAll(ctx, filter)
 }
+
 func (u *user) GetById(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	return u.repo.GetById(ctx, id)
 }
@@ -55,6 +56,7 @@ func (u *user) Update(ctx context.Context, userToUpdate entity.User) (*entity.Us
 	}
 	return updatedUser, nil
 }
+
 func (u *user) DeleteById(ctx context.Context, id uuid.UUID) error {
 	_, err := u.repo.GetById(ctx, id)
 	if err != nil {

@@ -101,6 +101,7 @@ func (u *UserHandlers) getUserById() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, user)
 	}
 }
+
 func (u *UserHandlers) updateUserById() echo.HandlerFunc {
 	type request struct {
 		FirstName string            `json:"first_name,omitempty" validate:"omitempty,max=25,min=3"`
@@ -170,6 +171,7 @@ func (u *UserHandlers) updateUserById() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, updatedUser)
 	}
 }
+
 func (u *UserHandlers) deleteUserById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, err := uuid.Parse(c.Param("id"))
@@ -206,6 +208,7 @@ func (u *UserHandlers) deleteUserById() echo.HandlerFunc {
 		return c.NoContent(http.StatusOK)
 	}
 }
+
 func RegisterUserRoutes(u usecase.User, g *echo.Group) {
 	a := NewUserHandlers(u)
 	g.GET("", a.allUsers())

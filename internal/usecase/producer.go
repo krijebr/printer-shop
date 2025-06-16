@@ -21,9 +21,11 @@ func NewProducer(r repo.Producer, p repo.Product) Producer {
 		repoProduct: p,
 	}
 }
+
 func (p *producer) GetAll(ctx context.Context) ([]*entity.Producer, error) {
 	return p.repo.GetAll(ctx)
 }
+
 func (p *producer) GetById(ctx context.Context, id uuid.UUID) (*entity.Producer, error) {
 	receivedProducer, err := p.repo.GetById(ctx, id)
 	if err != nil {
@@ -36,6 +38,7 @@ func (p *producer) GetById(ctx context.Context, id uuid.UUID) (*entity.Producer,
 	}
 	return receivedProducer, nil
 }
+
 func (p *producer) Create(ctx context.Context, producerToCreate entity.Producer) (*entity.Producer, error) {
 	producerToCreate.Id = uuid.New()
 	producerToCreate.CreatedAt = time.Now()
@@ -49,6 +52,7 @@ func (p *producer) Create(ctx context.Context, producerToCreate entity.Producer)
 	}
 	return newProducer, nil
 }
+
 func (p *producer) Update(ctx context.Context, producerToUpdate entity.Producer) (*entity.Producer, error) {
 	_, err := p.repo.GetById(ctx, producerToUpdate.Id)
 	if err != nil {
@@ -69,6 +73,7 @@ func (p *producer) Update(ctx context.Context, producerToUpdate entity.Producer)
 	}
 	return updatedProducer, nil
 }
+
 func (p *producer) DeleteById(ctx context.Context, id uuid.UUID) error {
 	filter := &entity.ProductFilter{
 		ProducerId: &id,

@@ -25,17 +25,32 @@ func (p *ProductHandlers) getAllProducts() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var filter *entity.ProductFilter
 		filter = nil
-		if c.QueryParam("producer_id") != "" {
+		if c.QueryParam("producer_id") != "" || c.QueryParam("product_status") != "" {
 			filter = new(entity.ProductFilter)
+		}
+		if c.QueryParam("producer_id") != "" {
 			producerId, err := uuid.Parse(c.QueryParam("producer_id"))
 			if err != nil {
 				slog.Error("invalid producer id", slog.Any("error", err))
-				return c.JSON(http.StatusNotFound, ErrResponse{
-					Error:   ErrResourceNotFoundCode,
-					Message: ErrResourceNotFoundMessage,
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrInvalidRequestCode,
+					Message: ErrInvalidRequestMessage,
 				})
 			}
 			filter.ProducerId = &producerId
+		}
+		if c.QueryParam("product_status") != "" {
+			validate := validator.New()
+			err := validate.Var(c.QueryParam("product_status"), "oneof=published hidden")
+			if err != nil {
+				slog.Error("validation error", slog.Any("error", err))
+				return c.JSON(http.StatusBadRequest, ErrResponse{
+					Error:   ErrValidationErrorCode,
+					Message: ErrValidationErrorMessage,
+				})
+			}
+			productStatus := entity.ProductStatus(c.QueryParam("product_status"))
+			filter.Status = &productStatus
 		}
 		products, err := p.usecase.GetAll(c.Request().Context(), filter)
 		if err != nil {
@@ -137,6 +152,7 @@ func (p *ProductHandlers) getProductById() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, product)
 	}
 }
+
 func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 	type request struct {
 		Name       string               `json:"name" validate:"omitempty,max=100,min=3"`
@@ -213,6 +229,7 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, updatedProduct)
 	}
 }
+
 func (p *ProductHandlers) deleteProductById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		productId, err := uuid.Parse(c.Param("id"))
@@ -250,6 +267,7 @@ func (p *ProductHandlers) deleteProductById() echo.HandlerFunc {
 		return c.NoContent(http.StatusOK)
 	}
 }
+
 func RegisterProductRoutes(u usecase.Product, g *echo.Group, m echo.MiddlewareFunc, r echo.MiddlewareFunc) {
 	a := NewProductHandlers(u)
 	g.GET("", a.getAllProducts(), r)

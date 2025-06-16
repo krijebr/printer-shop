@@ -23,6 +23,7 @@ func NewOrder(r repo.Order, c repo.Cart, p repo.Product) Order {
 		repoProduct: p,
 	}
 }
+
 func (o *order) Create(ctx context.Context, userId uuid.UUID) (*entity.Order, error) {
 	productsInCart, err := o.repoCart.GetAllProducts(ctx, userId)
 	if len(productsInCart) == 0 {
@@ -56,6 +57,7 @@ func (o *order) Create(ctx context.Context, userId uuid.UUID) (*entity.Order, er
 	}
 	return createdOrder, nil
 }
+
 func (o *order) GetAll(ctx context.Context, filter *entity.OrderFilter) ([]*entity.Order, error) {
 	orders, err := o.repo.GetAll(ctx, filter)
 	if err != nil {
@@ -68,6 +70,7 @@ func (o *order) GetAll(ctx context.Context, filter *entity.OrderFilter) ([]*enti
 	}
 	return orders, nil
 }
+
 func (o *order) GetById(ctx context.Context, id uuid.UUID) (*entity.Order, error) {
 	orderToReceive, err := o.repo.GetById(ctx, id)
 	if err != nil {
@@ -80,6 +83,7 @@ func (o *order) GetById(ctx context.Context, id uuid.UUID) (*entity.Order, error
 	}
 	return orderToReceive, nil
 }
+
 func (o *order) DeleteById(ctx context.Context, id uuid.UUID) error {
 	orderToDelete, err := o.repo.GetById(ctx, id)
 	if err != nil {
@@ -99,6 +103,7 @@ func (o *order) DeleteById(ctx context.Context, id uuid.UUID) error {
 	}
 	return nil
 }
+
 func (o *order) UpdateById(ctx context.Context, orderToUpdate *entity.Order) (*entity.Order, error) {
 	existingOrder, err := o.repo.GetById(ctx, orderToUpdate.Id)
 	if err != nil {

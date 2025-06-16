@@ -20,6 +20,7 @@ type (
 		Password string `json:"password"`
 		DBName   string `json:"db_name"`
 	}
+
 	HttpServer struct {
 		Port int `json:"port"`
 	}
@@ -58,6 +59,7 @@ func (d *Duration) UnmarshalJSON(b []byte) (err error) {
 	*d = Duration(dur)
 	return err
 }
+
 func InitConfigFromJson(path string) (*Config, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -74,6 +76,7 @@ func InitConfigFromJson(path string) (*Config, error) {
 	}
 	return &config, nil
 }
+
 func InitRoleConfigFromJson(path string) (*RoleConf, error) {
 	file, err := os.Open(path)
 	if err != nil {

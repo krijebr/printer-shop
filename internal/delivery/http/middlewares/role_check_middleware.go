@@ -39,6 +39,7 @@ func (r *RoleCheckMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 		} else {
 			userRole = entity.UserRoleGuest
+			c.Set(UserRoleContextKey, entity.UserRoleGuest)
 		}
 		path := strings.TrimPrefix(c.Path(), r.baseUrl)
 		if methods, inMapPaths := r.roles[path]; inMapPaths {
@@ -53,5 +54,4 @@ func (r *RoleCheckMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 			Message: ErrForbiddenMessage,
 		})
 	}
-
 }

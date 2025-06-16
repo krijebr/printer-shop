@@ -13,7 +13,7 @@ func CreateNewEchoServer(u *usecase.UseCases, r *config.RoleConf, baseUrl string
 	roleCheckMw := middlewares.NewRoleCheckMiddleware(r, baseUrl)
 	server := echo.New()
 	server.HideBanner = true
-	server.GET("health", v1.HealthCheck())
+	server.GET("health", HealthCheck())
 	g := server.Group(baseUrl)
 	v1.RegisterAuthRoutes(u.Auth, g.Group("auth"))
 	v1.RegisterCartRoutes(u.Cart, g.Group("cart", authMw.Handle, roleCheckMw.Handle))
