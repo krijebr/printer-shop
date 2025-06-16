@@ -29,16 +29,16 @@
         "GET":["customer","admin"],
         "POST":["admin","customer"]
     },
-        "orders/:id":{
+    "orders/:id":{
         "GET":["admin","customer"],
         "PUT":["admin"],
         "DELETE":["admin"]
     },
-        "profile":{
+    "profile":{
         "GET":["customer","admin"],
         "PUT":["admin","customer"]
     },
-        "cart":{
+    "cart":{
             "GET":["customer","admin"],
             "POST":["customer","admin"]
     }   

@@ -1,59 +1,90 @@
 package middlewares
 
 import (
-	"log/slog"
 	"net/http"
+	"strings"
 
+	"github.com/krijebr/printer-shop/internal/config"
 	. "github.com/krijebr/printer-shop/internal/delivery/http/common"
 	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/krijebr/printer-shop/internal/usecase"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/exp/slices"
 )
 
 type AuthMiddleware struct {
-	u *usecase.UseCases
+	u       *usecase.UseCases
+	roles   config.RoleConf
+	baseUrl string
 }
 
-func NewAuthMiddleware(u *usecase.UseCases) *AuthMiddleware {
+func NewAuthMiddleware(u *usecase.UseCases, r *config.RoleConf, baseUrl string) *AuthMiddleware {
 	return &AuthMiddleware{
-		u: u,
+		u:       u,
+		roles:   *r,
+		baseUrl: baseUrl,
 	}
 }
 
 func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		var (
+			userRole entity.UserRole
+			user     *entity.User
+			err      error
+		)
 		authHeader := c.Request().Header.Get("Authorization")
-		if authHeader == "" {
-			return c.JSON(http.StatusUnauthorized, ErrResponse{
-				Error:   ErrUnauthorizedCode,
-				Message: ErrUnauthorizedMessage,
-			})
+		if authHeader != "" {
+			user, err = a.u.Auth.ValidateToken(c.Request().Context(), getToken(authHeader))
+			if err != nil {
+				switch {
+				case err == usecase.ErrInvalidToken:
+					return c.JSON(http.StatusUnauthorized, ErrResponse{
+						Error:   ErrInvalidTokenCode,
+						Message: ErrInvalidTokenMessage,
+					})
+				default:
+					return c.JSON(http.StatusInternalServerError, ErrResponse{
+						Error:   ErrInternalErrorCode,
+						Message: ErrInternalErrorMessage,
+					})
+				}
+			}
+			c.Set(UserIdContextKey, user.Id)
+			userRole = user.Role
+			c.Set(UserRoleContextKey, userRole)
+		} else {
+			userRole = entity.UserRoleGuest
+			c.Set(UserRoleContextKey, userRole)
 		}
-		user, err := a.u.Auth.ValidateToken(c.Request().Context(), getToken(authHeader))
-		if err != nil {
-			switch {
-			case err == usecase.ErrInvalidToken:
-				return c.JSON(http.StatusUnauthorized, ErrResponse{
-					Error:   ErrInvalidTokenCode,
-					Message: ErrInvalidTokenMessage,
-				})
-			default:
-				slog.Error("token validation error", slog.Any("error", err))
-				return c.JSON(http.StatusInternalServerError, ErrResponse{
-					Error:   ErrInternalErrorCode,
-					Message: ErrInternalErrorMessage,
-				})
+		path := strings.TrimPrefix(c.Path(), a.baseUrl)
+		if methods, inMapPaths := a.roles[path]; inMapPaths {
+			if roles, inMapMethods := methods[c.Request().Method]; inMapMethods {
+				if slices.Contains(roles, string(userRole)) {
+					if !slices.Contains(roles, string(entity.UserRoleGuest)) {
+						if userRole != entity.UserRoleGuest {
+							if user.Status == entity.UserStatusBlocked {
+								return c.JSON(http.StatusForbidden, ErrResponse{
+									Error:   ErrUserIsBlockedCode,
+									Message: ErrUserIsBlockedMessage,
+								})
+							}
+						}
+					}
+					return next(c)
+				}
+				if userRole == entity.UserRoleGuest {
+					return c.JSON(http.StatusUnauthorized, ErrResponse{
+						Error:   ErrUnauthorizedCode,
+						Message: ErrUnauthorizedMessage,
+					})
+				}
 			}
 		}
-		if user.Status == entity.UserStatusBlocked {
-			return c.JSON(http.StatusForbidden, ErrResponse{
-				Error:   ErrForbiddenCode,
-				Message: ErrForbiddenMessage,
-			})
-		}
-		c.Set(UserIdContextKey, user.Id)
-		c.Set(UserRoleContextKey, user.Role)
-		return next(c)
+		return c.JSON(http.StatusForbidden, ErrResponse{
+			Error:   ErrForbiddenCode,
+			Message: ErrForbiddenMessage,
+		})
 	}
 
 }

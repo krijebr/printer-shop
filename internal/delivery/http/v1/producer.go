@@ -213,11 +213,11 @@ func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 	}
 }
 
-func RegisterProducerRoutes(u usecase.Producer, g *echo.Group, m echo.MiddlewareFunc, r echo.MiddlewareFunc) {
+func RegisterProducerRoutes(u usecase.Producer, g *echo.Group) {
 	a := NewProducerHandlers(u)
-	g.GET("", a.getAllProducers(), r)
-	g.POST("", a.createProducer(), m, r)
-	g.GET("/:id", a.getProducerById(), r)
-	g.PUT("/:id", a.updateProducerById(), m, r)
-	g.DELETE("/:id", a.deleteProducerById(), m, r)
+	g.GET("", a.getAllProducers())
+	g.POST("", a.createProducer())
+	g.GET("/:id", a.getProducerById())
+	g.PUT("/:id", a.updateProducerById())
+	g.DELETE("/:id", a.deleteProducerById())
 }

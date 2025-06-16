@@ -52,6 +52,34 @@ func (p *ProductHandlers) getAllProducts() echo.HandlerFunc {
 			productStatus := entity.ProductStatus(c.QueryParam("product_status"))
 			filter.Status = &productStatus
 		}
+		var (
+			userRole entity.UserRole
+			ok       bool
+		)
+		userRole, ok = c.Get(UserRoleContextKey).(entity.UserRole)
+		if !ok {
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
+		}
+		if userRole != entity.UserRoleAdmin {
+			if filter != nil {
+				if filter.Status != nil {
+					if *filter.Status == entity.ProductStatusHidden {
+						return c.JSON(http.StatusForbidden, ErrResponse{
+							Error:   ErrForbiddenCode,
+							Message: ErrForbiddenMessage,
+						})
+					}
+				}
+			}
+			if filter == nil {
+				filter = new(entity.ProductFilter)
+			}
+			publishedStatus := entity.ProductStatusPublished
+			filter.Status = &publishedStatus
+		}
 		products, err := p.usecase.GetAll(c.Request().Context(), filter)
 		if err != nil {
 			slog.Error("products receiving error", slog.Any("error", err))
@@ -268,11 +296,11 @@ func (p *ProductHandlers) deleteProductById() echo.HandlerFunc {
 	}
 }
 
-func RegisterProductRoutes(u usecase.Product, g *echo.Group, m echo.MiddlewareFunc, r echo.MiddlewareFunc) {
+func RegisterProductRoutes(u usecase.Product, g *echo.Group) {
 	a := NewProductHandlers(u)
-	g.GET("", a.getAllProducts(), r)
-	g.POST("", a.createProduct(), m, r)
-	g.GET("/:id", a.getProductById(), r)
-	g.PUT("/:id", a.updateProductById(), m, r)
-	g.DELETE("/:id", a.deleteProductById(), m, r)
+	g.GET("", a.getAllProducts())
+	g.POST("", a.createProduct())
+	g.GET("/:id", a.getProductById())
+	g.PUT("/:id", a.updateProductById())
+	g.DELETE("/:id", a.deleteProductById())
 }
