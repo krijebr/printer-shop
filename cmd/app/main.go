@@ -32,6 +32,8 @@ const (
 )
 
 func main() {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	cfg, err := config.InitConfigFromJson(confPath)
 	if err != nil {
@@ -90,9 +92,6 @@ func main() {
 		usecase.NewProduct(productRepo, producerRepo, cartRepo, orderRepo),
 		userUseCase)
 	r := http.CreateNewEchoServer(u, roleConf, baseUrl)
-
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
 
 	slog.Info("starting http server", slog.Int("port", cfg.HttpServer.Port))
 	go func() {

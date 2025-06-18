@@ -176,6 +176,25 @@ func (p *ProductHandlers) getProductById() echo.HandlerFunc {
 				})
 			}
 		}
+		var (
+			userRole entity.UserRole
+			ok       bool
+		)
+		userRole, ok = c.Get(UserRoleContextKey).(entity.UserRole)
+		if !ok {
+			return c.JSON(http.StatusInternalServerError, ErrResponse{
+				Error:   ErrInternalErrorCode,
+				Message: ErrInternalErrorMessage,
+			})
+		}
+		if userRole != entity.UserRoleAdmin {
+			if product.Status != entity.ProductStatusPublished {
+				return c.JSON(http.StatusForbidden, ErrResponse{
+					Error:   ErrForbiddenCode,
+					Message: ErrForbiddenMessage,
+				})
+			}
+		}
 		slog.Info("product received")
 		return c.JSON(http.StatusOK, product)
 	}

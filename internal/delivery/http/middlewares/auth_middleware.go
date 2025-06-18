@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
@@ -37,18 +38,22 @@ func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 		if authHeader != "" {
 			user, err = a.u.Auth.ValidateToken(c.Request().Context(), getToken(authHeader))
 			if err != nil {
-				switch {
-				case err == usecase.ErrInvalidToken:
+				if errors.Is(err, usecase.ErrInvalidToken) {
 					return c.JSON(http.StatusUnauthorized, ErrResponse{
 						Error:   ErrInvalidTokenCode,
 						Message: ErrInvalidTokenMessage,
 					})
-				default:
-					return c.JSON(http.StatusInternalServerError, ErrResponse{
-						Error:   ErrInternalErrorCode,
-						Message: ErrInternalErrorMessage,
-					})
 				}
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
+			}
+			if user.Status == entity.UserStatusBlocked {
+				return c.JSON(http.StatusForbidden, ErrResponse{
+					Error:   ErrUserIsBlockedCode,
+					Message: ErrUserIsBlockedMessage,
+				})
 			}
 			c.Set(UserIdContextKey, user.Id)
 			userRole = user.Role
@@ -61,16 +66,6 @@ func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 		if methods, inMapPaths := a.roles[path]; inMapPaths {
 			if roles, inMapMethods := methods[c.Request().Method]; inMapMethods {
 				if slices.Contains(roles, string(userRole)) {
-					if !slices.Contains(roles, string(entity.UserRoleGuest)) {
-						if userRole != entity.UserRoleGuest {
-							if user.Status == entity.UserStatusBlocked {
-								return c.JSON(http.StatusForbidden, ErrResponse{
-									Error:   ErrUserIsBlockedCode,
-									Message: ErrUserIsBlockedMessage,
-								})
-							}
-						}
-					}
 					return next(c)
 				}
 				if userRole == entity.UserRoleGuest {

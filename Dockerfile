@@ -8,7 +8,7 @@ COPY /migrations ./migrations
 COPY /cmd ./cmd
 COPY /config ./config
 COPY /internal ./internal
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o /usr/local/bin/app ./cmd
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o /usr/local/bin/app ./cmd/app
 FROM scratch
 COPY --from=builder /app/config /config
 COPY --from=builder /app/migrations/ /migrations
