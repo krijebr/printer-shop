@@ -2,7 +2,7 @@
     "postgres": {
         "host":"postgres",
         "port":5432,
-        "user_name":"postgres",
+        "user_name":"localhost",
         "password":"password",
         "db_name":"postgres"
     },
@@ -10,7 +10,7 @@
         "port":80
     },
     "redis":{
-        "host":"redis",
+        "host":"localhost",
 		"port":6379,
 		"password":"password",
 		"db":0

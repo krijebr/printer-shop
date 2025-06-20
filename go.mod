@@ -27,6 +27,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
