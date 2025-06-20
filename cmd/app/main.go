@@ -51,7 +51,7 @@ func main() {
 	}
 	slog.Info("starting app", slog.String("app-name", "printer shop"))
 
-	db, err := initDB(&cfg.Postgres)
+	db, err := initDB(ctx, &cfg.Postgres)
 	if err != nil {
 		slog.Error("database intialization error", slog.Any("error", err))
 		return
@@ -63,7 +63,7 @@ func main() {
 		return
 	}
 
-	rdb, err := initRedis(&cfg.Redis)
+	rdb, err := initRedis(ctx, &cfg.Redis)
 	if err != nil {
 		slog.Error("redis initialization error", slog.Any("error", err))
 		return
@@ -113,19 +113,23 @@ func main() {
 	}
 }
 
-func initDB(cfg *config.Postgres) (*sql.DB, error) {
+func initDB(ctx context.Context, cfg *config.Postgres) (*sql.DB, error) {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", cfg.Host, cfg.Port, cfg.UserName, cfg.Password, cfg.DBName)
-
 	var (
 		attempts = _defaultAttempts
 		err      error
 		db       *sql.DB
 	)
 	for attempts > 0 {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
 		slog.Info(fmt.Sprintf("trying to initialize database, attempts left: %d", attempts))
 		db, err = sql.Open("postgres", connStr)
 		if err == nil {
-			_, err = db.Exec("select 1")
+			_, err = db.ExecContext(ctx, "select 1")
 			if err == nil {
 				break
 			}
@@ -159,15 +163,19 @@ func migration(db *sql.DB) error {
 	slog.Info("migrate up success")
 	return nil
 }
-func initRedis(cfg *config.Redis) (*redis.Client, error) {
+func initRedis(ctx context.Context, cfg *config.Redis) (*redis.Client, error) {
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	ctx := context.Background()
 	var (
 		attempts = _defaultAttempts
 		client   *redis.Client
 		err      error
 	)
 	for attempts > 0 {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
 		slog.Info(fmt.Sprintf("trying to initialize redis, attempts left: %d", attempts))
 		client = redis.NewClient(&redis.Options{Addr: addr, Password: cfg.Password, DB: cfg.DB})
 		_, err = client.Ping(ctx).Result()
