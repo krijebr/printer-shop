@@ -1,0 +1,288 @@
+[
+  {
+    "producer": {
+      "name": "Hewlett-Packard",
+      "description": "The Hewlett-Packard Company was founded by Bill Hewlett and David Packard in 1939"
+    },
+    "products": [
+      {
+        "name": "Принтер HP LaserJet M111w (7MD68A) A4 WiFi",
+        "price": 12191,
+        "producer_id": "1380ab8b-9939-4af1-8e54-0b0733ee250d",
+        "status": "published"
+      },
+      {
+        "name": "Принтер лазерный HP LaserJet M111w (7MD68A)",
+        "price": 12524,
+        "producer_id": "1380ab8b-9939-4af1-8e54-0b0733ee250d",
+        "status": "published"
+      },
+      {
+        "name": "МФУ лазерное HP LaserJet M141w (7MD74A)",
+        "price": 16444,
+        "producer_id": "1380ab8b-9939-4af1-8e54-0b0733ee250d",
+        "status": "published"
+      },
+      {
+        "name": "Лазерное МФУ HP LaserJet M141w (7MD74A)",
+        "price": 16829,
+        "producer_id": "1380ab8b-9939-4af1-8e54-0b0733ee250d",
+        "status": "published"
+      },
+      {
+        "name": "МФУ лазерное HP Laser MFP 137fnw, ч/б, A4, белый/черный",
+        "price": 20585,
+        "producer_id": "1380ab8b-9939-4af1-8e54-0b0733ee250d",
+        "status": "published"
+      }
+    ]
+  },
+  {
+    "producer": {
+      "name": "OKI",
+      "description": "The company was founded by Kibataro Oki "
+    },
+    "products": [
+      {
+        "name": "OKI B731dnw",
+        "price": 77410,
+        "producer_id": "61b8937b-35cf-46ee-bc09-2a0465e0c9f3",
+        "status": "published"
+      },
+      {
+        "name": "OKI B410dn",
+        "price": 21000,
+        "producer_id": "61b8937b-35cf-46ee-bc09-2a0465e0c9f3",
+        "status": "published"
+      },
+      {
+        "name": "OKI B412dn",
+        "price": 45535,
+        "producer_id": "61b8937b-35cf-46ee-bc09-2a0465e0c9f3",
+        "status": "published"
+      },
+      {
+        "name": "OKI C650dn",
+        "price": 197534,
+        "producer_id": "61b8937b-35cf-46ee-bc09-2a0465e0c9f3",
+        "status": "published"
+      },
+      {
+        "name": "OKI C824DN-EU",
+        "price": 265574,
+        "producer_id": "61b8937b-35cf-46ee-bc09-2a0465e0c9f3",
+        "status": "published"
+      }
+    ]
+  },
+  {
+    "producer": {
+      "name": "Epson",
+      "description": "The roots of Seiko Epson Corporation go back to a company called Daiwa Kogyo, Ltd. which was founded in May 1942 by Hisao Yamazaki"
+    },
+    "products": [
+      {
+        "name": "МФУ Epson L3250",
+        "price": 15530,
+        "producer_id": "41d59f1d-6ced-41aa-b47a-d2080ca5e00d",
+        "status": "published"
+      },
+      {
+        "name": "МФУ струйное Epson EcoTank L3250, цветн., A4, черный",
+        "price": 15173,
+        "producer_id": "41d59f1d-6ced-41aa-b47a-d2080ca5e00d",
+        "status": "published"
+      },
+      {
+        "name": "МФУ Epson EcoTank L3210",
+        "price": 13032,
+        "producer_id": "41d59f1d-6ced-41aa-b47a-d2080ca5e00d",
+        "status": "published"
+      },
+      {
+        "name": "МФУ лазерное BROTHER MFC-L5710DW",
+        "price": 78052,
+        "producer_id": "41d59f1d-6ced-41aa-b47a-d2080ca5e00d",
+        "status": "published"
+      },
+      {
+        "name": "Струйное МФУ Epson L3256",
+        "price": 16940,
+        "producer_id": "41d59f1d-6ced-41aa-b47a-d2080ca5e00d",
+        "status": "published"
+      }
+    ]
+  },
+  {
+    "producer": {
+      "name": "Xiaomi",
+      "description": "Xiaomi was founded in 2010 in Beijing by Lei Jun along with six associates"
+    },
+    "products": [
+      {
+        "name": "Компактный фотопринтер Xiaomi Mi TEJ4018GL, белый",
+        "price": 6150,
+        "producer_id": "b3358787-6004-4405-b33d-e229c1197e73",
+        "status": "published"
+      },
+      {
+        "name": "Компактный фотопринтер Xiaomi Instant 1S Set EU, белый [bhr6747gl]",
+        "price": 13790,
+        "producer_id": "b3358787-6004-4405-b33d-e229c1197e73",
+        "status": "published"
+      }
+    ]
+  },
+  {
+    "producer": {
+      "name": "Pantum",
+      "description": "Pantum"
+    },
+    "products": [
+      {
+        "name": "Принтер Pantum P2500NW",
+        "price": 8994,
+        "producer_id": "2489a738-8cfa-4c82-9da7-c229ca3c36b2",
+        "status": "published"
+      },
+      {
+        "name": "Принтер Pantum P2516",
+        "price": 8109,
+        "producer_id": "2489a738-8cfa-4c82-9da7-c229ca3c36b2",
+        "status": "published"
+      },
+      {
+        "name": "Принтер Pantum P2500 ч/б А4 22ppm",
+        "price": 10385,
+        "producer_id": "2489a738-8cfa-4c82-9da7-c229ca3c36b2",
+        "status": "published"
+      },
+      {
+        "name": "Принтер Pantum P2518",
+        "price": 7927,
+        "producer_id": "2489a738-8cfa-4c82-9da7-c229ca3c36b2",
+        "status": "published"
+      },
+      {
+        "name": "Принтер Pantum P2207",
+        "price": 8092,
+        "producer_id": "2489a738-8cfa-4c82-9da7-c229ca3c36b2",
+        "status": "published"
+      }
+    ]
+  },
+  {
+    "producer": {
+      "name": "KYOCERA",
+      "description": "KYOCERA was founded as Kyoto Ceramic Company"
+    },
+    "products": [
+      {
+        "name": "Принтер Kyocera PA2001W",
+        "price": 19092,
+        "producer_id": "e9ee8fff-232c-4401-9382-b63fdfd11812",
+        "status": "published"
+      },
+      {
+        "name": "Принтер Kyocera Ecosys P2235dn ч/б A4 35ppm 1200x1200dpi Ethernet USB 1102RV3NL0",
+        "price": 28400,
+        "producer_id": "e9ee8fff-232c-4401-9382-b63fdfd11812",
+        "status": "published"
+      },
+      {
+        "name": "МФУ лазерное BROTHER MFC-L5710DW",
+        "price": 78052,
+        "producer_id": "e9ee8fff-232c-4401-9382-b63fdfd11812",
+        "status": "published"
+      },
+      {
+        "name": "Принтер Kyocera ECOSYS P2040dn",
+        "price": 33296,
+        "producer_id": "e9ee8fff-232c-4401-9382-b63fdfd11812",
+        "status": "published"
+      },
+      {
+        "name": "МФУ Kyocera ECOSYS M2135dn",
+        "price": 39781,
+        "producer_id": "e9ee8fff-232c-4401-9382-b63fdfd11812",
+        "status": "published"
+      }
+    ]
+  },
+  {
+    "producer": {
+      "name": "Canon",
+      "description": "The origins of Canon date back to the founding of Precision Optical Instruments Laboratory in Japan in 1933 by Takeshi Mitarai"
+    },
+    "products": [
+      {
+        "name": "Принтер лазерный цветной Canon i-SENSYS LBP633Cdw",
+        "price": 25824,
+        "producer_id": "922a101b-ad11-440c-b7f7-02bc7ab9fe8e",
+        "status": "published"
+      },
+      {
+        "name": "Принтер лазерный Canon i-SENSYS LBP6030B, ч/б, A4, черный",
+        "price": 15741,
+        "producer_id": "922a101b-ad11-440c-b7f7-02bc7ab9fe8e",
+        "status": "published"
+      },
+      {
+        "name": "Принтер с МФУ лазерный монохромный Canon i-SENSYS MF465dw",
+        "price": 34686,
+        "producer_id": "922a101b-ad11-440c-b7f7-02bc7ab9fe8e",
+        "status": "published"
+      },
+      {
+        "name": "Принтер лазерный Canon LBP2900",
+        "price": 30119,
+        "producer_id": "922a101b-ad11-440c-b7f7-02bc7ab9fe8e",
+        "status": "published"
+      },
+      {
+        "name": "Принтер лазерный Canon LBP243dw",
+        "price": 24300,
+        "producer_id": "922a101b-ad11-440c-b7f7-02bc7ab9fe8e",
+        "status": "published"
+      }
+    ]
+  },
+  {
+    "producer": {
+      "name": "Xerox",
+      "description": "Xerox was founded in 1906 in Rochester, New York, as the Haloid Photographic Company"
+    },
+    "products": [
+      {
+        "name": "Принтер лазерный Xerox Phaser 3020BI, ч/б, A4, белый",
+        "price": 9603,
+        "producer_id": "25370a42-611e-445b-b5b8-2562899d6c26",
+        "status": "published"
+      },
+      {
+        "name": "МФУ лазерное Xerox WorkCentre 3025 (3025V/BI)",
+        "price": 16097,
+        "producer_id": "25370a42-611e-445b-b5b8-2562899d6c26",
+        "status": "published"
+      },
+      {
+        "name": "МФУ Xerox B225DNI",
+        "price": 18934,
+        "producer_id": "25370a42-611e-445b-b5b8-2562899d6c26",
+        "status": "published"
+      },
+      {
+        "name": "МФУ Xerox WorkCentre 3025NI",
+        "price": 21505,
+        "producer_id": "25370a42-611e-445b-b5b8-2562899d6c26",
+        "status": "published"
+      },
+      {
+        "name": "Лазерное МФУ Xerox WorkCentre 3025V_NI (Wi-Fi, черно-белая печать)",
+        "price": 26522,
+        "producer_id": "25370a42-611e-445b-b5b8-2562899d6c26",
+        "status": "published"
+      }
+    ]
+  }
+]

@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 
 	"os"
 	"os/signal"
@@ -41,6 +43,7 @@ func NewActionsCli(a usecase.Auth, u usecase.User, p usecase.Producer, pr usecas
 const (
 	confPath         string        = "E:/GO_projects/printer-shop/config/config.json"
 	migratePath      string        = "file://E:/GO_projects/printer-shop/migrations"
+	demoDataPath     string        = "E:/GO_projects/printer-shop/demo/demo-data.json"
 	_defaultAttempts int           = 5
 	_defaultTimeout  time.Duration = 5 * time.Second
 )
@@ -168,8 +171,44 @@ func (a *ActionsCli) CreateAdmin() cli.ActionFunc {
 }
 
 func (a *ActionsCli) AddDemoData() cli.ActionFunc {
+	type Product struct {
+		Producer entity.Producer  `json:"producer"`
+		Products []entity.Product `json:"products"`
+	}
 	return func(c *cli.Context) error {
-
+		file, err := os.Open(demoDataPath)
+		if err != nil {
+			fmt.Println("datafile openning error")
+			return err
+		}
+		data, err := io.ReadAll(file)
+		if err != nil {
+			fmt.Println("datafile reading error")
+			return err
+		}
+		demoData := []Product{}
+		err = json.Unmarshal(data, &demoData)
+		if err != nil {
+			fmt.Println("datafile parsing error")
+			return err
+		}
+		for i := range demoData {
+			newRpoducer, err := a.producerUseCase.Create(c.Context, demoData[i].Producer)
+			if err != nil {
+				fmt.Println("producer creation error")
+				return err
+			}
+			if demoData[i].Products != nil {
+				for j := range demoData[i].Products {
+					demoData[i].Products[j].Producer = newRpoducer
+					_, err = a.productUseCase.Create(c.Context, demoData[i].Products[j])
+					if err != nil {
+						fmt.Println("product creation error")
+						return err
+					}
+				}
+			}
+		}
 		return nil
 	}
 }
