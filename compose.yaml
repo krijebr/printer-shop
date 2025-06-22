@@ -36,6 +36,8 @@ services:
       - "8000:8000"
     networks: 
       - dbnet
+    environment:
+      CONFIG_PATH: /config/config.json
     healthcheck:
       test: ["CMD", "curl","-f","http://localhost:8000/health"]
       interval: 5s

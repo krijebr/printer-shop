@@ -6,16 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 
+	_ "embed"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/krijebr/printer-shop/internal/config"
 	"github.com/krijebr/printer-shop/internal/entity"
@@ -41,18 +39,20 @@ func NewActionsCli(a usecase.Auth, u usecase.User, p usecase.Producer, pr usecas
 }
 
 const (
-	confPath         string        = "E:/GO_projects/printer-shop/config/config.json"
-	migratePath      string        = "file://E:/GO_projects/printer-shop/migrations"
+	defaultPath      string        = "E:/GO_projects/printer-shop/config/config.json"
 	demoDataPath     string        = "E:/GO_projects/printer-shop/demo/demo-data.json"
 	_defaultAttempts int           = 5
 	_defaultTimeout  time.Duration = 5 * time.Second
 )
 
+//go:embed demo-data.json
+var data []byte
+
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	cfg, err := config.InitConfigFromJson(confPath)
+	cfg, err := config.InitConfigFromJson(getConfigPath(defaultPath))
 	if err != nil {
 		fmt.Println("initialization error", err)
 		return
@@ -61,12 +61,6 @@ func main() {
 	db, err := initDB(ctx, &cfg.Postgres)
 	if err != nil {
 		fmt.Println("database intialization error", err)
-		return
-	}
-	err = migration(db)
-
-	if err != nil {
-		fmt.Println("migrate up error", err)
 		return
 	}
 
@@ -90,17 +84,17 @@ func main() {
 	actionsCli := NewActionsCli(authUseCase, userUseCase, producerUseCase, productUseCase)
 
 	app := &cli.App{
-		Name:  "Cli",
-		Usage: "clia aaplication of printer shop",
+		Name:  "cli",
+		Usage: "cli application of printer shop",
 		Commands: []*cli.Command{
 			{
 				Name:   "create-admin",
-				Usage:  "this is the first command",
+				Usage:  "creates a new admin",
 				Action: actionsCli.CreateAdmin(),
 			},
 			{
 				Name:   "add-demo-data",
-				Usage:  "this is the second command",
+				Usage:  "fills the database with demo data",
 				Action: actionsCli.AddDemoData(),
 			},
 		},
@@ -160,6 +154,7 @@ func (a *ActionsCli) CreateAdmin() cli.ActionFunc {
 			}
 		}
 		newUser.Role = entity.UserRoleAdmin
+		newUser.PasswordHash = ""
 		newUser, err = a.userUseCase.Update(c.Context, *newUser)
 		if err != nil {
 			fmt.Println("user updating error")
@@ -176,36 +171,24 @@ func (a *ActionsCli) AddDemoData() cli.ActionFunc {
 		Products []entity.Product `json:"products"`
 	}
 	return func(c *cli.Context) error {
-		file, err := os.Open(demoDataPath)
-		if err != nil {
-			fmt.Println("datafile openning error")
-			return err
-		}
-		data, err := io.ReadAll(file)
-		if err != nil {
-			fmt.Println("datafile reading error")
-			return err
-		}
 		demoData := []Product{}
-		err = json.Unmarshal(data, &demoData)
+		err := json.Unmarshal(data, &demoData)
 		if err != nil {
 			fmt.Println("datafile parsing error")
 			return err
 		}
 		for i := range demoData {
-			newRpoducer, err := a.producerUseCase.Create(c.Context, demoData[i].Producer)
+			newProducer, err := a.producerUseCase.Create(c.Context, demoData[i].Producer)
 			if err != nil {
 				fmt.Println("producer creation error")
 				return err
 			}
-			if demoData[i].Products != nil {
-				for j := range demoData[i].Products {
-					demoData[i].Products[j].Producer = newRpoducer
-					_, err = a.productUseCase.Create(c.Context, demoData[i].Products[j])
-					if err != nil {
-						fmt.Println("product creation error")
-						return err
-					}
+			for j := range demoData[i].Products {
+				demoData[i].Products[j].Producer = newProducer
+				_, err = a.productUseCase.Create(c.Context, demoData[i].Products[j])
+				if err != nil {
+					fmt.Println("product creation error")
+					return err
 				}
 			}
 		}
@@ -243,23 +226,10 @@ func initDB(ctx context.Context, cfg *config.Postgres) (*sql.DB, error) {
 
 	return db, nil
 }
-func migration(db *sql.DB) error {
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
-	if err != nil {
-		return err
+
+func getConfigPath(defaultPath string) string {
+	if os.Getenv("CONFIG_PATH") != "" {
+		return os.Getenv("CONFIG_PATH")
 	}
-	m, err := migrate.NewWithDatabaseInstance(migratePath, "postgres", driver)
-	if err != nil {
-		return err
-	}
-	err = m.Up()
-	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		return err
-	}
-	if err == migrate.ErrNoChange {
-		fmt.Println("migrate no changes")
-		return nil
-	}
-	fmt.Println("migrate up success")
-	return nil
+	return defaultPath
 }

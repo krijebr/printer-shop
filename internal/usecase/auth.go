@@ -88,7 +88,9 @@ func (a *auth) Register(ctx context.Context, user entity.User) (*entity.User, er
 		return nil, err
 	}
 	newUser, err := a.userRepo.GetById(ctx, user.Id)
-
+	if err != nil {
+		return nil, err
+	}
 	return newUser, nil
 }
 

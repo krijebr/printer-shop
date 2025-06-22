@@ -45,7 +45,7 @@ const (
 	ErrOrderNotExistMessage           = "order with this id doesn't exist"
 	ErrOrderCantBeUpdatedMessage      = "order can't be updated"
 	ErrUserIsUsedMessage              = "this user can't be deleted"
-	ErrUserIsBlockedMessage           = "user id blocked"
+	ErrUserIsBlockedMessage           = "user is blocked"
 	ErrOrderCantBeDeletedMessage      = "order can't be deleted"
 
 	UserIdContextKey   string = "userId"
