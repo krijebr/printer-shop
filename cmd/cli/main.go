@@ -160,7 +160,7 @@ func (a *ActionsCli) CreateAdmin() cli.ActionFunc {
 			fmt.Println("user updating error")
 			return err
 		}
-		fmt.Printf("new admin created. Email: %s, FirstName: %s, LastName: %s", newUser.Email, newUser.FirstName, newUser.LastName)
+		fmt.Printf("new admin created. Email: %s, FirstName: %s, LastName: %s\n", newUser.Email, newUser.FirstName, newUser.LastName)
 		return nil
 	}
 }
