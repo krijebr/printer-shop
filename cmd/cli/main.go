@@ -192,6 +192,7 @@ func (a *ActionsCli) AddDemoData() cli.ActionFunc {
 				}
 			}
 		}
+		fmt.Println("demo data successfully added to database")
 		return nil
 	}
 }
@@ -209,7 +210,7 @@ func initDB(ctx context.Context, cfg *config.Postgres) (*sql.DB, error) {
 			return nil, ctx.Err()
 		default:
 		}
-		fmt.Printf("trying to initialize database, attempts left: %d", attempts)
+		fmt.Printf("trying to initialize database, attempts left: %d\n", attempts)
 		db, err = sql.Open("postgres", connStr)
 		if err == nil {
 			_, err = db.ExecContext(ctx, "select 1")
@@ -223,7 +224,6 @@ func initDB(ctx context.Context, cfg *config.Postgres) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return db, nil
 }
 
