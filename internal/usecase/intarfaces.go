@@ -7,6 +7,7 @@ import (
 	"github.com/krijebr/printer-shop/internal/entity"
 )
 
+//go:generate mockgen -source=intarfaces.go -destination=mocks/mock.go
 type Auth interface {
 	Register(ctx context.Context, user entity.User) (createdUser *entity.User, err error)
 	Login(ctx context.Context, email, password string) (token string, refreshToken string, err error)

@@ -8,6 +8,7 @@ import (
 	"github.com/krijebr/printer-shop/internal/entity"
 )
 
+//go:generate mockgen -source=intarfaces.go -destination=mocks/mock.go
 type Token interface {
 	SetToken(ctx context.Context, userId uuid.UUID, secret string, ttl time.Duration) (err error)
 	SetRefreshToken(ctx context.Context, userId uuid.UUID, secret string, ttl time.Duration) (err error)
