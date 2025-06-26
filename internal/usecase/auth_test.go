@@ -17,10 +17,10 @@ func TestAuth_Register(t *testing.T) {
 	type mockBehavior func(s *mock_repo.MockUser, ctx context.Context, user entity.User)
 	var createdUser entity.User
 	testTable := []struct {
-		name          string
-		inputUser     entity.User
-		mockBehavior  mockBehavior
-		expectedError error
+		name         string
+		inputUser    entity.User
+		mockBehavior mockBehavior
+		expectedErr  error
 	}{
 		{
 			name: "OK",
@@ -42,7 +42,7 @@ func TestAuth_Register(t *testing.T) {
 						return &createdUser, nil
 					})
 			},
-			expectedError: nil,
+			expectedErr: nil,
 		},
 		{
 			name: "user with email already exists",
@@ -55,7 +55,7 @@ func TestAuth_Register(t *testing.T) {
 			mockBehavior: func(s *mock_repo.MockUser, ctx context.Context, user entity.User) {
 				s.EXPECT().GetByEmail(ctx, user.Email).Return(&entity.User{}, nil)
 			},
-			expectedError: ErrEmailAlreadyExists,
+			expectedErr: ErrEmailAlreadyExists,
 		},
 		{
 			name: "getByEmail error",
@@ -68,10 +68,10 @@ func TestAuth_Register(t *testing.T) {
 			mockBehavior: func(s *mock_repo.MockUser, ctx context.Context, user entity.User) {
 				s.EXPECT().GetByEmail(ctx, user.Email).Return(nil, errors.New("some error"))
 			},
-			expectedError: errors.New("some error"),
+			expectedErr: errors.New("some error"),
 		},
 		{
-			name: "create error",
+			name: "create user error",
 			inputUser: entity.User{
 				FirstName:    "Ivan",
 				LastName:     "Ivanov",
@@ -82,7 +82,22 @@ func TestAuth_Register(t *testing.T) {
 				s.EXPECT().GetByEmail(ctx, user.Email).Return(nil, repo.ErrUserNotFound)
 				s.EXPECT().Create(ctx, gomock.AssignableToTypeOf(entity.User{})).Return(errors.New("some error"))
 			},
-			expectedError: errors.New("some error"),
+			expectedErr: errors.New("some error"),
+		},
+		{
+			name: "get user error",
+			inputUser: entity.User{
+				FirstName:    "Ivan",
+				LastName:     "Ivanov",
+				Email:        "ivan@gmail.com",
+				PasswordHash: "12345678910",
+			},
+			mockBehavior: func(s *mock_repo.MockUser, ctx context.Context, user entity.User) {
+				s.EXPECT().GetByEmail(ctx, user.Email).Return(nil, repo.ErrUserNotFound)
+				s.EXPECT().Create(ctx, gomock.AssignableToTypeOf(entity.User{})).Return(nil)
+				s.EXPECT().GetById(ctx, gomock.AssignableToTypeOf(uuid.UUID{})).Return(nil, errors.New("some error"))
+			},
+			expectedErr: errors.New("some error"),
 		},
 	}
 	for _, testCase := range testTable {
@@ -97,20 +112,21 @@ func TestAuth_Register(t *testing.T) {
 			authUsecase := NewAuth(auth, token, 0, 0, "")
 
 			actualUser, err := authUsecase.Register(context.Background(), testCase.inputUser)
-			if err != nil {
-				assert.Equal(t, err, testCase.expectedError)
+
+			if testCase.expectedErr != nil {
+				assert.Equal(t, testCase.expectedErr, err)
 				assert.Nil(t, actualUser)
 			} else {
-				assert.NotEqual(t, actualUser.Id, uuid.Nil)
-				assert.Equal(t, actualUser.FirstName, testCase.inputUser.FirstName)
-				assert.Equal(t, actualUser.LastName, testCase.inputUser.LastName)
-				assert.Equal(t, actualUser.Email, testCase.inputUser.Email)
-				assert.NotEqual(t, actualUser.PasswordHash, "")
-				assert.Equal(t, actualUser.Status, entity.UserStatusActive)
-				assert.Equal(t, actualUser.Role, entity.UserRoleCustomer)
-				assert.NotEqual(t, actualUser.CreatedAt, 0)
+				assert.NoError(t, err)
+				assert.NotEqual(t, uuid.Nil, actualUser.Id)
+				assert.Equal(t, testCase.inputUser.FirstName, actualUser.FirstName)
+				assert.Equal(t, testCase.inputUser.LastName, actualUser.LastName)
+				assert.Equal(t, testCase.inputUser.Email, actualUser.Email)
+				assert.NotEqual(t, "", actualUser.PasswordHash)
+				assert.Equal(t, entity.UserStatusActive, actualUser.Status)
+				assert.Equal(t, entity.UserRoleCustomer, actualUser.Role)
+				assert.NotEqual(t, 0, actualUser.CreatedAt)
 			}
 		})
 	}
-
 }
