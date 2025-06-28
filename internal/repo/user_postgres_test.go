@@ -15,6 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var someErr = errors.New("some error")
+
 func TestUserRepoPg_Create(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -69,7 +71,7 @@ func TestUserRepoPg_Create(t *testing.T) {
 
 				mock.ExpectExec("insert into users").
 					WithArgs(user.Id, user.FirstName, user.LastName, user.Email, user.PasswordHash, user.Status, user.Role, user.CreatedAt).
-					WillReturnError(errors.New("some error"))
+					WillReturnError(someErr)
 			},
 			wantErr: true,
 		},
@@ -155,10 +157,10 @@ func TestUserRepoPg_GetById(t *testing.T) {
 			name:        "some error",
 			inputUserId: uuid.MustParse("00000000-0000-0000-0000-000000000001"),
 			mockBehavior: func(ctx context.Context, id uuid.UUID) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from users where id = $1")).WithArgs(id).WillReturnError(errors.New("some error"))
+				mock.ExpectQuery(regexp.QuoteMeta("select * from users where id = $1")).WithArgs(id).WillReturnError(someErr)
 			},
 			expectedUser: nil,
-			expectedErr:  errors.New("some error"),
+			expectedErr:  someErr,
 		},
 	}
 	for _, testCase := range testTable {

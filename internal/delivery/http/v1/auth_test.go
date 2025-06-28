@@ -3,7 +3,7 @@ package v1
 import (
 	"bytes"
 	"context"
-	"fmt"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -79,7 +79,7 @@ func TestAuthHandlers_register(t *testing.T) {
 				PasswordHash: "12345678910",
 			},
 			mockBehavior: func(s *mock_usecase.MockAuth, ctx context.Context, user entity.User) {
-				s.EXPECT().Register(ctx, user).Return(nil, fmt.Errorf("some error"))
+				s.EXPECT().Register(ctx, user).Return(nil, errors.New("some error"))
 			},
 			expectedStatusCode:   http.StatusInternalServerError,
 			expectedResponseBody: `{"error":4,"message":"internal error"}`,
