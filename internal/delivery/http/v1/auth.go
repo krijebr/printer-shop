@@ -167,7 +167,7 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 		if err != nil {
 			if errors.Is(err, usecase.ErrInvalidToken) {
 				slog.Error("invalid refresh token", slog.Any("error", err))
-				return c.JSON(http.StatusForbidden, ErrResponse{
+				return c.JSON(http.StatusUnauthorized, ErrResponse{
 					Error:   ErrInvalidRefreshTokenCode,
 					Message: ErrInvalidRefreshTokenMessage,
 				})

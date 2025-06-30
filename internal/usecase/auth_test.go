@@ -3,10 +3,10 @@ package usecase
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/krijebr/printer-shop/internal/entity"
@@ -163,7 +163,6 @@ func TestAuth_generateRandomKey(t *testing.T) {
 	var authUsecase auth
 	firstRandomKey := authUsecase.generateRandomKey()
 	secondRandomKey := authUsecase.generateRandomKey()
-	fmt.Println(firstRandomKey, " ", secondRandomKey)
 	t.Run("random key is not empty string", func(t *testing.T) {
 		assert.NotEqual(t, firstRandomKey, "")
 	})
@@ -219,8 +218,8 @@ func TestAuth_Login(t *testing.T) {
 				s.EXPECT().GetByEmail(ctx, email).Return(&user, nil)
 			},
 			mockTokenBehavior: func(s *mock_repo.MockToken, ctx context.Context, userId uuid.UUID) {
-				s.EXPECT().SetToken(ctx, userId, gomock.AssignableToTypeOf(""), gomock.AssignableToTypeOf(time.Duration(0)))
-				s.EXPECT().SetRefreshToken(ctx, userId, gomock.AssignableToTypeOf(""), gomock.AssignableToTypeOf(time.Duration(0)))
+				s.EXPECT().SetToken(ctx, userId, gomock.AssignableToTypeOf(""), gomock.AssignableToTypeOf(time.Duration(0))).Return(nil)
+				s.EXPECT().SetRefreshToken(ctx, userId, gomock.AssignableToTypeOf(""), gomock.AssignableToTypeOf(time.Duration(0))).Return(nil)
 			},
 			expectedErr: nil,
 		},
@@ -316,6 +315,179 @@ func TestAuth_Login(t *testing.T) {
 				assert.NotEqual(t, token, "")
 				assert.NotEqual(t, refreshToken, "")
 				assert.NotEqual(t, token, refreshToken)
+			}
+		})
+	}
+}
+
+func TestAuth_ValidateToken(t *testing.T) {
+	type mockUserBehavior func(s *mock_repo.MockUser, ctx context.Context, user *entity.User)
+	type mockTokenBehavior func(s *mock_repo.MockToken, ctx context.Context, userId uuid.UUID, secret string)
+	testTable := []struct {
+		name              string
+		userId            uuid.UUID
+		expectedUser      *entity.User
+		mockUserBehavior  mockUserBehavior
+		mockTokenBehavior mockTokenBehavior
+		expectedErr       error
+	}{
+		{
+			name:   "OK",
+			userId: uuid.MustParse("8be456fa-aa6b-4310-b321-2cacfb8193a9"),
+			expectedUser: &entity.User{
+				Id:           uuid.MustParse("8be456fa-aa6b-4310-b321-2cacfb8193a9"),
+				FirstName:    "Ivan",
+				LastName:     "Ivanov",
+				Email:        "ivan@gmail.com",
+				PasswordHash: "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e",
+				Status:       entity.UserStatusActive,
+				Role:         entity.UserRoleCustomer,
+				CreatedAt:    time.Date(2025, 6, 25, 0, 0, 0, 0, time.UTC),
+			},
+			mockUserBehavior: func(s *mock_repo.MockUser, ctx context.Context, user *entity.User) {
+				s.EXPECT().GetById(ctx, user.Id).Return(user, nil)
+			},
+			mockTokenBehavior: func(s *mock_repo.MockToken, ctx context.Context, userId uuid.UUID, secret string) {
+				s.EXPECT().GetTokenByUserId(ctx, userId).Return(secret, nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name:         "some error",
+			userId:       uuid.MustParse("8be456fa-aa6b-4310-b321-2cacfb8193a9"),
+			expectedUser: nil,
+			mockUserBehavior: func(s *mock_repo.MockUser, ctx context.Context, user *entity.User) {
+			},
+			mockTokenBehavior: func(s *mock_repo.MockToken, ctx context.Context, userId uuid.UUID, secret string) {
+				s.EXPECT().GetTokenByUserId(ctx, userId).Return("", someErr)
+			},
+			expectedErr: someErr,
+		},
+		{
+			name:         "invalid token",
+			userId:       uuid.MustParse("8be456fa-aa6b-4310-b321-2cacfb8193a9"),
+			expectedUser: nil,
+			mockUserBehavior: func(s *mock_repo.MockUser, ctx context.Context, user *entity.User) {
+			},
+			mockTokenBehavior: func(s *mock_repo.MockToken, ctx context.Context, userId uuid.UUID, secret string) {
+				secretSlice := []byte(secret)
+				secretSlice[0] = secretSlice[0] + 1
+				secret = string(secretSlice)
+				s.EXPECT().GetTokenByUserId(ctx, userId).Return(secret, nil)
+			},
+			expectedErr: ErrInvalidToken,
+		},
+	}
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			userMock := mock_repo.NewMockUser(c)
+			tokenMock := mock_repo.NewMockToken(c)
+
+			var authUsecase auth
+			authUsecase.userRepo = userMock
+			authUsecase.tokenRepo = tokenMock
+			authUsecase.tokenTTL = time.Minute * 5
+			secret := authUsecase.generateRandomKey()
+			expTime := time.Now().Add(authUsecase.tokenTTL)
+			tokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+				"iss": testCase.userId.String(),
+				"exp": expTime.Unix(),
+			})
+
+			token, err := tokenObj.SignedString([]byte(secret))
+
+			testCase.mockTokenBehavior(tokenMock, context.Background(), testCase.userId, secret)
+			testCase.mockUserBehavior(userMock, context.Background(), testCase.expectedUser)
+
+			actualUser, err := authUsecase.ValidateToken(context.Background(), token)
+
+			if testCase.expectedErr != nil {
+				assert.True(t, errors.Is(err, testCase.expectedErr))
+				assert.Equal(t, actualUser, testCase.expectedUser)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, testCase.expectedUser, actualUser)
+			}
+		})
+	}
+}
+
+func TestAuth_RefreshToken(t *testing.T) {
+	type mockUserBehavior func(s *mock_repo.MockUser, ctx context.Context)
+	type mockTokenBehavior func(s *mock_repo.MockToken, ctx context.Context, userId uuid.UUID, secret string)
+	testTable := []struct {
+		name         string
+		userId       uuid.UUID
+		mockBehavior mockTokenBehavior
+		expectedErr  error
+	}{
+		{
+			name:   "OK",
+			userId: uuid.MustParse("8be456fa-aa6b-4310-b321-2cacfb8193a9"),
+			mockBehavior: func(s *mock_repo.MockToken, ctx context.Context, userId uuid.UUID, secret string) {
+				s.EXPECT().GetRefreshTokenByUserId(ctx, userId).Return(secret, nil)
+				s.EXPECT().SetToken(ctx, userId, gomock.AssignableToTypeOf(""), gomock.AssignableToTypeOf(time.Duration(0))).Return(nil)
+				s.EXPECT().SetRefreshToken(ctx, userId, gomock.AssignableToTypeOf(""), gomock.AssignableToTypeOf(time.Duration(0))).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name:   "some error",
+			userId: uuid.MustParse("8be456fa-aa6b-4310-b321-2cacfb8193a9"),
+			mockBehavior: func(s *mock_repo.MockToken, ctx context.Context, userId uuid.UUID, secret string) {
+				s.EXPECT().GetRefreshTokenByUserId(ctx, userId).Return("", someErr)
+			},
+			expectedErr: someErr,
+		},
+		{
+			name:   "invalid token",
+			userId: uuid.MustParse("8be456fa-aa6b-4310-b321-2cacfb8193a9"),
+			mockBehavior: func(s *mock_repo.MockToken, ctx context.Context, userId uuid.UUID, secret string) {
+				secretSlice := []byte(secret)
+				secretSlice[0] = secretSlice[0] + 1
+				secret = string(secretSlice)
+				s.EXPECT().GetRefreshTokenByUserId(ctx, userId).Return(secret, nil)
+			},
+			expectedErr: ErrInvalidToken,
+		},
+	}
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			userMock := mock_repo.NewMockUser(c)
+			tokenMock := mock_repo.NewMockToken(c)
+
+			var authUsecase auth
+			authUsecase.userRepo = userMock
+			authUsecase.tokenRepo = tokenMock
+			authUsecase.refreshTokenTTL = time.Hour * 5
+			secret := authUsecase.generateRandomKey()
+			expTime := time.Now().Add(authUsecase.refreshTokenTTL)
+			refreshTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+				"iss": testCase.userId.String(),
+				"exp": expTime.Unix(),
+			})
+
+			refreshToken, err := refreshTokenObj.SignedString([]byte(secret))
+
+			testCase.mockBehavior(tokenMock, context.Background(), testCase.userId, secret)
+
+			token, newRefreshToken, err := authUsecase.RefreshToken(context.Background(), refreshToken)
+
+			if testCase.expectedErr != nil {
+				assert.True(t, errors.Is(err, testCase.expectedErr))
+				assert.Equal(t, token, "")
+				assert.Equal(t, newRefreshToken, "")
+			} else {
+				assert.NoError(t, err)
+				assert.NotEqual(t, token, refreshToken)
+				assert.NotEqual(t, token, "")
+				assert.NotEqual(t, refreshToken, "")
 			}
 		})
 	}

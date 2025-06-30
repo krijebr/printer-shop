@@ -28,7 +28,7 @@ const (
 	ErrOrderCantBeDeletedCode      = 20
 
 	ErrInvalidTokenMessage            = "invalid token"
-	ErrInvalidRefreshTokenMessage     = "invalid token"
+	ErrInvalidRefreshTokenMessage     = "invalid refresh token"
 	ErrResourceNotFoundMessage        = "resource not found"
 	ErrInternalErrorMessage           = "internal error"
 	ErrUnauthorizedMessage            = "unauthorized"
