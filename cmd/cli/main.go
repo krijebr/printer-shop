@@ -40,7 +40,6 @@ func NewActionsCli(a usecase.Auth, u usecase.User, p usecase.Producer, pr usecas
 
 const (
 	defaultPath      string        = "E:/GO_projects/printer-shop/config/config.json"
-	demoDataPath     string        = "E:/GO_projects/printer-shop/demo/demo-data.json"
 	_defaultAttempts int           = 5
 	_defaultTimeout  time.Duration = 5 * time.Second
 )
