@@ -1,9 +1,13 @@
+
+![Build Status](https://github.com/ivan123/my-project/actions/workflows/build.yml/badge.svg)
 # Printer-shop
 Проект реализует REST API интернет магазина принтеров. 
 ## Содержание
 * [Технологии](#Технологии)
 * [Использование](#Использование)
-* [environment](#environment)
+* [Требования](#Требования)
+* [Тестирование](#Тестирование)
+* [environment](#Environment)
 
 ## Технологии
 * Go
@@ -11,11 +15,8 @@
 * Redis
 
 ## Использование
-Есть два compose файла. 
-* compose.yaml для запуска приложения в docker контейнере
-* compose.dev.yaml создаёт docker контейнеры postgresql и redis для работы в режиме отладки
 
-Для установки в docker контейнере необходимо выполнить в корне проекта команду:
+Для установки приложения в docker контейнере необходимо выполнить в корне проекта команду:
 
 `docker compose up -d`
 
@@ -28,9 +29,7 @@
 
 `cli add-demo-data`
 
-Для установки контейнеров postgresql и redis необходимо выполнить в корне проекта команду:
-
-`docker compose -f compose.dev.yaml up -d`
+В папке doc ноходится файл конфигурации для postman, содержащий коллекцию http запросов для тестирования приложения.
 
 ## Требования
 Для установки и запуска проекта, необходим [go](https://go.dev/dl/) 1.24.2+
@@ -44,5 +43,5 @@
 
 `go test ./... -v`
 
-## environment
+## Environment
 CONFIG_PATH путь к файлу конфигурации

@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	confPath         string        = "./config/config.json"
+	defaultPath      string        = "E:/GO_projects/printer-shop/config/config.json"
 	migratePath      string        = "file://./migrations"
 	roleConfPath     string        = "./config/role_config.json"
 	_defaultAttempts int           = 5
@@ -35,7 +35,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	cfg, err := config.InitConfigFromJson(confPath)
+	cfg, err := config.InitConfigFromJson(getConfigPath(defaultPath))
 	if err != nil {
 		slog.Error("initialization error", slog.Any("error", err))
 		return
@@ -189,4 +189,11 @@ func initRedis(ctx context.Context, cfg *config.Redis) (*redis.Client, error) {
 		return nil, err
 	}
 	return client, nil
+}
+
+func getConfigPath(defaultPath string) string {
+	if os.Getenv("CONFIG_PATH") != "" {
+		return os.Getenv("CONFIG_PATH")
+	}
+	return defaultPath
 }
