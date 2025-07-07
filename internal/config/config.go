@@ -32,7 +32,7 @@ type (
 	}
 	Security struct {
 		TokenTTL        Duration `json:"token_ttl"`
-		RefreshTokenTTL Duration `json:"refrsh_token_ttl"`
+		RefreshTokenTTL Duration `json:"refresh_token_ttl"`
 		HashSalt        string   `json:"hash_salt"`
 	}
 

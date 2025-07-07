@@ -31,7 +31,7 @@ func (a *AuthHandlers) register() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			slog.Error("invalid request", slog.Any("error", err))
+			slog.Debug("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -40,7 +40,7 @@ func (a *AuthHandlers) register() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			slog.Error("validation error", slog.Any("error", err))
+			slog.Debug("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -58,7 +58,7 @@ func (a *AuthHandlers) register() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrEmailAlreadyExists):
-				slog.Error("user with this email already exists", slog.Any("error", err))
+				slog.Debug("user with this email already exists", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrEmailAlreadyExistsCode,
 					Message: ErrEmailAlreadyExistsMessage,
@@ -71,7 +71,7 @@ func (a *AuthHandlers) register() echo.HandlerFunc {
 				})
 			}
 		}
-		slog.Info("new use registered")
+		slog.Info("new user registered")
 		return c.JSON(http.StatusOK, newUser)
 	}
 }
@@ -89,7 +89,7 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			slog.Error("invalid request", slog.Any("error", err))
+			slog.Debug("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -98,7 +98,7 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			slog.Error("validation error", slog.Any("error", err))
+			slog.Debug("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -108,13 +108,13 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrUserNotFound) || errors.Is(err, usecase.ErrWrongPassword):
-				slog.Error("wrong email or password", slog.Any("error", err))
+				slog.Debug("wrong email or password", slog.Any("error", err))
 				return c.JSON(http.StatusForbidden, ErrResponse{
 					Error:   ErrInvalidLoginCredentialsCode,
 					Message: ErrInvalidLoginCredentialsMessage,
 				})
 			case errors.Is(err, usecase.ErrUserIsBlocked):
-				slog.Error("user is blocked", slog.Any("error", err))
+				slog.Debug("user is blocked", slog.Any("error", err))
 				return c.JSON(http.StatusForbidden, ErrResponse{
 					Error:   ErrUserIsBlockedCode,
 					Message: ErrUserIsBlockedMessage,
@@ -131,6 +131,7 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 			Token:        token,
 			RefreshToken: refreshToken,
 		}
+		slog.Info("user logged in")
 		return c.JSON(http.StatusOK, responseData)
 	}
 }
@@ -147,7 +148,7 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			slog.Error("invalid request", slog.Any("error", err))
+			slog.Debug("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -156,7 +157,7 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			slog.Error("validation error", slog.Any("error", err))
+			slog.Debug("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -166,7 +167,7 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 		token, refreshToken, err := a.usecase.RefreshToken(c.Request().Context(), requestData.RefreshToken)
 		if err != nil {
 			if errors.Is(err, usecase.ErrInvalidToken) {
-				slog.Error("invalid refresh token", slog.Any("error", err))
+				slog.Debug("invalid refresh token", slog.Any("error", err))
 				return c.JSON(http.StatusUnauthorized, ErrResponse{
 					Error:   ErrInvalidRefreshTokenCode,
 					Message: ErrInvalidRefreshTokenMessage,
@@ -182,6 +183,7 @@ func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 			Token:        token,
 			RefreshToken: refreshToken,
 		}
+		slog.Info("tokens refreshed")
 		return c.JSON(http.StatusOK, responseData)
 	}
 }

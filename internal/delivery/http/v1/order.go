@@ -32,7 +32,7 @@ func (o *OrderHandlers) getAllOrders() echo.HandlerFunc {
 		if c.QueryParam("user_id") != "" {
 			userId, err := uuid.Parse(c.QueryParam("user_id"))
 			if err != nil {
-				slog.Error("invalid user id", slog.Any("error", err))
+				slog.Debug("invalid user id", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrValidationErrorCode,
 					Message: ErrValidationErrorMessage,
@@ -73,7 +73,7 @@ func (o *OrderHandlers) getAllOrders() echo.HandlerFunc {
 			validate := validator.New()
 			err := validate.Var(c.QueryParam("order_status"), "oneof=new in_progress done")
 			if err != nil {
-				slog.Error("validation error", slog.Any("error", err))
+				slog.Debug("validation error", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrValidationErrorCode,
 					Message: ErrValidationErrorMessage,
@@ -109,14 +109,17 @@ func (o *OrderHandlers) createOrder() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrCartIsEmpty):
-				slog.Error("producer not found", slog.Any("error", err))
+				slog.Debug("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrCartIsEmptyCode,
 					Message: ErrCartIsEmptyMessage,
 				})
 			default:
 				slog.Error("order creation error", slog.Any("error", err))
-				return c.NoContent(http.StatusInternalServerError)
+				return c.JSON(http.StatusInternalServerError, ErrResponse{
+					Error:   ErrInternalErrorCode,
+					Message: ErrInternalErrorMessage,
+				})
 			}
 		}
 		return c.JSON(http.StatusOK, order)
@@ -127,7 +130,7 @@ func (o *OrderHandlers) getOrderById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		orderId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid order id", slog.Any("error", err))
+			slog.Debug("invalid order id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -137,7 +140,7 @@ func (o *OrderHandlers) getOrderById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrOrderNotFound):
-				slog.Error("order not found", slog.Any("error", err))
+				slog.Debug("order not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
@@ -197,7 +200,7 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		orderId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid product id", slog.Any("error", err))
+			slog.Debug("invalid product id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -206,7 +209,7 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 		var requestData request
 		err = c.Bind(&requestData)
 		if err != nil {
-			slog.Error("invalid request", slog.Any("error", err))
+			slog.Debug("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -215,7 +218,7 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			slog.Error("validation error", slog.Any("error", err))
+			slog.Debug("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -224,6 +227,7 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 		order := &entity.Order{}
 		order.Id = orderId
 		if requestData.Status == "" && len(requestData.Products) == 0 {
+			slog.Debug("validation error")
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -240,7 +244,7 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 			for _, productInRequest := range requestData.Products {
 				err = validate.Struct(productInRequest)
 				if err != nil {
-					slog.Error("validation error", slog.Any("error", err))
+					slog.Debug("validation error", slog.Any("error", err))
 					return c.JSON(http.StatusBadRequest, ErrResponse{
 						Error:   ErrValidationErrorCode,
 						Message: ErrValidationErrorMessage,
@@ -266,19 +270,19 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrOrderNotFound):
-				slog.Error("order not found", slog.Any("error", err))
+				slog.Debug("order not found", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrOrderNotExistCode,
 					Message: ErrOrderNotExistMessage,
 				})
 			case errors.Is(err, usecase.ErrProductNotFound):
-				slog.Error("product not found", slog.Any("error", err))
+				slog.Debug("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProductNotExistCode,
 					Message: ErrProductNotExistMessage,
 				})
 			case errors.Is(err, usecase.ErrOrderCantBeUpdated):
-				slog.Error("order can't be updated", slog.Any("error", err))
+				slog.Debug("order can't be updated", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrOrderCantBeUpdatedCode,
 					Message: ErrOrderCantBeUpdatedMessage,
@@ -291,6 +295,7 @@ func (o *OrderHandlers) updateOrderById() echo.HandlerFunc {
 				})
 			}
 		}
+		slog.Info("order updated")
 		return c.JSON(http.StatusOK, updatedOrder)
 	}
 }
@@ -299,7 +304,7 @@ func (o *OrderHandlers) deleteOrderById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		orderId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid order id", slog.Any("error", err))
+			slog.Debug("invalid order id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -309,13 +314,13 @@ func (o *OrderHandlers) deleteOrderById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrOrderNotFound):
-				slog.Error("order not found", slog.Any("error", err))
+				slog.Debug("order not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			case errors.Is(err, usecase.ErrOrderCantBeDeleted):
-				slog.Error("order can't be deleted", slog.Any("error", err))
+				slog.Debug("order can't be deleted", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrOrderCantBeDeletedCode,
 					Message: ErrOrderCantBeDeletedMessage,
@@ -328,7 +333,7 @@ func (o *OrderHandlers) deleteOrderById() echo.HandlerFunc {
 				})
 			}
 		}
-		slog.Info("product received")
+		slog.Info("oreder deleted")
 		return c.NoContent(http.StatusOK)
 	}
 }

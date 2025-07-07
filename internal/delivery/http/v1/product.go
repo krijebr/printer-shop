@@ -31,7 +31,7 @@ func (p *ProductHandlers) getAllProducts() echo.HandlerFunc {
 		if c.QueryParam("producer_id") != "" {
 			producerId, err := uuid.Parse(c.QueryParam("producer_id"))
 			if err != nil {
-				slog.Error("invalid producer id", slog.Any("error", err))
+				slog.Debug("invalid producer id", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrInvalidRequestCode,
 					Message: ErrInvalidRequestMessage,
@@ -43,7 +43,7 @@ func (p *ProductHandlers) getAllProducts() echo.HandlerFunc {
 			validate := validator.New()
 			err := validate.Var(c.QueryParam("product_status"), "oneof=published hidden")
 			if err != nil {
-				slog.Error("validation error", slog.Any("error", err))
+				slog.Debug("validation error", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrValidationErrorCode,
 					Message: ErrValidationErrorMessage,
@@ -104,7 +104,7 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			slog.Error("invalid request", slog.Any("error", err))
+			slog.Debug("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -113,7 +113,7 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			slog.Error("validation error", slog.Any("error", err))
+			slog.Debug("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -131,7 +131,7 @@ func (p *ProductHandlers) createProduct() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrProducerNotFound):
-				slog.Error("producer not found", slog.Any("error", err))
+				slog.Debug("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProducerNotExistCode,
 					Message: ErrProducerNotExistMessage,
@@ -153,7 +153,7 @@ func (p *ProductHandlers) getProductById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		productId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid product id", slog.Any("error", err))
+			slog.Debug("invalid product id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -163,7 +163,7 @@ func (p *ProductHandlers) getProductById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrProductNotFound):
-				slog.Error("product not found", slog.Any("error", err))
+				slog.Debug("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
@@ -210,7 +210,7 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		productId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid product id", slog.Any("error", err))
+			slog.Debug("invalid product id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -219,7 +219,7 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 		var requestData request
 		err = c.Bind(&requestData)
 		if err != nil {
-			slog.Error("invalid request", slog.Any("error", err))
+			slog.Debug("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -228,7 +228,7 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			slog.Error("validation error", slog.Any("error", err))
+			slog.Debug("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -253,13 +253,13 @@ func (p *ProductHandlers) updateProductById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrProductNotFound):
-				slog.Error("product not found", slog.Any("error", err))
+				slog.Debug("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			case errors.Is(err, usecase.ErrProducerNotFound):
-				slog.Error("producer not found", slog.Any("error", err))
+				slog.Debug("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProducerNotExistCode,
 					Message: ErrProducerNotExistMessage,
@@ -281,7 +281,7 @@ func (p *ProductHandlers) deleteProductById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		productId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid product id", slog.Any("error", err))
+			slog.Debug("invalid product id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -291,13 +291,13 @@ func (p *ProductHandlers) deleteProductById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrProductNotFound):
-				slog.Error("product not found", slog.Any("error", err))
+				slog.Debug("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			case errors.Is(err, usecase.ErrProductIsUsed):
-				slog.Error("product is used", slog.Any("error", err))
+				slog.Debug("product is used", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProductIsUsedCode,
 					Message: ErrProductIsUsedMessage,

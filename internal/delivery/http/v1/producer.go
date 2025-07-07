@@ -45,7 +45,7 @@ func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			slog.Error("invalid request", slog.Any("error", err))
+			slog.Debug("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -54,7 +54,7 @@ func (p *ProducerHandlers) createProducer() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			slog.Error("validation error", slog.Any("error", err))
+			slog.Debug("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -82,7 +82,7 @@ func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		producerId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid producer id", slog.Any("error", err))
+			slog.Debug("invalid producer id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -92,7 +92,7 @@ func (p *ProducerHandlers) getProducerById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrProducerNotFound):
-				slog.Error("producer not found", slog.Any("error", err))
+				slog.Debug("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
@@ -118,7 +118,7 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		producerId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid producer id", slog.Any("error", err))
+			slog.Debug("invalid producer id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -127,7 +127,7 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 		var requestData request
 		err = c.Bind(&requestData)
 		if err != nil {
-			slog.Error("invalid request", slog.Any("error", err))
+			slog.Debug("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -136,13 +136,14 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			slog.Error("validation error", slog.Any("error", err))
+			slog.Debug("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
 			})
 		}
 		if requestData.Name == "" && requestData.Description == "" {
+			slog.Debug("validation error")
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -157,7 +158,7 @@ func (p *ProducerHandlers) updateProducerById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrProducerNotFound):
-				slog.Error("producer not found", slog.Any("error", err))
+				slog.Debug("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
@@ -179,7 +180,7 @@ func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		producerId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid producer id", slog.Any("error", err))
+			slog.Debug("invalid producer id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -189,13 +190,13 @@ func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrProducerNotFound):
-				slog.Error("producer not found", slog.Any("error", err))
+				slog.Debug("producer not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			case errors.Is(err, usecase.ErrProducerIsUsed):
-				slog.Error("producer is used", slog.Any("error", err))
+				slog.Debug("producer is used", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProducerIsUsedCode,
 					Message: ErrProducerIsUsedMessage,
@@ -208,7 +209,7 @@ func (p *ProducerHandlers) deleteProducerById() echo.HandlerFunc {
 				})
 			}
 		}
-		slog.Info("Producer deleted")
+		slog.Info("producer deleted")
 		return c.NoContent(http.StatusOK)
 	}
 }

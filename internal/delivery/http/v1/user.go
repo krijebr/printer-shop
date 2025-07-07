@@ -34,7 +34,7 @@ func (u *UserHandlers) allUsers() echo.HandlerFunc {
 			validate := validator.New()
 			err := validate.Var(c.QueryParam("user_status"), "oneof=active blocked")
 			if err != nil {
-				slog.Error("validation error", slog.Any("error", err))
+				slog.Debug("validation error", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrValidationErrorCode,
 					Message: ErrValidationErrorMessage,
@@ -48,7 +48,7 @@ func (u *UserHandlers) allUsers() echo.HandlerFunc {
 			validate := validator.New()
 			err := validate.Var(c.QueryParam("user_role"), "oneof=customer admin")
 			if err != nil {
-				slog.Error("validation error", slog.Any("error", err))
+				slog.Debug("validation error", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrValidationErrorCode,
 					Message: ErrValidationErrorMessage,
@@ -74,7 +74,7 @@ func (u *UserHandlers) getUserById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid user id", slog.Any("error", err))
+			slog.Debug("invalid user id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -84,7 +84,7 @@ func (u *UserHandlers) getUserById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrUserNotFound):
-				slog.Error("user not found", slog.Any("error", err))
+				slog.Debug("user not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
@@ -112,7 +112,7 @@ func (u *UserHandlers) updateUserById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid user id", slog.Any("error", err))
+			slog.Debug("invalid user id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -121,7 +121,7 @@ func (u *UserHandlers) updateUserById() echo.HandlerFunc {
 		var requestData request
 		err = c.Bind(&requestData)
 		if err != nil {
-			slog.Error("invalid request", slog.Any("error", err))
+			slog.Debug("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -130,7 +130,7 @@ func (u *UserHandlers) updateUserById() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			slog.Error("validation error", slog.Any("error", err))
+			slog.Debug("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -153,7 +153,7 @@ func (u *UserHandlers) updateUserById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrUserNotFound):
-				slog.Error("user not found", slog.Any("error", err))
+				slog.Debug("user not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
@@ -176,7 +176,7 @@ func (u *UserHandlers) deleteUserById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			slog.Error("invalid user id", slog.Any("error", err))
+			slog.Debug("invalid user id", slog.Any("error", err))
 			return c.JSON(http.StatusNotFound, ErrResponse{
 				Error:   ErrResourceNotFoundCode,
 				Message: ErrResourceNotFoundMessage,
@@ -186,13 +186,13 @@ func (u *UserHandlers) deleteUserById() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrUserNotFound):
-				slog.Error("user not found", slog.Any("error", err))
+				slog.Debug("user not found", slog.Any("error", err))
 				return c.JSON(http.StatusNotFound, ErrResponse{
 					Error:   ErrResourceNotFoundCode,
 					Message: ErrResourceNotFoundMessage,
 				})
 			case errors.Is(err, usecase.ErrUserIsUsed):
-				slog.Error("user is used", slog.Any("error", err))
+				slog.Debug("user is used", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrUserIsUsedCode,
 					Message: ErrUserIsUsedMessage,

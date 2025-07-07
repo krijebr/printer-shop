@@ -60,7 +60,7 @@ func (h *CartHandlers) addProductToCart() echo.HandlerFunc {
 		var requestData request
 		err := c.Bind(&requestData)
 		if err != nil {
-			slog.Error("invalid request", slog.Any("error", err))
+			slog.Debug("invalid request", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrInvalidRequestCode,
 				Message: ErrInvalidRequestMessage,
@@ -69,7 +69,7 @@ func (h *CartHandlers) addProductToCart() echo.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(requestData)
 		if err != nil {
-			slog.Error("validation error", slog.Any("error", err))
+			slog.Debug("validation error", slog.Any("error", err))
 			return c.JSON(http.StatusBadRequest, ErrResponse{
 				Error:   ErrValidationErrorCode,
 				Message: ErrValidationErrorMessage,
@@ -79,13 +79,13 @@ func (h *CartHandlers) addProductToCart() echo.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, usecase.ErrProductNotFound):
-				slog.Error("product not found", slog.Any("error", err))
+				slog.Debug("product not found", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProductNotExistCode,
 					Message: ErrProductNotExistMessage,
 				})
 			case errors.Is(err, usecase.ErrProductIsHidden):
-				slog.Error("product is hidden", slog.Any("error", err))
+				slog.Debug("product is hidden", slog.Any("error", err))
 				return c.JSON(http.StatusBadRequest, ErrResponse{
 					Error:   ErrProductNotExistCode,
 					Message: ErrProductNotExistMessage,
