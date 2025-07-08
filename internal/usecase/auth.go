@@ -167,7 +167,7 @@ func (a *auth) ValidateToken(ctx context.Context, token string) (*entity.User, e
 		return []byte(secret), nil
 	})
 	if err != nil {
-		if errors.Is(err, repo.ErrTokenNotFound) || errors.Is(err, jwt.ErrTokenSignatureInvalid) {
+		if errors.Is(err, repo.ErrTokenNotFound) || errors.Is(err, jwt.ErrTokenSignatureInvalid) || errors.Is(err, jwt.ErrTokenMalformed) {
 			return nil, ErrInvalidToken
 		}
 		return nil, err
@@ -213,7 +213,7 @@ func (a *auth) RefreshToken(ctx context.Context, refreshToken string) (string, s
 		return []byte(secret), nil
 	})
 	if err != nil {
-		if errors.Is(err, repo.ErrTokenNotFound) || errors.Is(err, jwt.ErrTokenSignatureInvalid) {
+		if errors.Is(err, repo.ErrTokenNotFound) || errors.Is(err, jwt.ErrTokenSignatureInvalid) || errors.Is(err, jwt.ErrTokenMalformed) {
 			return "", "", ErrInvalidToken
 		}
 		return "", "", err

@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -39,11 +40,13 @@ func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 			user, err = a.u.Auth.ValidateToken(c.Request().Context(), getToken(authHeader))
 			if err != nil {
 				if errors.Is(err, usecase.ErrInvalidToken) {
+					slog.Debug("invalid token", slog.Any("error", err))
 					return c.JSON(http.StatusUnauthorized, ErrResponse{
 						Error:   ErrInvalidTokenCode,
 						Message: ErrInvalidTokenMessage,
 					})
 				}
+				slog.Error("token validation error", slog.Any("error", err))
 				return c.JSON(http.StatusInternalServerError, ErrResponse{
 					Error:   ErrInternalErrorCode,
 					Message: ErrInternalErrorMessage,
@@ -69,6 +72,7 @@ func (a *AuthMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 					return next(c)
 				}
 				if userRole == entity.UserRoleGuest {
+					slog.Debug("unauthorized", slog.Any("error", err))
 					return c.JSON(http.StatusUnauthorized, ErrResponse{
 						Error:   ErrUnauthorizedCode,
 						Message: ErrUnauthorizedMessage,

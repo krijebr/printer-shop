@@ -4,6 +4,8 @@ go 1.24.2
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
+	github.com/go-playground/validator v9.31.0+incompatible
+	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v4 v4.13.4
@@ -16,13 +18,13 @@ require (
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-redis/redismock/v9 v9.2.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
