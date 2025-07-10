@@ -1,23 +1,23 @@
 
 # Printer-shop
 
-Проект реализует REST API интернет магазина принтеров.
+Проект реализует REST API интернет магазина по продаже принтеров.
 
 ## Содержание
 
-* [Используемые технологии](#Используемые технологии)
+* [Технологии](#Технологии)
 * [Использование](#Использование)
 * [Тестирование](#Тестирование)
 * [Environment](#Environment)
 * [Документация](#документация)
 * [Автор](#Автор)
 
-## Используемые технологии
+## Технологии
 
-* Go 1.24+
+* Go 1.24
 * Postgresql 17.5
 * Redis 8.0
-* Docker
+* Docker 28.0.4
 
 ## Использование
 
@@ -25,40 +25,40 @@
 
 1. Запуск приложения в docker контейнере.
 
-Для запуска приложения в docker контейнере необходимо в корне проекта выполнить команду:
+    Для запуска приложения в docker контейнере необходимо в корне проекта выполнить команду:
 
-`docker compose up -d`
+    `docker compose up -d`
 
-Вместе с приложением устанавливается cli утилита. 
+    Вместе с приложением устанавливается cli утилита. 
 
-Для добавления учетной записи администратора неоходимо выполнить команду:
+    Для добавления учетной записи администратора неоходимо выполнить команду:
 
-`cli create-admin <firstName> <lastName> <email> <password>`
+    `cli create-admin <firstName> <lastName> <email> <password>`
 
-Для заполнения базы данных демо данными необходимо выполнить команду:
+    Для заполнения базы данных демо данными необходимо выполнить команду:
 
-`cli add-demo-data`
+    `cli add-demo-data`
 
 
 2. Запуск приложения в режиме локальной разработки.
 
-Для запуска приложения в режиме локальной разработки необходимо установить [go](https://go.dev/dl/) 1.24.2+
+    Для запуска приложения в режиме локальной разработки необходимо установить [go](https://go.dev/dl/) 1.24.2+
 
-Для установки зависимостей необходимо в корне проекта выполнить команду:
+    Для установки зависимостей необходимо в корне проекта выполнить команду:
 
-`go mod download`
+    `go mod download`
 
-Для запуска контейнеров postgres и redis необходимо в корне проекта выполнить команду:
+    Для запуска контейнеров postgres и redis необходимо в корне проекта выполнить команду:
 
-`docker compose -f compose.dev.yaml up -d`
+    `docker compose -f compose.dev.yaml up -d`
 
-Для запуска приложения необходимо в корне проекта выполнить команду:
+    Для запуска приложения необходимо в корне проекта выполнить команду:
 
-`go run ./cmd/app`
+    `go run ./cmd/app`
 
-Для запуска cli утилиты необходимо в корне проекта выполнить команду:
+    Для запуска cli утилиты необходимо в корне проекта выполнить команду:
 
-`go run ./cmd/cli`
+    `go run ./cmd/cli`
 
 ## Тестирование
 
@@ -66,7 +66,7 @@
 
 `go test ./... -v`
 
-Для тестирования приложения создана [коллекция запросов для postman](https://github.com/krijebr/printer-shop/blob/main/doc/printer-shop.postman_collection.json).
+Для тестирования приложения разработана [коллекция запросов для postman](https://github.com/krijebr/printer-shop/blob/main/doc/printer-shop.postman_collection.json).
 
 ## Environment
 | имя | описание | пример |
@@ -75,8 +75,8 @@
 
 ## Документация
 * [Спецификация Swagger (OpenAPI)](https://github.com/krijebr/printer-shop/blob/main/doc/printer-shop.yaml)
-* [Диаграмма базы данных](https://github.com/krijebr/printer-shop/blob/main/doc/printer-shop_dbdiagram.png)
+* [Структура базы данных](https://github.com/krijebr/printer-shop/blob/main/doc/printer-shop_dbdiagram.png)
 
 ## Автор
 
-* [Барсуков Павел](https://github.com/krijebr) - Back-End Engineer [krijebr123@gmail.com](krijebr123@gmail.com)
+* [Барсуков Павел](https://github.com/krijebr) - Back-End Engineer [krijebr123@gmail.com](krijebr123@gmail.com)а
