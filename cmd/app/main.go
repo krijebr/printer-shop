@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	defaultPath      string        = "E:/GO_projects/printer-shop/config/config.json"
+	defaultPath      string        = "./config/config.json"
 	migratePath      string        = "file://./migrations"
 	roleConfPath     string        = "./config/role_config.json"
 	_defaultAttempts int           = 5
@@ -156,7 +156,7 @@ func migration(db *sql.DB) error {
 	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return err
 	}
-	if err == migrate.ErrNoChange {
+	if errors.Is(err, migrate.ErrNoChange) {
 		slog.Info("migrate no changes")
 		return nil
 	}

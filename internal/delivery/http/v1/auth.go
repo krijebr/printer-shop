@@ -138,7 +138,7 @@ func (a *AuthHandlers) login() echo.HandlerFunc {
 
 func (a *AuthHandlers) refreshTokens() echo.HandlerFunc {
 	type request struct {
-		RefreshToken string `json:"refresh_token" validate:"required,jwt"`
+		RefreshToken string `json:"refresh_token" validate:"required"`
 	}
 	type response struct {
 		Token        string `json:"token"`

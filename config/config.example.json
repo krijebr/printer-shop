@@ -3,11 +3,11 @@
         "host":"postgres",
         "port":5432,
         "user_name":"postgres",
-        "password":"password",
+        "password":"mysecretpassword",
         "db_name":"postgres"
     },
     "http_server":{
-        "port":80
+        "port":8000
     },
     "redis":{
         "host":"redis",
