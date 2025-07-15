@@ -474,3 +474,154 @@ func TestUserRepoPg_UpdateByEmail(t *testing.T) {
 		})
 	}
 }
+
+func TestUserRepoPg_scanUser(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+	var r UserRepoPg
+
+	type mockBehavior func()
+	type getRow func(db *sql.DB) Row
+
+	testTable := []struct {
+		name         string
+		getRow       getRow
+		mockBehavior mockBehavior
+		expectedUser *entity.User
+		expectedErr  error
+	}{
+		{
+			name: "OK_first row",
+			getRow: func(db *sql.DB) Row {
+				rows, _ := db.Query("select * from users")
+				rows.Next()
+				return rows
+			},
+			mockBehavior: func() {
+				idColumn := sqlmock.NewColumn("id").OfType("uuid", uuid.Nil.String()).Nullable(false)
+				firstNameColumn := sqlmock.NewColumn("first_name").OfType("varchar", "Ivan").Nullable(false)
+				lastNameColumn := sqlmock.NewColumn("last_name").OfType("varchar", "Ivanov").Nullable(false)
+				emailColumn := sqlmock.NewColumn("email").OfType("varchar", "ivan@list.ru").Nullable(false)
+				passworHashColumn := sqlmock.NewColumn("password_hash").OfType("varchar", "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e").Nullable(false)
+				statusColumn := sqlmock.NewColumn("status").OfType("varchar", "active").Nullable(false)
+				roleColumn := sqlmock.NewColumn("role").OfType("varchar", "customer").Nullable(false)
+				createdAtColumn := sqlmock.NewColumn("created_at").OfType("timestamp", "2025-05-19 17:07:13.947").Nullable(false)
+				rows := sqlmock.NewRowsWithColumnDefinition(idColumn,
+					firstNameColumn,
+					lastNameColumn,
+					emailColumn,
+					passworHashColumn,
+					statusColumn,
+					roleColumn,
+					createdAtColumn).AddRow("00000000-0000-0000-0000-000000000001", "Ivan", "Ivanov", "ivan@gmail.com", "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e", "active", "customer", "2006-01-02T15:04:05Z")
+				rows = rows.AddRow("00000000-0000-0000-0000-000000000002", "Peter", "Petrov", "peter@gmail.com", "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e", "active", "customer", "2006-01-02T15:04:05Z")
+				mock.ExpectQuery(regexp.QuoteMeta("select * from users")).WillReturnRows(rows)
+			},
+			expectedUser: &entity.User{
+				Id:           uuid.MustParse("00000000-0000-0000-0000-000000000001"),
+				FirstName:    "Ivan",
+				LastName:     "Ivanov",
+				Email:        "ivan@gmail.com",
+				PasswordHash: "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e",
+				Status:       entity.UserStatusActive,
+				Role:         entity.UserRoleCustomer,
+				CreatedAt:    time.Date(2006, 1, 2, 15, 4, 5, 0, time.UTC),
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "OK_second_row",
+			getRow: func(db *sql.DB) Row {
+				rows, _ := db.Query("select * from users")
+				rows.Next()
+				rows.Next()
+				return rows
+			},
+			mockBehavior: func() {
+				idColumn := sqlmock.NewColumn("id").OfType("uuid", uuid.Nil.String()).Nullable(false)
+				firstNameColumn := sqlmock.NewColumn("first_name").OfType("varchar", "Ivan").Nullable(false)
+				lastNameColumn := sqlmock.NewColumn("last_name").OfType("varchar", "Ivanov").Nullable(false)
+				emailColumn := sqlmock.NewColumn("email").OfType("varchar", "ivan@list.ru").Nullable(false)
+				passworHashColumn := sqlmock.NewColumn("password_hash").OfType("varchar", "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e").Nullable(false)
+				statusColumn := sqlmock.NewColumn("status").OfType("varchar", "active").Nullable(false)
+				roleColumn := sqlmock.NewColumn("role").OfType("varchar", "customer").Nullable(false)
+				createdAtColumn := sqlmock.NewColumn("created_at").OfType("timestamp", "2025-05-19 17:07:13.947").Nullable(false)
+				rows := sqlmock.NewRowsWithColumnDefinition(idColumn,
+					firstNameColumn,
+					lastNameColumn,
+					emailColumn,
+					passworHashColumn,
+					statusColumn,
+					roleColumn,
+					createdAtColumn).AddRow("00000000-0000-0000-0000-000000000001", "Ivan", "Ivanov", "ivan@gmail.com", "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e", "active", "customer", "2006-01-02T15:04:05Z")
+				rows = rows.AddRow("00000000-0000-0000-0000-000000000002", "Peter", "Petrov", "peter@gmail.com", "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e", "active", "customer", "2006-01-02T15:04:05Z")
+				mock.ExpectQuery(regexp.QuoteMeta("select * from users")).WillReturnRows(rows)
+			},
+			expectedUser: &entity.User{
+				Id:           uuid.MustParse("00000000-0000-0000-0000-000000000002"),
+				FirstName:    "Peter",
+				LastName:     "Petrov",
+				Email:        "peter@gmail.com",
+				PasswordHash: "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e",
+				Status:       entity.UserStatusActive,
+				Role:         entity.UserRoleCustomer,
+				CreatedAt:    time.Date(2006, 1, 2, 15, 4, 5, 0, time.UTC),
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "OK_Call_QueryRow",
+			getRow: func(db *sql.DB) Row {
+				row := db.QueryRow("select * from users where id = '00000000-0000-0000-0000-000000000001'")
+				return row
+			},
+			mockBehavior: func() {
+				idColumn := sqlmock.NewColumn("id").OfType("uuid", uuid.Nil.String()).Nullable(false)
+				firstNameColumn := sqlmock.NewColumn("first_name").OfType("varchar", "Ivan").Nullable(false)
+				lastNameColumn := sqlmock.NewColumn("last_name").OfType("varchar", "Ivanov").Nullable(false)
+				emailColumn := sqlmock.NewColumn("email").OfType("varchar", "ivan@list.ru").Nullable(false)
+				passworHashColumn := sqlmock.NewColumn("password_hash").OfType("varchar", "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e").Nullable(false)
+				statusColumn := sqlmock.NewColumn("status").OfType("varchar", "active").Nullable(false)
+				roleColumn := sqlmock.NewColumn("role").OfType("varchar", "customer").Nullable(false)
+				createdAtColumn := sqlmock.NewColumn("created_at").OfType("timestamp", "2025-05-19 17:07:13.947").Nullable(false)
+				rows := sqlmock.NewRowsWithColumnDefinition(idColumn,
+					firstNameColumn,
+					lastNameColumn,
+					emailColumn,
+					passworHashColumn,
+					statusColumn,
+					roleColumn,
+					createdAtColumn).AddRow("00000000-0000-0000-0000-000000000001", "Ivan", "Ivanov", "ivan@gmail.com", "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e", "active", "customer", "2006-01-02T15:04:05Z")
+				mock.ExpectQuery(regexp.QuoteMeta("select * from users where id = '00000000-0000-0000-0000-000000000001'")).WillReturnRows(rows)
+			},
+			expectedUser: &entity.User{
+				Id:           uuid.MustParse("00000000-0000-0000-0000-000000000001"),
+				FirstName:    "Ivan",
+				LastName:     "Ivanov",
+				Email:        "ivan@gmail.com",
+				PasswordHash: "992320c97d2edc09debf80bc3cd2b770a07a97ecee15771e158a744f38790d2e",
+				Status:       entity.UserStatusActive,
+				Role:         entity.UserRoleCustomer,
+				CreatedAt:    time.Date(2006, 1, 2, 15, 4, 5, 0, time.UTC),
+			},
+			expectedErr: nil,
+		},
+	}
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			testCase.mockBehavior()
+			actualUser, err := r.scanUser(testCase.getRow(db))
+			if testCase.expectedErr != nil {
+				assert.Equal(t, testCase.expectedErr, err)
+				assert.Nil(t, actualUser)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, testCase.expectedUser, actualUser)
+			}
+		})
+	}
+}

@@ -79,4 +79,4 @@
 
 ## Автор
 
-* [Барсуков Павел](https://github.com/krijebr) - Back-End Engineer [krijebr123@gmail.com](krijebr123@gmail.com)а
+* [Барсуков Павел](https://github.com/krijebr) - Back-End Engineer [krijebr123@gmail.com](krijebr123@gmail.com)
