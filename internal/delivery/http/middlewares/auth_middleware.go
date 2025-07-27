@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/krijebr/printer-shop/internal/config"
@@ -11,7 +12,6 @@ import (
 	"github.com/krijebr/printer-shop/internal/entity"
 	"github.com/krijebr/printer-shop/internal/usecase"
 	"github.com/labstack/echo/v4"
-	"golang.org/x/exp/slices"
 )
 
 type AuthMiddleware struct {

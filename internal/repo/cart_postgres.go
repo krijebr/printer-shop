@@ -24,7 +24,7 @@ func NewCartRepoPg(db *sql.DB) Cart {
 func (c *CartRepoPg) GetAllProducts(ctx context.Context, userId uuid.UUID) ([]*entity.ProductInCart, error) {
 	rows, err := c.db.QueryContext(ctx,
 		"select "+
-			"products.id,products.name,products.price,products.status,products.created_at,producers.id,producers.name,producers.description,producers.created_at, carts.count"+
+			"products.id,products.name,products.price,products.status,products.created_at,producers.id,producers.name,producers.description,producers.created_at, carts.count "+
 			"from "+
 			"carts join products on carts.product_id = products.id join producers on producers.id = producer_id "+
 			"where "+

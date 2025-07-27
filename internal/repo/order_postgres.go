@@ -27,6 +27,7 @@ func (o *OrderRepoPg) Create(ctx context.Context, order *entity.Order) error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 	_, err = tx.ExecContext(ctx, "insert into orders(id, user_id, status, created_at) values ($1,$2,$3,$4)",
 		order.Id, order.UserId, order.Status, order.CreatedAt)
 	if err != nil {
@@ -175,6 +176,7 @@ func (o *OrderRepoPg) UpdateById(ctx context.Context, order *entity.Order) (err 
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 	if order.Status != "" {
 		_, err := tx.ExecContext(ctx, "update orders set status = $1  where id = $2", order.Status, order.Id)
 		if err != nil {

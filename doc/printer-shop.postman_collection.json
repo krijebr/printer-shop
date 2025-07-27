@@ -23,12 +23,13 @@
 									"} catch (e) {\r",
 									"    isJson = false;\r",
 									"}\r",
-									"if (isJson){\r",
-									"if (pm.response.json().refresh_token && pm.response.json().token)\r",
-									"    {\r",
-									"        pm.globals.set(\"refresh_token\", pm.response.json().refresh_token)\r",
-									"        pm.globals.set(\"token\", pm.response.json().token)\r",
-									"    }\r",
+									"if (isJson)\r",
+									"{\r",
+									"    if (pm.response.json().refresh_token && pm.response.json().token)\r",
+									"        {\r",
+									"            pm.environment.set(\"refresh_token\", pm.response.json().refresh_token)\r",
+									"            pm.environment.set(\"token\", pm.response.json().token)\r",
+									"        }\r",
 									"}"
 								],
 								"type": "text/javascript",
@@ -99,12 +100,13 @@
 									"} catch (e) {\r",
 									"    isJson = false;\r",
 									"}\r",
-									"if (isJson){\r",
-									"if (pm.response.json().refresh_token && pm.response.json().token) \r",
+									"if (isJson)\r",
 									"{\r",
-									"    pm.globals.set(\"refresh_token\", pm.response.json().refresh_token)\r",
-									"    pm.globals.set(\"token\", pm.response.json().token)\r",
-									"}\r",
+									"    if (pm.response.json().refresh_token && pm.response.json().token) \r",
+									"    {\r",
+									"        pm.environment.set(\"refresh_token\", pm.response.json().refresh_token)\r",
+									"        pm.environment.set(\"token\", pm.response.json().token)\r",
+									"    }\r",
 									"}"
 								],
 								"type": "text/javascript",
@@ -136,6 +138,12 @@
 				{
 					"name": "get all products",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "GET",
 						"header": [],
 						"url": "{{url}}/api/v1/products"
@@ -235,6 +243,12 @@
 				{
 					"name": "get all producers",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
 						"method": "GET",
 						"header": [],
 						"url": "{{url}}/api/v1/producers"
@@ -242,7 +256,7 @@
 					"response": []
 				},
 				{
-					"name": "new Request",
+					"name": "new producer",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -364,7 +378,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"first_name\": \"Pavel\",\r\n    \"last_name\": \"Barsukov\",\r\n    \"email\": \"krijebr@list.ru\",\r\n    \"password\": \"12345678910\"\r\n}",
+							"raw": "{\r\n    \"first_name\": \"Pavel\",\r\n    \"last_name\": \"Barsukov\",\r\n    \"password\": \"12345678910\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -438,7 +452,7 @@
 					"response": []
 				},
 				{
-					"name": "New Request",
+					"name": "update user by id",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -450,7 +464,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"first_name\":\"\",\r\n\t\"last_name\":\"\",\r\n\t\"user_status\":\"\",\r\n\t\"user_role\":\"\"\r\n}",
+							"raw": "{\r\n    \"first_name\":\"\",\r\n\t\"last_name\":\"\",\r\n\t\"user_status\":\"blocked\",\r\n\t\"user_role\":\"\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -658,6 +672,20 @@
 							}
 						},
 						"url": "{{url}}/api/v1/orders/{{order_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "health check",
+			"item": [
+				{
+					"name": "health check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/health"
 					},
 					"response": []
 				}
